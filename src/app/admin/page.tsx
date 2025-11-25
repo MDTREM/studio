@@ -12,12 +12,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query } from "firebase/firestore";
+import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from "@/firebase";
+import { collection, query, doc } from "firebase/firestore";
 import AddProductDialog from "./_components/AddProductDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function AdminProductsPage() {
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const productsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -25,6 +39,16 @@ export default function AdminProductsPage() {
   }, [firestore]);
 
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
+
+  const handleDelete = (productId: string, productName: string) => {
+    if (!firestore) return;
+    const productRef = doc(firestore, 'products', productId);
+    deleteDocumentNonBlocking(productRef);
+    toast({
+      title: "Produto Excluído!",
+      description: `O produto "${productName}" foi removido.`,
+    });
+  };
 
   if (isLoading) {
     return <div>Carregando produtos...</div>;
@@ -90,6 +114,7 @@ export default function AdminProductsPage() {
                         {product.basePrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </TableCell>
                     <TableCell>
+                      <AlertDialog>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button aria-haspopup="true" size="icon" variant="ghost">
@@ -99,10 +124,26 @@ export default function AdminProductsPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                                <DropdownMenuItem>Editar</DropdownMenuItem>
-                                <DropdownMenuItem>Excluir</DropdownMenuItem>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Editar</DropdownMenuItem>
+                                <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>Excluir</DropdownMenuItem>
+                                </AlertDialogTrigger>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Essa ação não pode ser desfeita. Isso excluirá permanentemente o produto
+                                "{product.name}".
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(product.id, product.name)}>Excluir</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                     </TableCell>
                 </TableRow>
               ))}
