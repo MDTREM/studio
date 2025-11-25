@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Product } from '@/lib/definitions';
 import { ArrowRight, Check, FileUp, Loader2, Phone } from 'lucide-react';
 import { useAuth, useFirestore, addDocumentNonBlocking } from '@/firebase';
 import { collection } from 'firebase/firestore';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 
 interface QuoteFormProps {
   products: Product[];
@@ -26,7 +27,6 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
   const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [fileName, setFileName] = useState('');
 
   const firestore = useFirestore();
   const { user } = useAuth();
@@ -100,7 +100,7 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
             }
         ],
         totalAmount: estimatedPrice,
-        artworkUrl: '', // TODO: Implement file upload
+        artworkUrl: '', // Artwork will be sent separately
     };
 
     addDocumentNonBlocking(collection(firestore, 'orders_items'), orderData)
@@ -114,23 +114,22 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
       });
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFileName(e.target.files[0].name);
-    } else {
-      setFileName('');
-    }
-  };
-
   if (isSubmitted) {
     return (
         <Card className="w-full shadow-lg">
             <CardContent className="p-10 text-center">
                 <Check className="w-16 h-16 mx-auto text-green-500 bg-green-100 rounded-full p-2 mb-4" />
                 <h2 className="text-2xl font-bold mb-2">Pedido Enviado!</h2>
-                <p className="text-muted-foreground">
-                    Seu pedido de orçamento foi enviado com sucesso. Em breve, nossa equipe entrará em contato para confirmar os detalhes.
+                <p className="text-muted-foreground mb-6">
+                    Seu pedido de orçamento foi enviado com sucesso. Se você tem uma arte pronta, por favor, envie para nosso e-mail ou WhatsApp junto com o número do seu pedido.
                 </p>
+                <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Próximos Passos</AlertTitle>
+                    <AlertDescription>
+                        Nossa equipe entrará em contato em breve para confirmar os detalhes e solicitar sua arte.
+                    </AlertDescription>
+                </Alert>
                 <Button onClick={() => setIsSubmitted(false)} className="mt-6">Fazer Novo Orçamento</Button>
             </CardContent>
         </Card>
@@ -206,23 +205,13 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
                 )}
 
               <div className="grid gap-2">
-                <Label>Enviar sua arte (opcional)</Label>
-                <div className="flex items-center gap-4">
-                  <Button asChild variant="outline">
-                    <Label htmlFor="artwork" className="cursor-pointer">
-                      <FileUp className="mr-2 h-4 w-4" />
-                      Anexar arquivo
-                    </Label>
-                  </Button>
-                  <Input
-                    id="artwork"
-                    type="file"
-                    className="sr-only"
-                    onChange={handleFileChange}
-                  />
-                  {fileName && <p className="text-sm text-muted-foreground truncate">{fileName}</p>}
-                </div>
-                <p className="text-sm text-muted-foreground">Envie seu arquivo em PDF, CDR, AI ou JPG.</p>
+                <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Como enviar sua arte?</AlertTitle>
+                    <AlertDescription>
+                        Após finalizar o pedido, nossa equipe entrará em contato para solicitar o arquivo da sua arte por e-mail ou WhatsApp.
+                    </AlertDescription>
+                </Alert>
               </div>
             </>
           )}
