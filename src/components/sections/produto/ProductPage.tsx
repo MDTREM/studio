@@ -6,12 +6,14 @@ import { Product } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Check, ChevronRight, Download, Home, Minus, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
+import { Check, ChevronRight, Download, Home, Info, Lightbulb, Minus, PackageSearch, Pencil, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProductPageProps {
   product: Product;
@@ -20,6 +22,7 @@ interface ProductPageProps {
 export default function ProductPage({ product }: ProductPageProps) {
   const [quantity, setQuantity] = useState(product.variations.quantities[0] || 1);
   const [mainImage, setMainImage] = useState(product.imageUrl);
+  const [artworkOption, setArtworkOption] = useState('professional-check');
 
   // Hardcoded rating for now
   const rating = 4.5;
@@ -53,6 +56,7 @@ export default function ProductPage({ product }: ProductPageProps) {
 
 
   return (
+    <TooltipProvider>
     <div className="container max-w-7xl mx-auto px-4 py-8 sm:py-16">
         <nav className="flex items-center text-sm text-muted-foreground mb-8">
             {breadcrumbs.map((crumb, index) => (
@@ -166,9 +170,57 @@ export default function ProductPage({ product }: ProductPageProps) {
                 </div>
             )}
           </div>
-          
+
           <Separator className="my-8" />
           
+          {/* Arte Final */}
+          <div className="grid gap-4 mb-8">
+            <Label className='font-semibold text-base'>Como você quer sua arte?</Label>
+            <RadioGroup value={artworkOption} onValueChange={setArtworkOption} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Label htmlFor="professional-design" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-purple-500 has-[:checked]:ring-2 has-[:checked]:ring-purple-200", artworkOption === 'professional-design' ? 'border-purple-500' : 'border-border')}>
+                  <RadioGroupItem value="professional-design" id="professional-design" className="sr-only" />
+                  <div className='flex justify-between items-start'>
+                    <div className='flex gap-4'>
+                      <div className="text-purple-500">
+                          <Lightbulb className="w-6 h-6" />
+                          <Pencil className="w-6 h-6 -mt-2 ml-2" />
+                      </div>
+                      <div>
+                        <p className='font-bold'>Designer Profissional</p>
+                      </div>
+                    </div>
+                    <div className='text-xs font-bold bg-yellow-300 text-yellow-900 px-2 py-0.5 rounded-md'>NOVO</div>
+                  </div>
+                  <p className='text-muted-foreground text-sm mt-2'>Não tenho o arquivo, preciso de criação profissional.</p>
+                  <div className='flex items-center gap-2 mt-2'>
+                    <p className='font-bold text-lg'>R$ 45,99 *</p>
+                    <Tooltip>
+                      <TooltipTrigger><Info className='w-4 h-4 text-blue-500'/></TooltipTrigger>
+                      <TooltipContent><p>Informação sobre o serviço</p></TooltipContent>
+                    </Tooltip>
+                  </div>
+              </Label>
+              <Label htmlFor="professional-check" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-orange-500 has-[:checked]:ring-2 has-[:checked]:ring-orange-200", artworkOption === 'professional-check' ? 'border-orange-500' : 'border-border')}>
+                  <RadioGroupItem value="professional-check" id="professional-check" className="sr-only" />
+                   <div className='flex gap-4 items-start'>
+                      <PackageSearch className="w-8 h-8 text-orange-500" />
+                      <div>
+                        <p className='font-bold'>Checagem Profissional</p>
+                      </div>
+                    </div>
+                  <p className='text-muted-foreground text-sm mt-2'>Já tenho o arquivo mas quero uma conferência profissional.</p>
+                  <div className='flex items-center gap-2 mt-2'>
+                    <p className='font-bold text-lg'>R$ 16,99</p>
+                     <Tooltip>
+                      <TooltipTrigger><Info className='w-4 h-4 text-blue-500'/></TooltipTrigger>
+                      <TooltipContent><p>Informação sobre o serviço</p></TooltipContent>
+                    </Tooltip>
+                  </div>
+              </Label>
+            </RadioGroup>
+          </div>
+          
+
           {/* Quantidade */}
             <div className="grid gap-4 mb-8">
                 <Label className="font-semibold text-base">Escolha a quantidade</Label>
@@ -258,5 +310,8 @@ export default function ProductPage({ product }: ProductPageProps) {
             </div>
         </div>
     </div>
+    </TooltipProvider>
   );
 }
+
+    
