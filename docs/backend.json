@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user of the application.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The user's unique ID."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the user's profile picture."
+        },
+        "accountType": {
+          "type": "string",
+          "enum": [
+            "pf",
+            "pj"
+          ],
+          "description": "The type of account, either Pessoa Física (pf) or Pessoa Jurídica (pj)."
+        },
+        "cpf": {
+          "type": "string",
+          "description": "The user's CPF (for individuals)."
+        },
+        "companyName": {
+          "type": "string",
+          "description": "The company's legal name (for businesses)."
+        },
+        "tradingName": {
+          "type": "string",
+          "description": "The company's trading name (for businesses)."
+        },
+        "cnpj": {
+          "type": "string",
+          "description": "The company's CNPJ (for businesses)."
+        }
+      },
+      "required": [
+        "uid",
+        "email",
+        "accountType"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "anonymous",
+      "email-password",
+      "google.com"
+    ]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user profile information."
+    }
+  }
+}
