@@ -2,15 +2,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { Order } from "@/lib/definitions";
+import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
+import { Order, OrderStatus } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
-import { collection, query } from "firebase/firestore";
-import { ListFilter } from "lucide-react";
+import { collection, query, doc } from "firebase/firestore";
+import { ListFilter, MoreHorizontal } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const statusColors = {
+const statusColors: { [key in OrderStatus]: string } = {
     'Em análise': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
     'Em produção': 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300',
     'Pronto para retirada': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
@@ -18,13 +19,28 @@ const statusColors = {
     'Cancelado': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
 };
 
+const availableStatuses: OrderStatus[] = ['Em análise', 'Em produção', 'Pronto para retirada', 'Entregue', 'Cancelado'];
+
+
 export default function AdminOrdersPage() {
     const firestore = useFirestore();
+    const { toast } = useToast();
+
     const ordersQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         return query(collection(firestore, "orders_items"));
     }, [firestore]);
     const { data: orders, isLoading } = useCollection<Order>(ordersQuery);
+
+    const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
+        if (!firestore) return;
+        const orderRef = doc(firestore, 'orders_items', orderId);
+        updateDocumentNonBlocking(orderRef, { status: newStatus });
+        toast({
+            title: "Status Atualizado!",
+            description: `O pedido foi atualizado para "${newStatus}".`,
+        });
+    }
 
     if (isLoading) {
         return <div>Carregando pedidos...</div>
@@ -51,6 +67,7 @@ export default function AdminOrdersPage() {
                         <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Filtrar por status</DropdownMenuLabel>
                         <DropdownMenuSeparator />
+                        {/* TODO: Implement filter logic */}
                         <DropdownMenuCheckboxItem checked>
                             Em análise
                         </DropdownMenuCheckboxItem>
@@ -82,6 +99,9 @@ export default function AdminOrdersPage() {
                         Data
                         </TableHead>
                         <TableHead className="text-right">Valor</TableHead>
+                        <TableHead>
+                            <span className="sr-only">Ações</span>
+                        </TableHead>
                     </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -106,6 +126,29 @@ export default function AdminOrdersPage() {
                             </TableCell>
                             <TableCell className="text-right">
                                 {order.totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </TableCell>
+                            <TableCell>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button aria-haspopup="true" size="icon" variant="ghost">
+                                            <MoreHorizontal className="h-4 w-4" />
+                                            <span className="sr-only">Toggle menu</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Mudar Status</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        {availableStatuses.map(status => (
+                                            <DropdownMenuItem 
+                                                key={status} 
+                                                onClick={() => handleStatusChange(order.id, status)}
+                                                disabled={order.status === status}
+                                            >
+                                                {status}
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </TableCell>
                         </TableRow>
                     ))}
