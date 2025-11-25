@@ -20,15 +20,8 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
     <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group">
       <div className="relative">
         <Link href={`/orcamento?produto=${product.id}`}>
-          <div className="relative aspect-square w-full overflow-hidden">
-            <Image
-              src={product.imageUrl}
-              alt={`Imagem do produto ${product.name}`}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              data-ai-hint={product.imageHint}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            />
+          <div className="relative aspect-square w-full overflow-hidden bg-primary flex items-center justify-center">
+            {/* Placeholder for image */}
           </div>
         </Link>
         <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full h-8 w-8">
