@@ -2,19 +2,18 @@
  * Core Philosophy: This ruleset implements a hybrid security model tailored for the Ouro Gráfica marketplace.
  * Publicly accessible data, such as the product and category catalogs, is readable by anyone, ensuring a smooth browsing experience.
  * All user-specific data, including profiles and order histories, is strictly private and governed by a user-ownership model, where users can only access their own information.
+ * An admin role is implemented to allow privileged access for store management.
  *
  * Data Structure: The data is organized into logical, top-level collections for public catalogs (`products`, `categories`) and transactional data (`orders_items`).
  * All private user information is hierarchically nested under the `/users/{userId}` path, creating a clear and secure boundary for personal data.
  *
  * Key Security Decisions:
- * - User Enumeration Disabled: Listing users from the top-level `/users` collection is explicitly forbidden to protect user privacy.
- * - Public Catalogs: `products` and `categories` are world-readable to allow anonymous browsing. All write operations are disabled by default, pending the implementation of an administrative role system.
- * - Strict Ownership: All documents within `/users/{userId}` are accessible only to the authenticated user whose UID matches the `userId` in the path.
- * - Disallowed Global List on Order Items: To prevent data leakage, `list` operations on the top-level `orders_items` collection are disallowed. Clients must retrieve order items in the context of a specific order.
+ * - Admin Access: Users with a custom claim or a specific field (`isAdmin: true`) in their profile document have elevated privileges.
+ * - User Enumeration Disabled for Non-Admins: Listing users from the top-level `/users` collection is forbidden for regular users to protect privacy.
+ * - Public Catalogs: `products` and `categories` are world-readable. Write operations are restricted to admins.
+ * - Strict Ownership: All documents within `/users/{userId}` are accessible only to the authenticated user whose UID matches the `userId` in the path, or by an admin.
  *
- * Denormalization for Authorization: To ensure fast and secure access control, this ruleset relies on denormalization. Specifically, the `customerId` (the user's UID) must be denormalized and stored on each document in the `/orders_items` collection. This avoids slow and insecure cross-collection `get()` calls and allows for direct ownership checks on order items.
- *
- * Structural Segregation: Public data (`products`, `categories`) is kept in separate top-level collections from private user data (`/users/{userId}/...`), which provides a clean, high-performance security boundary for queries.
+ * Denormalization for Authorization: To ensure fast and secure access control, this ruleset relies on denormalization. For example, the `customerId` (the user's UID) is stored on each `orders_items` document. This avoids slow cross-collection `get()` calls and allows for direct ownership checks.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -40,11 +39,11 @@ service cloud.firestore {
     }
 
     /**
-     * Validates ownership for an existing document.
-     * Ensures that update/delete operations target a document that actually exists.
+     * Checks if the currently authenticated user has admin privileges.
+     * It does this by checking for an `isAdmin` flag in the user's own profile document.
      */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
 
     /**
@@ -61,66 +60,63 @@ service cloud.firestore {
     //-------------------------------------------------------------------------
 
     /**
-     * @description Products are public for browsing but cannot be modified by clients.
+     * @description Products are public for browsing but can only be modified by admins.
      * @path /products/{productId}
-     * @allow (get) Any user, signed in or not, can view a product.
-     * @deny (create) A user attempts to create a new product document.
-     * @principle Public read access for catalog data, with writes disabled pending an admin role implementation.
+     * @allow (get, list) Any user, signed in or not, can view products.
+     * @allow (create, update, delete) Only admins can manage the product catalog.
+     * @principle Public read access for catalog, with writes restricted to trusted roles.
      */
     match /products/{productId} {
       allow get, list: if true;
-      // CRITICAL: Cannot implement owner-only writes. The 'Product' entity is missing an 'ownerId' or admin role flag.
-      allow create, update, delete: if false; // TODO: Add admin validation once an admin role system is implemented.
+      allow create, update, delete: if isAdmin();
     }
 
     /**
-     * @description Categories are public for browsing but cannot be modified by clients.
+     * @description Categories are public for browsing but can only be modified by admins.
      * @path /categories/{categoryId}
-     * @allow (get) Any user, signed in or not, can view a category.
-     * @deny (create) A user attempts to create a new category document.
-     * @principle Public read access for catalog data, with writes disabled pending an admin role implementation.
+     * @allow (get, list) Any user, signed in or not, can view a category.
+     * @allow (create, update, delete) Only admins can manage categories.
+     * @principle Public read access for catalog, with writes restricted to trusted roles.
      */
     match /categories/{categoryId} {
       allow get, list: if true;
-      // CRITICAL: Cannot implement owner-only writes. The 'Category' entity is missing an 'ownerId' or admin role flag.
-      allow create, update, delete: if false; // TODO: Add admin validation once an admin role system is implemented.
+      allow create, update, delete: if isAdmin();
     }
 
     /**
-     * @description A user's profile document. Only the owner can read or write their own data.
+     * @description A user's profile document. The owner can manage their own data. Admins have read-only access.
      * @path /users/{userId}
-     * @allow (create) An authenticated user with UID 'user123' creates their own profile at `/users/user123`.
-     * @deny (get) User 'user123' tries to read the profile at `/users/user456`.
-     * @deny (list) Any user tries to list all documents in the `/users` collection.
-     * @principle Enforces strict data privacy and ownership, and prevents user enumeration.
+     * @allow (get) Owner or an admin can read the profile.
+     * @deny (list) Regular users cannot list all users. Admins can.
+     * @allow (create, update, delete) Only the owner can modify their profile.
+     * @principle Enforces data privacy while allowing for administrative oversight.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false;
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && isImmutable('id');
-      allow delete: if isExistingOwner(userId);
+      allow update: if isOwner(userId) && isImmutable('id');
+      allow delete: if isOwner(userId);
 
       /**
-       * @description A user's orders. Only the owner can manage their orders.
+       * @description A user's orders. Only the owner or an admin can access them.
        * @path /users/{userId}/orders/{orderId}
-       * @allow (create) User 'user123' creates a new order in their own subcollection.
-       * @deny (get) User 'user456' tries to read an order belonging to 'user123'.
-       * @principle Path-based security where access to a subcollection is inherited from the parent document's owner.
+       * @allow (get, list) Owner or admin can view orders.
+       * @allow (create, update, delete) Only the owner can manage their orders.
+       * @principle Path-based security inherited from parent, plus admin override.
        */
       match /orders/{orderId} {
-        allow get, list: if isOwner(userId);
+        allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.customerId == userId;
-        allow update: if isExistingOwner(userId) && isImmutable('customerId');
-        allow delete: if isExistingOwner(userId);
+        allow update: if (isOwner(userId) || isAdmin()) && isImmutable('customerId');
+        allow delete: if isOwner(userId) || isAdmin();
       }
 
       /**
        * @description A user's favorite products (wishlist).
        * @path /users/{userId}/favorites/{productId}
-       * @allow (get, list, create, delete) User 'user123' can manage their own favorites.
-       * @deny (get) User 'user456' tries to access the favorites of 'user123'.
-       * @principle Path-based security for user-owned subcollections.
+       * @allow (get, list, create, delete) Only the user can manage their own favorites. Admins do not need access here.
+       * @principle Strict path-based security for personal, non-critical data.
        */
       match /favorites/{productId} {
         allow get, list: if isOwner(userId);
@@ -131,24 +127,20 @@ service cloud.firestore {
     }
 
     /**
-     * @description Individual items within an order. Access is granted based on a denormalized `customerId`.
+     * @description Individual items within an order. Access is granted to the owner or an admin.
      * @path /orders_items/{orderItemId}
-     * @allow (get) User 'user123' reads an order item where `resource.data.customerId == 'user123'`.
-     * @deny (get) User 'user456' tries to read an order item belonging to 'user123'.
-     * @deny (list) Any user tries to list the `orders_items` collection, preventing data leakage.
-     * @principle Relies on denormalized data (`customerId`) for secure, high-performance authorization checks.
+     * @allow (get) The user who owns the order item or an admin can read it.
+     * @allow (list) Admins can list all order items for the admin dashboard.
+     * @allow (create) The owner can create an order item.
+     * @allow (update, delete) The owner or an admin can modify or delete the order item.
+     * @principle Relies on denormalized data (`customerId`) for secure, high-performance checks with an admin override.
      */
     match /orders_items/{orderItemId} {
-      // SECURITY: The document being read MUST have a 'customerId' field matching the user.
-      allow get: if isOwner(resource.data.customerId);
-      // SECURITY: Listing this top-level collection is disallowed to prevent users from querying all order items in the system.
-      allow list: if false;
-      // SECURITY: The new document MUST have a 'customerId' field matching the user creating it.
+      allow get: if isOwner(resource.data.customerId) || isAdmin();
+      allow list: if isAdmin();
       allow create: if isOwner(request.resource.data.customerId);
-      // SECURITY: The user must own the existing document and cannot change the customerId.
-      allow update: if isExistingOwner(resource.data.customerId) && isImmutable('customerId');
-      // SECURITY: The user must own the existing document to delete it.
-      allow delete: if isExistingOwner(resource.data.customerId);
+      allow update: if (isOwner(resource.data.customerId) || isAdmin()) && isImmutable('customerId');
+      allow delete: if isOwner(resource.data.customerId) || isAdmin();
     }
   }
 }
