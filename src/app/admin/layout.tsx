@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, ShoppingCart, Users } from "lucide-react";
+import { Package, ShoppingCart, Users, Tags } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import UserNav from "@/components/shared/UserNav";
 import { FirebaseClientProvider } from "@/firebase";
@@ -27,6 +27,13 @@ export default function AdminLayout({
                 >
                   <Package className="h-4 w-4" />
                   Produtos
+                </Link>
+                <Link
+                  href="/admin/categories"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                >
+                  <Tags className="h-4 w-4" />
+                  Categorias
                 </Link>
                 <Link
                   href="/admin/orders"
