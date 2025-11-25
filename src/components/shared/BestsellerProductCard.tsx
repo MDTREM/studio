@@ -42,7 +42,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
         <div className="flex items-center gap-1 mb-2">
             <div className="flex items-center">
                 {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                    <Star key={i} className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-primary fill-primary' : 'text-gray-300'}`} />
                 ))}
             </div>
             <span className="text-xs text-muted-foreground">({reviewCount} avaliações)</span>
