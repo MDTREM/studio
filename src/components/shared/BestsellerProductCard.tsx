@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Product } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import Link from 'next/link';
 
 interface BestsellerProductCardProps {
@@ -59,13 +59,13 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
         </div>
       </div>
       
-      <CardContent className="p-4 flex flex-col flex-grow">
+      <CardContent className="p-4 flex flex-col flex-grow text-center">
         <h3 className="font-semibold text-sm mb-2 truncate">{product.name}</h3>
         <div className="flex-grow">
           <p className="text-xs text-muted-foreground line-through">
             {product.basePrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </p>
-          <p className="text-lg font-bold text-primary">
+          <p className="text-2xl font-bold text-primary">
             {discountedPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </p>
           <p className="text-xs text-muted-foreground">
@@ -75,7 +75,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
         <div className="mt-4 flex flex-col gap-2">
             <Button size="sm" asChild>
                 <Link href={`/orcamento?produto=${product.id}`}>
-                    <ShoppingCart className="mr-2 h-4 w-4" /> Comprar agora
+                    Comprar agora mesmo
                 </Link>
             </Button>
             <Button size="sm" variant="outline" asChild>
