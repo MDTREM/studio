@@ -16,7 +16,7 @@ const statusColors = {
 };
 
 export default function DashboardPage() {
-    const { user } = useUser();
+    const { user, isUserLoading } = useUser(); // <-- Adicionado isUserLoading
     const firestore = useFirestore();
 
     const userOrdersQuery = useMemoFirebase(() => {
@@ -24,10 +24,16 @@ export default function DashboardPage() {
         return query(collection(firestore, "orders_items"), where("customerId", "==", user.uid));
     }, [firestore, user]);
     
-    const { data: userOrders, isLoading } = useCollection<Order>(userOrdersQuery);
+    const { data: userOrders, isLoading: areOrdersLoading } = useCollection<Order>(userOrdersQuery);
     
-    if (isLoading) {
+    // Aguarda o carregamento inicial do usuário antes de qualquer outra coisa
+    if (isUserLoading || areOrdersLoading) {
         return <div>Carregando seus pedidos...</div>
+    }
+
+    if (!user) {
+        // Isso pode acontecer brevemente ou se o usuário acessar diretamente sem estar logado
+        return <div>Você precisa estar logado para ver esta página.</div>
     }
 
   return (
@@ -54,9 +60,9 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {userOrders && userOrders.map((order: Order) => (
+              {userOrders && userOrders.length > 0 ? userOrders.map((order: Order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
+                  <TableCell className="font-medium">{order.id.substring(0, 7)}...</TableCell>
                   <TableCell>{order.productName}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className={cn("border", statusColors[order.status])}>
@@ -68,8 +74,7 @@ export default function DashboardPage() {
                     {order.totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </TableCell>
                 </TableRow>
-              ))}
-              {!userOrders && (
+              )) : (
                 <TableRow>
                     <TableCell colSpan={5} className="text-center">Nenhum pedido encontrado.</TableCell>
                 </TableRow>
