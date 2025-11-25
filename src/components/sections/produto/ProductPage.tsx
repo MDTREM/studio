@@ -150,6 +150,29 @@ export default function ProductPage({ product }: ProductPageProps) {
           </div>
           
           <Separator className="my-8" />
+          
+          {/* Quantidade */}
+          <div className="grid gap-3 mb-8">
+            <Label className='font-semibold text-base'>Quantidade</Label>
+            <div className="flex items-center gap-2">
+                <div className="flex items-center border rounded-md">
+                    <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleQuantityChange(-50)}>
+                        <Minus className="h-4 w-4" />
+                    </Button>
+                    <Input 
+                        type="number" 
+                        className="h-10 w-20 text-center border-x" 
+                        value={quantity}
+                        onChange={(e) => setQuantity(parseInt(e.target.value))}
+                        min={1}
+                    />
+                    <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleQuantityChange(50)}>
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+          </div>
+
 
           {/* Preço e Compra */}
           <div className="space-y-4 pb-32">
