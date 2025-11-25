@@ -56,13 +56,13 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
+          "min-h-screen bg-white font-sans antialiased",
           ptSans.variable
         )}
       >
         <div className="relative flex min-h-screen flex-col">
           <Header />
-          <main className="flex-1 bg-background">{children}</main>
+          <main className="flex-1 bg-white">{children}</main>
           <Footer />
         </div>
         <WhatsappButton />

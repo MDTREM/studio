@@ -37,7 +37,7 @@ export default function Header() {
             <span>Primeira compra? Use o cupom OURO5</span>
         </div>
       </TopBanner>
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background text-foreground">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
         <div className="container flex h-20 max-w-7xl items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2">
             <Logo />
@@ -45,8 +45,8 @@ export default function Header() {
 
           <div className="hidden md:flex flex-1 max-w-xl">
             <div className="relative w-full">
-                <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 border-border h-11 pl-6 pr-12 text-base" />
-                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full">
+                <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-background/20 text-white border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-white/70" />
+                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full hover:bg-white/20">
                     <Search className="h-5 w-5" />
                 </Button>
             </div>
@@ -61,7 +61,7 @@ export default function Header() {
                     </div>
                 </Link>
                 <UserNav />
-                 <Button variant="ghost" size="icon" className="relative h-10 w-10">
+                 <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/20">
                     <ShoppingCart className="h-6 w-6" />
                     <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">0</span>
                     <span className="sr-only">Carrinho</span>
@@ -70,12 +70,12 @@ export default function Header() {
             
             <Sheet>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" className="hover:bg-gray-100">
+                <Button variant="ghost" size="icon" className="hover:bg-white/20">
                   <Menu className="h-6 w-6" />
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-background text-foreground">
+              <SheetContent side="right" className="bg-black text-white">
                 <div className="flex flex-col gap-6 pt-10">
                   <Link href="/" className="flex items-center gap-2">
                     <Logo />
@@ -99,7 +99,7 @@ export default function Header() {
             </Sheet>
           </div>
         </div>
-        <div className="hidden md:block border-t">
+        <div className="hidden md:block border-t border-border/40">
             <div className="container max-w-7xl">
                 <nav className="flex items-center gap-6 text-sm font-medium h-12">
                 {secondaryNavLinks.map((link) => (
