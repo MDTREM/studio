@@ -11,6 +11,7 @@ import {
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import { Category } from '@/lib/definitions';
+import Image from 'next/image';
 
 export default function CategoriesSection() {
   const firestore = useFirestore();
@@ -47,8 +48,15 @@ export default function CategoriesSection() {
                         <Link href={`/catalogo?categoria=${category.id}`} className="group p-1 block">
                             <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full">
                                 <CardContent className="p-0">
-                                <div className="relative aspect-square bg-primary flex items-center justify-center">
-                                    {/* Placeholder for image */}
+                                <div className="relative aspect-square bg-secondary flex items-center justify-center">
+                                    <Image 
+                                      src={category.imageUrl} 
+                                      alt={category.name} 
+                                      fill 
+                                      className="object-cover" 
+                                      data-ai-hint={category.imageHint}
+                                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
+                                    />
                                 </div>
                                 <div className="p-4">
                                     <h3 className="text-center font-semibold text-foreground group-hover:text-primary transition-colors">

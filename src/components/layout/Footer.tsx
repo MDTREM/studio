@@ -15,10 +15,10 @@ export default function Footer() {
                 <Logo />
             </div>
             <div className="flex gap-4">
-              <Link href="#" aria-label="Instagram">
+              <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                 <Instagram className="h-6 w-6 hover:text-primary transition-colors" />
               </Link>
-              <Link href="#" aria-label="Facebook">
+              <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                 <Facebook className="h-6 w-6 hover:text-primary transition-colors" />
               </Link>
             </div>
@@ -28,9 +28,9 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <h3 className="font-bold mb-4">Políticas</h3>
             <nav className="flex flex-col gap-2 text-sm text-gray-400">
-              <Link href="#" className="hover:text-primary transition-colors">Política de Cookies</Link>
-              <Link href="#" className="hover:text-primary transition-colors">Termos de Uso</Link>
-              <Link href="#" className="hover:text-primary transition-colors">Política de Privacidade</Link>
+              <Link href="/politica-de-cookies" className="hover:text-primary transition-colors">Política de Cookies</Link>
+              <Link href="/termos-de-uso" className="hover:text-primary transition-colors">Termos de Uso</Link>
+              <Link href="/politica-de-privacidade" className="hover:text-primary transition-colors">Política de Privacidade</Link>
             </nav>
           </div>
 
