@@ -153,10 +153,12 @@ export default function Header() {
           </div>
           
           <div className="flex items-center gap-2">
-             <Button variant="ghost" size="icon" className="relative h-10 w-10 md:hidden text-white hover:bg-white/10 hover:text-white">
-                <ShoppingCart className="h-6 w-6" />
-                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>
-                <span className="sr-only">Carrinho</span>
+            <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 md:hidden text-white hover:bg-white/10 hover:text-white">
+                <Link href="/carrinho">
+                    <ShoppingCart className="h-6 w-6" />
+                    {cartCount > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
+                    <span className="sr-only">Carrinho</span>
+                </Link>
             </Button>
           </div>
 
@@ -179,10 +181,12 @@ export default function Header() {
                     </div>
                 </Link>
                 <UserNav />
-                 <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
-                    <ShoppingCart className="h-6 w-6" />
-                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>
-                    <span className="sr-only">Carrinho</span>
+                 <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
+                    <Link href="/carrinho">
+                        <ShoppingCart className="h-6 w-6" />
+                        {cartCount > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
+                        <span className="sr-only">Carrinho</span>
+                    </Link>
                 </Button>
           </div>
         </div>

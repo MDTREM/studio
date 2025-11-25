@@ -1,7 +1,7 @@
 'use client';
 
 import { CartItem } from '@/lib/definitions';
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -9,6 +9,7 @@ interface CartContextType {
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   cartCount: number;
+  cartTotal: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -43,27 +44,35 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
   };
 
-  const updateQuantity = (itemId: string, quantity: number) => {
+  const updateQuantity = (itemId: string, newQuantity: number) => {
     setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId
-          ? {
-              ...item,
-              quantity,
-              // Recalculate price if necessary. This assumes a simple price * quantity logic.
-              // A more complex pricing model would need the original price per unit.
-              totalPrice: (item.totalPrice / item.quantity) * quantity,
-            }
-          : item
-      )
+      prevItems.map(item => {
+        if (item.id === itemId) {
+          // Find the original price per unit from the product variations
+          const baseQuantity = item.product.variations.quantities[0] || 1;
+          const discountFactor = Math.log10(newQuantity / baseQuantity + 1) / 2;
+          const pricePerUnit = item.product.basePrice / baseQuantity * (1 - discountFactor);
+          
+          return {
+            ...item,
+            quantity: newQuantity,
+            totalPrice: pricePerUnit * newQuantity
+          };
+        }
+        return item;
+      }).filter(item => item.quantity > 0) // Remove item if quantity is 0
     );
   };
   
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
+  const cartTotal = useMemo(() => {
+    return cartItems.reduce((total, item) => total + item.totalPrice, 0);
+  }, [cartItems]);
+
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, cartCount }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, cartCount, cartTotal }}>
       {children}
     </CartContext.Provider>
   );
