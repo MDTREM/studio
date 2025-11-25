@@ -138,10 +138,13 @@ export default function SignupPage() {
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
                             <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={setDate}
-                            initialFocus
+                                mode="single"
+                                captionLayout="dropdown-buttons"
+                                fromYear={1900}
+                                toYear={new Date().getFullYear()}
+                                selected={date}
+                                onSelect={setDate}
+                                initialFocus
                             />
                         </PopoverContent>
                     </Popover>
