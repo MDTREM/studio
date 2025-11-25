@@ -35,6 +35,11 @@
           "type": "string",
           "description": "The user's CPF (for individuals)."
         },
+        "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The user's date of birth (for individuals)."
+        },
         "companyName": {
           "type": "string",
           "description": "The company's legal name (for businesses)."
@@ -46,12 +51,22 @@
         "cnpj": {
           "type": "string",
           "description": "The company's CNPJ (for businesses)."
+        },
+        "phone": {
+            "type": "string",
+            "description": "The user's phone number."
+        },
+        "address": {
+            "type": "string",
+            "description": "The user's full address."
         }
       },
       "required": [
         "uid",
         "email",
-        "accountType"
+        "accountType",
+        "phone",
+        "address"
       ]
     }
   },
