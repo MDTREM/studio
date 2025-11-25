@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { Product } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Check, ChevronRight, Download, Home, Minus, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -18,8 +17,7 @@ interface ProductPageProps {
 }
 
 export default function ProductPage({ product }: ProductPageProps) {
-  const [quantity, setQuantity] = useState(100);
-  const [selectedFormat, setSelectedFormat] = useState(product.variations.formats[0] || '');
+  const [quantity, setQuantity] = useState(product.variations.quantities[0] || 1);
   const [mainImage, setMainImage] = useState(product.imageUrl);
 
   // Hardcoded rating for now
@@ -32,7 +30,7 @@ export default function ProductPage({ product }: ProductPageProps) {
 
   const breadcrumbs = [
     { label: 'Início', href: '/' },
-    { label: 'Papelaria Personalizada', href: '/catalogo' },
+    { label: 'Catálogo', href: '/catalogo' },
     { label: product.name, href: `/produto/${product.id}` },
   ];
 
@@ -97,27 +95,33 @@ export default function ProductPage({ product }: ProductPageProps) {
 
           {/* Variações */}
           <div className="space-y-6">
-            {product.variations.materials && (
+            {product.variations.materials && product.variations.materials.length > 0 && (
                  <div className="grid gap-3">
                     <Label className='font-semibold text-base'>Material</Label>
-                    <Select defaultValue={product.variations.materials[0]}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                        {product.variations.materials.map(material => <SelectItem key={material} value={material}>{material}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
+                    <RadioGroup defaultValue={product.variations.materials[0]} className="flex flex-wrap gap-2">
+                        {product.variations.materials.map(material => (
+                             <Label key={material} htmlFor={`material-${material}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
+                                <RadioGroupItem value={material} id={`material-${material}`} className="sr-only" />
+                                {material}
+                            </Label>
+                        ))}
+                    </RadioGroup>
                 </div>
             )}
-            <div className="grid gap-3">
-                <Label htmlFor="format" className='font-semibold text-base'>Formato</Label>
-                <Select value={selectedFormat} onValueChange={setSelectedFormat}>
-                    <SelectTrigger id="format"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                    {product.variations.formats.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-            </div>
-            {product.variations.colors && (
+            {product.variations.formats && product.variations.formats.length > 0 && (
+                <div className="grid gap-3">
+                    <Label htmlFor="format" className='font-semibold text-base'>Formato</Label>
+                    <RadioGroup defaultValue={product.variations.formats[0]} className="flex flex-wrap gap-2">
+                        {product.variations.formats.map(f => (
+                            <Label key={f} htmlFor={`format-${f}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
+                                <RadioGroupItem value={f} id={`format-${f}`} className="sr-only" />
+                                {f}
+                            </Label>
+                        ))}
+                    </RadioGroup>
+                </div>
+            )}
+            {product.variations.colors && product.variations.colors.length > 0 && (
                  <div className="grid gap-3">
                     <Label className='font-semibold text-base'>Cor</Label>
                     <RadioGroup defaultValue={product.variations.colors[0]} className="flex flex-wrap gap-2">
@@ -130,23 +134,25 @@ export default function ProductPage({ product }: ProductPageProps) {
                     </RadioGroup>
                 </div>
             )}
-            <div className="grid gap-3">
-                <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento</Label>
-                <RadioGroup defaultValue={product.variations.finishings[0]} className="flex flex-wrap gap-2">
-                    {product.variations.finishings.map(f => (
-                        <Label key={f} htmlFor={`finishing-${f}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
-                            <RadioGroupItem value={f} id={`finishing-${f}`} className="sr-only" />
-                            {f}
-                        </Label>
-                    ))}
-                </RadioGroup>
-            </div>
+            {product.variations.finishings && product.variations.finishings.length > 0 && (
+                <div className="grid gap-3">
+                    <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento</Label>
+                    <RadioGroup defaultValue={product.variations.finishings[0]} className="flex flex-wrap gap-2">
+                        {product.variations.finishings.map(f => (
+                            <Label key={f} htmlFor={`finishing-${f}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
+                                <RadioGroupItem value={f} id={`finishing-${f}`} className="sr-only" />
+                                {f}
+                            </Label>
+                        ))}
+                    </RadioGroup>
+                </div>
+            )}
           </div>
           
           <Separator className="my-8" />
 
           {/* Preço e Compra */}
-          <div className="space-y-4">
+          <div className="space-y-4 pb-32">
             <div className='border rounded-lg p-3 flex items-center gap-3 bg-secondary/30'>
                 <Truck className="h-6 w-6 text-primary" />
                 <div>
@@ -178,7 +184,7 @@ export default function ProductPage({ product }: ProductPageProps) {
        <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-[0_-2px_10px_rgba(0,0,0,0.1)] p-4">
             <div className="container max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className='hidden md:block'>
-                    <p className="text-sm text-muted-foreground font-medium">100 Adesivo Redondo - 48x48mm...</p>
+                    <p className="text-sm text-muted-foreground font-medium">{product.name}</p>
                 </div>
                 <div className='flex items-center gap-4 w-full md:w-auto'>
                      <div className="flex items-center gap-2">
