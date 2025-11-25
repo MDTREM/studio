@@ -5,14 +5,18 @@ export type Product = {
   id: string;
   name: string;
   shortDescription: string;
+  description?: string;
   imageUrl: string;
   imageHint: string;
   basePrice: number;
   category: string;
   variations: {
-    sizes: string[];
-    quantities: number[];
+    models?: string[];
+    materials?: string[];
+    formats: string[];
+    colors?: string[];
     finishings: string[];
+    quantities: number[];
   };
 };
 

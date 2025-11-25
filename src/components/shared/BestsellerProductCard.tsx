@@ -19,7 +19,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group">
       <div className="relative">
-        <Link href={`/orcamento?produto=${product.id}`}>
+        <Link href={`/produto/${product.id}`}>
           <div className="relative aspect-square w-full overflow-hidden bg-primary flex items-center justify-center">
             {/* Placeholder for image */}
           </div>
