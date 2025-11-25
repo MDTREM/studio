@@ -2,7 +2,7 @@ import { Gem } from 'lucide-react';
 
 export default function Logo() {
   return (
-    <div className="flex items-center gap-2 text-lg font-bold text-foreground">
+    <div className="flex items-center gap-2 text-lg font-bold">
       <div className="p-2 bg-primary rounded-md">
         <Gem className="h-5 w-5 text-primary-foreground" />
       </div>

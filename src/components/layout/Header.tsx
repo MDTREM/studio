@@ -10,6 +10,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import TopBanner from './TopBanner';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -19,7 +20,9 @@ const navLinks = [
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <>
+    <TopBanner text="Aproveite nossas ofertas de Black Friday!" />
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
       <div className="container flex h-16 max-w-7xl items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Logo />
@@ -30,7 +33,7 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-foreground/80 transition-colors hover:text-foreground"
+              className="transition-colors hover:text-white/80"
             >
               {link.label}
             </Link>
@@ -43,12 +46,12 @@ export default function Header() {
             </div>
             <Sheet>
                 <SheetTrigger asChild className="md:hidden">
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="hover:bg-gray-800">
                         <Menu className="h-6 w-6" />
                         <span className="sr-only">Toggle Menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="right">
+                <SheetContent side="right" className="bg-black text-white">
                     <div className="flex flex-col gap-6 pt-10">
                         <Link href="/" className="flex items-center gap-2">
                             <Logo />
@@ -58,7 +61,7 @@ export default function Header() {
                             <Link
                             key={link.href}
                             href={link.href}
-                            className="text-foreground/80 transition-colors hover:text-foreground"
+                            className="transition-colors hover:text-white/80"
                             >
                             {link.label}
                             </Link>
@@ -71,5 +74,6 @@ export default function Header() {
         </div>
       </div>
     </header>
+    </>
   );
 }
