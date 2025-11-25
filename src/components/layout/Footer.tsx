@@ -15,10 +15,10 @@ export default function Footer() {
                 <Logo />
             </div>
             <div className="flex gap-4">
-              <Link href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <Link href="https://www.instagram.com/graficaouro/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                 <Instagram className="h-6 w-6 hover:text-primary transition-colors" />
               </Link>
-              <Link href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <Link href="https://www.facebook.com/profile.php?id=61583717952045" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                 <Facebook className="h-6 w-6 hover:text-primary transition-colors" />
               </Link>
             </div>
