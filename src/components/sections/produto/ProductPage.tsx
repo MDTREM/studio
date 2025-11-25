@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { Product } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface ProductPageProps {
   product: Product;
@@ -25,14 +26,31 @@ export default function ProductPage({ product }: ProductPageProps) {
   const reviewCount = 192;
 
   const handleQuantityChange = (amount: number) => {
-    setQuantity(prev => Math.max(1, prev + amount));
+    const newQuantity = Math.max(1, quantity + amount);
+    // Find the closest quantity from the available options
+    const closestQuantity = product.variations.quantities.reduce((prev, curr) => 
+        Math.abs(curr - newQuantity) < Math.abs(prev - newQuantity) ? curr : prev
+    );
+    setQuantity(closestQuantity);
   }
-
+  
   const breadcrumbs = [
     { label: 'Início', href: '/' },
     { label: 'Catálogo', href: '/catalogo' },
     { label: product.name, href: `/produto/${product.id}` },
   ];
+
+  // Dummy price calculation logic, you can adjust this
+  const getPriceForQuantity = (q: number) => {
+    const baseQuantity = product.variations.quantities[0] || 1;
+    const discountFactor = Math.log10(q / baseQuantity + 1) / 2;
+    const pricePerUnit = product.basePrice / baseQuantity * (1 - discountFactor);
+    const totalPrice = pricePerUnit * q;
+    return { pricePerUnit, totalPrice };
+  }
+
+  const selectedPrice = useMemo(() => getPriceForQuantity(quantity), [quantity, product]);
+
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8 sm:py-16">
@@ -152,26 +170,41 @@ export default function ProductPage({ product }: ProductPageProps) {
           <Separator className="my-8" />
           
           {/* Quantidade */}
-          <div className="grid gap-3 mb-8">
-            <Label className='font-semibold text-base'>Quantidade</Label>
-            <div className="flex items-center gap-2">
-                <div className="flex items-center border rounded-md">
-                    <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleQuantityChange(-50)}>
-                        <Minus className="h-4 w-4" />
-                    </Button>
-                    <Input 
-                        type="number" 
-                        className="h-10 w-20 text-center border-x" 
-                        value={quantity}
-                        onChange={(e) => setQuantity(parseInt(e.target.value))}
-                        min={1}
-                    />
-                    <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleQuantityChange(50)}>
-                        <Plus className="h-4 w-4" />
-                    </Button>
-                </div>
+            <div className="grid gap-4 mb-8">
+                <Label className="font-semibold text-base">Escolha a quantidade</Label>
+                <RadioGroup value={quantity.toString()} onValueChange={(val) => setQuantity(parseInt(val))}>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[200px]">Quantidade</TableHead>
+                                <TableHead>Valor por unidade</TableHead>
+                                <TableHead className="text-right">Valor Total</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {product.variations.quantities.map((q) => {
+                                const { pricePerUnit, totalPrice } = getPriceForQuantity(q);
+                                return (
+                                    <TableRow key={q}>
+                                        <TableCell>
+                                            <Label htmlFor={`quantity-${q}`} className="flex items-center gap-3 font-medium cursor-pointer">
+                                                <RadioGroupItem value={q.toString()} id={`quantity-${q}`} />
+                                                {q} unidades
+                                            </Label>
+                                        </TableCell>
+                                        <TableCell>
+                                            {pricePerUnit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/un
+                                        </TableCell>
+                                        <TableCell className="text-right font-medium">
+                                            {totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </RadioGroup>
             </div>
-          </div>
 
 
           {/* Preço e Compra */}
@@ -207,29 +240,14 @@ export default function ProductPage({ product }: ProductPageProps) {
        <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-[0_-2px_10px_rgba(0,0,0,0.1)] p-4">
             <div className="container max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className='hidden md:block'>
-                    <p className="text-sm text-muted-foreground font-medium">{product.name}</p>
+                    <p className="text-sm text-muted-foreground font-medium">{product.name} - {quantity} unidades</p>
                 </div>
                 <div className='flex items-center gap-4 w-full md:w-auto'>
-                     <div className="flex items-center gap-2">
-                        <span className='font-semibold text-sm'>Quantidade:</span>
-                        <div className="flex items-center border rounded-md">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(-50)}>
-                                <Minus className="h-4 w-4" />
-                            </Button>
-                            <Input 
-                                type="number" 
-                                className="h-8 w-16 text-center border-x" 
-                                value={quantity}
-                                onChange={(e) => setQuantity(parseInt(e.target.value))}
-                            />
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(50)}>
-                                <Plus className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
                      <div className="text-right">
                         <p className="text-sm text-muted-foreground">Total</p>
-                        <p className="text-2xl font-bold text-primary">{product.basePrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        <p className="text-2xl font-bold text-primary">
+                            {selectedPrice.totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </p>
                     </div>
                 </div>
 
