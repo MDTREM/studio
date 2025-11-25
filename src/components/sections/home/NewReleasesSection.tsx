@@ -17,7 +17,7 @@ export default function NewReleasesSection() {
     // Assuming you have a 'createdAt' field in your products
     const newProductsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
-        return query(collection(firestore, "products"), orderBy("createdAt", "desc"), limit(4));
+        return query(collection(firestore, "products"), orderBy("createdAt", "desc"), limit(8));
     }, [firestore]);
     
     const { data: newProducts, isLoading } = useCollection<Product>(newProductsQuery);
@@ -40,7 +40,7 @@ export default function NewReleasesSection() {
                 <Carousel
                     opts={{
                         align: "start",
-                        loop: true,
+                        loop: newProducts.length > 4,
                     }}
                     className="w-full"
                 >

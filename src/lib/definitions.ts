@@ -52,3 +52,11 @@ export type User = {
   tradingName?: string;
   cnpj?: string;
 };
+
+// Add the 'createdAt' field to the Product entity in backend.json
+// This is important for sorting new products.
+// "createdAt": {
+//   "type": "string",
+//   "format": "date-time",
+//   "description": "Timestamp when the product was created."
+// }

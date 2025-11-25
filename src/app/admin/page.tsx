@@ -14,6 +14,7 @@ import {
 import Image from "next/image";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
+import AddProductDialog from "./_components/AddProductDialog";
 
 export default function AdminProductsPage() {
   const firestore = useFirestore();
@@ -30,21 +31,20 @@ export default function AdminProductsPage() {
   }
 
   if (!products) {
-    return <div>Nenhum produto encontrado.</div>;
+    return (
+      <div>
+        <AddProductDialog />
+        <p>Nenhum produto encontrado.</p>
+      </div>
+    );
   }
-
 
   return (
     <>
       <div className="flex items-center">
         <h1 className="text-lg font-semibold md:text-2xl">Produtos</h1>
         <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" className="h-8 gap-1">
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Adicionar Produto
-                </span>
-            </Button>
+            <AddProductDialog />
         </div>
       </div>
       <Card>
@@ -52,7 +52,6 @@ export default function AdminProductsPage() {
           <CardTitle>Gerenciamento de Produtos</CardTitle>
           <CardDescription>
             Adicione, edite e remova produtos do seu catálogo.
-            {/* Para adicionar novos campos ao produto, edite a interface 'Product' em src/lib/definitions.ts e atualize este formulário e tabela. */}
           </CardDescription>
         </CardHeader>
         <CardContent>
