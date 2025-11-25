@@ -17,7 +17,7 @@ export const products: Product[] = [
     imageUrl: 'https://picsum.photos/seed/prod1/600/400',
     imageHint: 'business card',
     basePrice: 89.90,
-    category: 'panfletos',
+    category: 'cartoes-visita',
     variations: {
       sizes: ['9x5 cm', '8x5 cm'],
       quantities: [100, 500, 1000],
@@ -92,6 +92,34 @@ export const products: Product[] = [
       sizes: ['30x40 cm', '50x70 cm', 'Personalizado'],
       quantities: [1, 5, 10],
       finishings: ['Furos para fixação', 'Sem furos'],
+    },
+  },
+  {
+    id: 'agenda-2025',
+    name: 'Agenda 2025',
+    shortDescription: 'Capa dura personalizada, miolo padrão.',
+    imageUrl: 'https://picsum.photos/seed/prod7/600/400',
+    imageHint: 'planner 2025',
+    basePrice: 55.00,
+    category: 'agendas',
+    variations: {
+      sizes: ['14x20 cm'],
+      quantities: [10, 25, 50, 100],
+      finishings: ['Wire-o', 'Espiral'],
+    },
+  },
+  {
+    id: 'calendario-mesa',
+    name: 'Calendário de Mesa',
+    shortDescription: 'Base em papel triplex, 12 lâminas.',
+    imageUrl: 'https://picsum.photos/seed/prod8/600/400',
+    imageHint: 'desk calendar',
+    basePrice: 25.00,
+    category: 'agendas',
+    variations: {
+      sizes: ['15x10 cm'],
+      quantities: [50, 100, 250],
+      finishings: ['Wire-o'],
     },
   },
 ];

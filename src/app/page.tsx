@@ -1,3 +1,4 @@
+import AgendasSection from "@/components/sections/home/AgendasSection";
 import BestsellersSection from "@/components/sections/home/BestsellersSection";
 import CategoriesSection from "@/components/sections/home/CategoriesSection";
 import Hero from "@/components/sections/home/Hero";
@@ -12,6 +13,7 @@ export default function Home() {
       <PromoBanners />
       <BestsellersSection />
       <CategoriesSection />
+      <AgendasSection />
     </>
   );
 }
