@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,12 +12,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { useAuth, useFirestore, setDocumentNonBlocking, useUser } from '@/firebase';
 import { initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { doc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { AuthError } from 'firebase/auth';
+import { AuthError, onAuthStateChanged } from 'firebase/auth';
 
 export default function SignupPage() {
   const [accountType, setAccountType] = useState('pf');
@@ -32,34 +32,46 @@ export default function SignupPage() {
   const [companyName, setCompanyName] = useState('');
   const [tradingName, setTradingName] = useState('');
   const [cnpj, setCnpj] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const auth = useAuth();
   const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
 
+  useEffect(() => {
+    // Redirect if user becomes authenticated
+    if (!isUserLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
+
   const handleSignup = async () => {
     if (!auth || !firestore) return;
+    setIsSubmitting(true);
 
     try {
-        initiateEmailSignUp(auth, email, password);
-        const unsubscribe = auth.onAuthStateChanged(user => {
-            if (user) {
-                const userRef = doc(firestore, "users", user.uid);
-                const userData = {
-                    id: user.uid,
-                    email,
-                    name: accountType === 'pf' ? name : companyName,
-                    phone,
-                    address,
-                    ...(accountType === 'pf' && { cpf, birthDate: date }),
-                    ...(accountType === 'pj' && { companyName, tradingName, cnpj }),
-                };
-                setDocumentNonBlocking(userRef, userData, { merge: true });
-                unsubscribe();
-                router.push('/dashboard');
-            }
-        });
+      const unsubscribe = onAuthStateChanged(auth, (newUser) => {
+        if (newUser) {
+          const userRef = doc(firestore, "users", newUser.uid);
+          const userData = {
+              id: newUser.uid,
+              email,
+              name: accountType === 'pf' ? name : companyName,
+              phone,
+              address,
+              isAdmin: false,
+              ...(accountType === 'pf' && { cpf, birthDate: date }),
+              ...(accountType === 'pj' && { companyName, tradingName, cnpj }),
+          };
+          setDocumentNonBlocking(userRef, userData, { merge: true });
+          unsubscribe();
+          // The useEffect will handle the redirect to /dashboard
+        }
+      });
+
+      initiateEmailSignUp(auth, email, password);
 
     } catch (error) {
       console.error('Error signing up:', error);
@@ -69,6 +81,7 @@ export default function SignupPage() {
         title: 'Erro ao criar conta',
         description: authError.message,
       });
+      setIsSubmitting(false);
     }
   };
 
@@ -170,7 +183,9 @@ export default function SignupPage() {
             <Label htmlFor="password">Senha</Label>
             <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
           </div>
-          <Button className="w-full" onClick={handleSignup}>Criar conta</Button>
+          <Button className="w-full" onClick={handleSignup} disabled={isSubmitting || isUserLoading}>
+            {isSubmitting || isUserLoading ? 'Criando conta...' : 'Criar conta'}
+          </Button>
         </CardContent>
         <CardFooter className="text-center text-sm text-muted-foreground">
           Já tem uma conta?{' '}
