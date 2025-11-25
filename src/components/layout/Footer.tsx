@@ -46,7 +46,7 @@ export default function Footer() {
           {/* CNPJ */}
            <div className="text-center md:text-left">
             <h3 className="font-bold mb-4">CNPJ</h3>
-            <p className="text-sm text-gray-400">00.000.000/0001-00</p>
+            <p className="text-sm text-gray-400">27.619.752/0001-91</p>
           </div>
 
         </div>

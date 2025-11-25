@@ -227,7 +227,7 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-end gap-4">
             <Button variant="outline" asChild>
-                <a href={`https://wa.me/5511999999999?text=${getWhatsAppMessage()}`} target="_blank" rel="noopener noreferrer">
+                <a href={`https://wa.me/5531982190935?text=${getWhatsAppMessage()}`} target="_blank" rel="noopener noreferrer">
                     <Phone className="mr-2 h-4 w-4" />
                     Enviar para WhatsApp
                 </a>
