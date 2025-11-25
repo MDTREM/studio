@@ -4,6 +4,7 @@ import CategoriesSection from "@/components/sections/home/CategoriesSection";
 import Hero from "@/components/sections/home/Hero";
 import InfoCarousel from "@/components/sections/home/InfoCarousel";
 import NewReleasesSection from "@/components/sections/home/NewReleasesSection";
+import PrinterBanners from "@/components/sections/home/PrinterBanners";
 import PromoBanners from "@/components/sections/home/PromoBanners";
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
       <CategoriesSection />
       <AgendasSection />
       <NewReleasesSection />
+      <PrinterBanners />
     </>
   );
 }
