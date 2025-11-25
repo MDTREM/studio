@@ -55,12 +55,13 @@ const categoryLinks = [
 ];
 
 const secondaryNavLinks = [
-    { href: '/catalogo', label: 'Todos os produtos', icon: <Menu className="h-5 w-5" /> },
-    { href: '/catalogo?categoria=agendas', label: 'Agendas', dropdown: true },
+    { href: '/catalogo', label: 'Todos os produtos', icon: <Menu className="h-5 w-5" />, dropdown: true },
+    { href: '/catalogo?categoria=adesivos', label: 'Adesivos' },
     { href: '/catalogo?categoria=banners', label: 'Banners' },
-    { href: '/catalogo?categoria=cadernos', label: 'Cadernos para colorir' },
-    { href: '/catalogo?categoria=mouse-pad', label: 'Mouse Pad Personalizado' },
-    { href: '/catalogo?categoria=pastas', label: 'Pastas personalizadas' },
+    { href: '/catalogo?categoria=cartoes-visita', label: 'Cartões de Visitas' },
+    { href: '/catalogo?categoria=panfletos', label: 'Panfletos' },
+    { href: '/catalogo?categoria=placas', label: 'Placas' },
+    { href: '/catalogo?categoria=wind-banner', label: 'Wind Banner' },
 ]
 
 export default function Header() {
