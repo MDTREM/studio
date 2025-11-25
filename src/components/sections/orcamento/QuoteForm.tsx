@@ -24,6 +24,7 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
   const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [fileName, setFileName] = useState('');
 
   useEffect(() => {
     if (selectedProduct) {
@@ -88,6 +89,14 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
         setIsSubmitted(true);
     }, 2000);
   }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFileName(e.target.files[0].name);
+    } else {
+      setFileName('');
+    }
+  };
 
   if (isSubmitted) {
     return (
@@ -171,8 +180,22 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="artwork">Enviar sua arte (opcional)</Label>
-                <Input id="artwork" type="file" className="file:text-foreground" />
+                <Label>Enviar sua arte (opcional)</Label>
+                <div className="flex items-center gap-4">
+                  <Button asChild variant="outline">
+                    <Label htmlFor="artwork" className="cursor-pointer">
+                      <FileUp className="mr-2 h-4 w-4" />
+                      Anexar arquivo
+                    </Label>
+                  </Button>
+                  <Input
+                    id="artwork"
+                    type="file"
+                    className="sr-only"
+                    onChange={handleFileChange}
+                  />
+                  {fileName && <p className="text-sm text-muted-foreground truncate">{fileName}</p>}
+                </div>
                 <p className="text-sm text-muted-foreground">Envie seu arquivo em PDF, CDR, AI ou JPG.</p>
               </div>
             </>
