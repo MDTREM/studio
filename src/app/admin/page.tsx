@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Product } from "@/lib/definitions";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,7 @@ import Image from "next/image";
 import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from "@/firebase";
 import { collection, query, doc } from "firebase/firestore";
 import AddProductDialog from "./_components/AddProductDialog";
+import EditProductDialog from "./_components/EditProductDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -124,7 +125,11 @@ export default function AdminProductsPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Editar</DropdownMenuItem>
+                                <EditProductDialog product={product}>
+                                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    Editar
+                                  </DropdownMenuItem>
+                                </EditProductDialog>
                                 <AlertDialogTrigger asChild>
                                   <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>Excluir</DropdownMenuItem>
                                 </AlertDialogTrigger>
