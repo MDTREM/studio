@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { LayoutDashboard, LogIn, LogOut } from 'lucide-react';
+import { LayoutDashboard, LogIn, LogOut, User } from 'lucide-react';
 
 export default function UserNav() {
   // TODO: Replace with real authentication state
@@ -20,11 +20,13 @@ export default function UserNav() {
 
   if (!isLoggedIn) {
     return (
-      <Link href="/login" passHref>
-        <Button variant="outline">
-          <LogIn className="mr-2 h-4 w-4" />
-          Entrar
-        </Button>
+        <Link href="/login" className="flex items-center gap-2 text-sm font-medium hover:text-primary">
+            <User className="h-6 w-6" />
+            <div>
+                <span className="text-muted-foreground">Bem-vindo(a)</span>
+                <br/>
+                <strong>Entrar ou Cadastrar</strong>
+            </div>
       </Link>
     );
   }
