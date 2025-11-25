@@ -1,5 +1,4 @@
 'use client';
-import { categories } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import {
@@ -9,8 +8,26 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+import { Category } from '@/lib/definitions';
 
 export default function CategoriesSection() {
+  const firestore = useFirestore();
+  const categoriesQuery = useMemoFirebase(() => {
+      if (!firestore) return null;
+      return query(collection(firestore, "categories"));
+  }, [firestore]);
+  const { data: categories, isLoading } = useCollection<Category>(categoriesQuery);
+
+  if (isLoading) {
+      return <div className="container max-w-7xl mx-auto px-4 text-center py-12">Carregando categorias...</div>;
+  }
+
+  if (!categories) {
+    return null;
+  }
+
   return (
     <section className="py-16 sm:py-24 bg-background">
       <div className="container max-w-7xl mx-auto px-4">

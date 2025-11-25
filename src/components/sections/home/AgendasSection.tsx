@@ -7,13 +7,25 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
-import { products } from "@/lib/data";
 import BestsellerProductCard from "@/components/shared/BestsellerProductCard";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query, where } from "firebase/firestore";
+import { Product } from "@/lib/definitions";
 
 export default function AgendasSection() {
-    const agendaProducts = products.filter(p => p.category === 'agendas');
+    const firestore = useFirestore();
+    const agendasQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, "products"), where("categoryId", "==", "agendas"));
+    }, [firestore]);
+    const { data: agendaProducts, isLoading } = useCollection<Product>(agendasQuery);
 
-    if (agendaProducts.length === 0) {
+
+    if (isLoading) {
+        return <div className="container max-w-7xl mx-auto px-4 text-center py-12">Carregando agendas...</div>;
+    }
+
+    if (!agendaProducts || agendaProducts.length === 0) {
         return null; // Don't render the section if there are no products in this category
     }
 

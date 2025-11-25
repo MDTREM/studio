@@ -12,10 +12,66 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { initiateEmailSignUp } from '@/firebase/non-blocking-login';
+import { doc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { AuthError } from 'firebase/auth';
 
 export default function SignupPage() {
   const [accountType, setAccountType] = useState('pf');
   const [date, setDate] = useState<Date | undefined>();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [tradingName, setTradingName] = useState('');
+  const [cnpj, setCnpj] = useState('');
+
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleSignup = async () => {
+    if (!auth || !firestore) return;
+
+    try {
+        initiateEmailSignUp(auth, email, password);
+        const unsubscribe = auth.onAuthStateChanged(user => {
+            if (user) {
+                const userRef = doc(firestore, "users", user.uid);
+                const userData = {
+                    id: user.uid,
+                    email,
+                    name: accountType === 'pf' ? name : companyName,
+                    phone,
+                    address,
+                    ...(accountType === 'pf' && { cpf, birthDate: date }),
+                    ...(accountType === 'pj' && { companyName, tradingName, cnpj }),
+                };
+                setDocumentNonBlocking(userRef, userData, { merge: true });
+                unsubscribe();
+                router.push('/dashboard');
+            }
+        });
+
+    } catch (error) {
+      console.error('Error signing up:', error);
+      const authError = error as AuthError;
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao criar conta',
+        description: authError.message,
+      });
+    }
+  };
+
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-14rem)] py-12">
@@ -45,12 +101,12 @@ export default function SignupPage() {
             <>
               <div className="grid gap-2">
                 <Label htmlFor="name">Nome Completo</Label>
-                <Input id="name" placeholder="Seu Nome Completo" required />
+                <Input id="name" placeholder="Seu Nome Completo" required value={name} onChange={e => setName(e.target.value)} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="cpf">CPF</Label>
-                  <Input id="cpf" placeholder="000.000.000-00" required />
+                  <Input id="cpf" placeholder="000.000.000-00" required value={cpf} onChange={e => setCpf(e.target.value)} />
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="birthDate">Data de Nascimento</Label>
@@ -83,38 +139,38 @@ export default function SignupPage() {
             <>
               <div className="grid gap-2">
                 <Label htmlFor="companyName">Razão Social</Label>
-                <Input id="companyName" placeholder="Nome da sua empresa" required />
+                <Input id="companyName" placeholder="Nome da sua empresa" required value={companyName} onChange={e => setCompanyName(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="tradingName">Nome Fantasia</Label>
-                <Input id="tradingName" placeholder="Nome popular da sua empresa" />
+                <Input id="tradingName" placeholder="Nome popular da sua empresa" value={tradingName} onChange={e => setTradingName(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="cnpj">CNPJ</Label>
-                <Input id="cnpj" placeholder="00.000.000/0001-00" required />
+                <Input id="cnpj" placeholder="00.000.000/0001-00" required value={cnpj} onChange={e => setCnpj(e.target.value)} />
               </div>
             </>
           )}
 
           <div className="grid gap-2">
             <Label htmlFor="phone">Telefone</Label>
-            <Input id="phone" type="tel" placeholder="(11) 99999-9999" required />
+            <Input id="phone" type="tel" placeholder="(11) 99999-9999" required value={phone} onChange={e => setPhone(e.target.value)} />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="address">Endereço</Label>
-            <Input id="address" placeholder="Rua, Número, Bairro, Cidade - Estado" required />
+            <Input id="address" placeholder="Rua, Número, Bairro, Cidade - Estado" required value={address} onChange={e => setAddress(e.target.value)} />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="m@exemplo.com" required />
+            <Input id="email" type="email" placeholder="m@exemplo.com" required value={email} onChange={e => setEmail(e.target.value)} />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Senha</Label>
-            <Input id="password" type="password" required />
+            <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
           </div>
-          <Button className="w-full">Criar conta</Button>
+          <Button className="w-full" onClick={handleSignup}>Criar conta</Button>
         </CardContent>
         <CardFooter className="text-center text-sm text-muted-foreground">
           Já tem uma conta?{' '}

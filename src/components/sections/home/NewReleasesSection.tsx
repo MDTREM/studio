@@ -7,15 +7,27 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
-import { products } from "@/lib/data";
 import BestsellerProductCard from "@/components/shared/BestsellerProductCard";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query, orderBy, limit } from "firebase/firestore";
+import { Product } from "@/lib/definitions";
 
 export default function NewReleasesSection() {
-    // For now, we'll feature the first 4 products as "New Releases"
-    // This can be updated later to filter by a specific category or property
-    const newProducts = products.slice(0, 4);
+    const firestore = useFirestore();
+    // Assuming you have a 'createdAt' field in your products
+    const newProductsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, "products"), orderBy("createdAt", "desc"), limit(4));
+    }, [firestore]);
+    
+    const { data: newProducts, isLoading } = useCollection<Product>(newProductsQuery);
 
-    if (newProducts.length === 0) {
+    if (isLoading) {
+        return <div className="container max-w-7xl mx-auto px-4 text-center py-12">Carregando lançamentos...</div>;
+    }
+
+
+    if (!newProducts || newProducts.length === 0) {
         return null;
     }
 

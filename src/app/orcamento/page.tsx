@@ -1,9 +1,25 @@
+'use client';
 import QuoteForm from "@/components/sections/orcamento/QuoteForm";
-import { products } from "@/lib/data";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { Product } from "@/lib/definitions";
+import { collection, query } from "firebase/firestore";
 
 export default function OrcamentoPage({ searchParams }: { searchParams: { produto?: string } }) {
-  const selectedProduct = products.find(p => p.id === searchParams.produto);
+    const firestore = useFirestore();
+    const productsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, "products"));
+    }, [firestore]);
+    const { data: products, isLoading } = useCollection<Product>(productsQuery);
   
+    if (isLoading) {
+        return <div>Carregando...</div>
+    }
+
+    if (!products) {
+        return <div>Nenhum produto encontrado.</div>
+    }
+
   return (
     <div className="container max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-12">

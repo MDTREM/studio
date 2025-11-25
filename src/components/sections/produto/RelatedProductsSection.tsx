@@ -6,8 +6,10 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
-import { products } from "@/lib/data";
 import BestsellerProductCard from "@/components/shared/BestsellerProductCard";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { Product } from "@/lib/definitions";
+import { collection, query, where, limit } from "firebase/firestore";
 
 interface RelatedProductsSectionProps {
     category: string;
@@ -15,9 +17,25 @@ interface RelatedProductsSectionProps {
 }
 
 export default function RelatedProductsSection({ category, currentProductId }: RelatedProductsSectionProps) {
-    const relatedProducts = products.filter(p => p.category === category && p.id !== currentProductId);
+    const firestore = useFirestore();
+    const relatedProductsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(
+            collection(firestore, "products"), 
+            where("categoryId", "==", category),
+            limit(10) // Fetch a few more to filter out the current one
+        );
+    }, [firestore, category]);
 
-    if (relatedProducts.length === 0) {
+    const { data: relatedProducts, isLoading } = useCollection<Product>(relatedProductsQuery);
+    
+    const filteredProducts = relatedProducts?.filter(p => p.id !== currentProductId);
+
+    if (isLoading) {
+        return <div className="container max-w-7xl mx-auto px-4">Carregando produtos relacionados...</div>
+    }
+
+    if (!filteredProducts || filteredProducts.length === 0) {
         return null;
     }
 
@@ -36,7 +54,7 @@ export default function RelatedProductsSection({ category, currentProductId }: R
                     className="w-full"
                 >
                     <CarouselContent>
-                        {relatedProducts.map((product) => (
+                        {filteredProducts.map((product) => (
                             <CarouselItem key={product.id} className="md:basis-1/3 lg:basis-1/4">
                                 <div className="p-1">
                                     <BestsellerProductCard product={product} />

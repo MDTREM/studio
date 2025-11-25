@@ -7,10 +7,27 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
-import { products } from "@/lib/data";
 import BestsellerProductCard from "@/components/shared/BestsellerProductCard";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query } from "firebase/firestore";
+import { Product } from "@/lib/definitions";
 
 export default function BestsellersSection() {
+    const firestore = useFirestore();
+    const productsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, "products"));
+    }, [firestore]);
+    const { data: products, isLoading } = useCollection<Product>(productsQuery);
+
+    if (isLoading) {
+        return <div className="container max-w-7xl mx-auto px-4 text-center py-12">Carregando...</div>;
+    }
+
+    if (!products) {
+        return null;
+    }
+
     return (
         <section className="py-16 sm:py-24 bg-background">
             <div className="container max-w-7xl mx-auto px-4">

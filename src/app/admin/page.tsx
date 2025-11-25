@@ -1,7 +1,7 @@
+'use client';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { products } from "@/lib/data";
 import { Product } from "@/lib/definitions";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import {
@@ -12,8 +12,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query } from "firebase/firestore";
 
 export default function AdminProductsPage() {
+  const firestore = useFirestore();
+
+  const productsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "products"));
+  }, [firestore]);
+
+  const { data: products, isLoading } = useCollection<Product>(productsQuery);
+
+  if (isLoading) {
+    return <div>Carregando produtos...</div>;
+  }
+
+  if (!products) {
+    return <div>Nenhum produto encontrado.</div>;
+  }
+
+
   return (
     <>
       <div className="flex items-center">
@@ -66,7 +86,7 @@ export default function AdminProductsPage() {
                         />
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
+                    <TableCell>{product.categoryId}</TableCell>
                     <TableCell className="hidden md:table-cell">
                         {product.basePrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </TableCell>

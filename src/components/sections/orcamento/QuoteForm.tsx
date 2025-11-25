@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Product } from '@/lib/definitions';
 import { ArrowRight, Check, FileUp, Loader2, Phone } from 'lucide-react';
+import { useAuth, useFirestore, addDocumentNonBlocking } from '@/firebase';
+import { collection } from 'firebase/firestore';
 
 interface QuoteFormProps {
   products: Product[];
@@ -26,9 +28,13 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fileName, setFileName] = useState('');
 
+  const firestore = useFirestore();
+  const { user } = useAuth();
+
+
   useEffect(() => {
     if (selectedProduct) {
-      setSize(selectedProduct.variations.sizes[0] || '');
+      setSize(selectedProduct.variations.formats[0] || '');
       setQuantity(selectedProduct.variations.quantities[0]?.toString() || '');
       setFinishing(selectedProduct.variations.finishings[0] || '');
     } else {
@@ -39,26 +45,15 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
   }, [selectedProduct]);
 
   useEffect(() => {
-    if (selectedProduct && size && quantity) {
-      // Onde você pode alterar o cálculo do orçamento
-      // A lógica atual é um exemplo simples. Altere conforme suas regras de negócio.
+    if (selectedProduct && quantity) {
       const calculatePrice = () => {
         let price = selectedProduct.basePrice;
         const qty = parseInt(quantity);
+        const baseQuantity = selectedProduct.variations.quantities[0] || 1;
+        const discountFactor = Math.log10(qty / baseQuantity + 1) / 2;
+        const pricePerUnit = selectedProduct.basePrice / baseQuantity * (1-discountFactor);
 
-        // Fator de quantidade
-        if (qty > 100) price *= 0.9;
-        if (qty > 500) price *= 0.85;
-
-        // Fator de tamanho (exemplo)
-        if (size.includes('A5')) price *= 1.2;
-        if (size.includes('10x10')) price *= 1.1;
-
-        // Fator de acabamento (exemplo)
-        if (finishing.includes('Fosca')) price += 20;
-        if (finishing.includes('Especial')) price += 50;
-
-        setEstimatedPrice(price);
+        setEstimatedPrice(pricePerUnit * qty);
       };
       calculatePrice();
     } else {
@@ -73,7 +68,7 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
   const getWhatsAppMessage = () => {
     let message = `Olá! Gostaria de um orçamento para o seguinte item:\n\n`;
     message += `*Produto:* ${selectedProduct?.name}\n`;
-    message += `*Tamanho:* ${size}\n`;
+    if (size) message += `*Tamanho:* ${size}\n`;
     message += `*Quantidade:* ${quantity}\n`;
     if(finishing) message += `*Acabamento:* ${finishing}\n`;
     if(estimatedPrice) message += `*Preço Estimado:* ${estimatedPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
@@ -82,12 +77,41 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!firestore || !selectedProduct) return;
+
     setIsSubmitting(true);
-    // Simular chamada de API
-    setTimeout(() => {
+    
+    const orderData = {
+        customerId: user?.uid || 'anonymous',
+        customerName: user?.displayName || 'Cliente Anônimo',
+        customerEmail: user?.email || '',
+        orderDate: new Date().toISOString(),
+        status: 'Em análise',
+        items: [
+            {
+                productId: selectedProduct.id,
+                productName: selectedProduct.name,
+                quantity: parseInt(quantity),
+                price: estimatedPrice,
+                variation: {
+                    size,
+                    finishing,
+                }
+            }
+        ],
+        totalAmount: estimatedPrice,
+        artworkUrl: '', // TODO: Implement file upload
+    };
+
+    addDocumentNonBlocking(collection(firestore, 'orders_items'), orderData)
+      .then(() => {
         setIsSubmitting(false);
         setIsSubmitted(true);
-    }, 2000);
+      })
+      .catch((error) => {
+        console.error("Error writing document: ", error);
+        setIsSubmitting(false);
+      });
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,7 +168,7 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
                       <SelectValue placeholder="Selecione o tamanho" />
                     </SelectTrigger>
                     <SelectContent>
-                      {selectedProduct.variations.sizes.map(s => (
+                      {selectedProduct.variations.formats.map(s => (
                         <SelectItem key={s} value={s}>{s}</SelectItem>
                       ))}
                     </SelectContent>
@@ -165,19 +189,21 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
                 </div>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="finishing">Acabamento</Label>
-                <Select value={finishing} onValueChange={setFinishing}>
-                  <SelectTrigger id="finishing">
-                    <SelectValue placeholder="Selecione o acabamento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectedProduct.variations.finishings.map(f => (
-                      <SelectItem key={f} value={f}>{f}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                {selectedProduct.variations.finishings && selectedProduct.variations.finishings.length > 0 && (
+                    <div className="grid gap-2">
+                        <Label htmlFor="finishing">Acabamento</Label>
+                        <Select value={finishing} onValueChange={setFinishing}>
+                        <SelectTrigger id="finishing">
+                            <SelectValue placeholder="Selecione o acabamento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {selectedProduct.variations.finishings.map(f => (
+                            <SelectItem key={f} value={f}>{f}</SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
+                    </div>
+                )}
 
               <div className="grid gap-2">
                 <Label>Enviar sua arte (opcional)</Label>

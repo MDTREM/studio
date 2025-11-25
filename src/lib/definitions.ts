@@ -9,7 +9,7 @@ export type Product = {
   imageUrl: string;
   imageHint: string;
   basePrice: number;
-  category: string;
+  categoryId: string;
   variations: {
     models?: string[];
     materials?: string[];
@@ -18,6 +18,7 @@ export type Product = {
     finishings: string[];
     quantities: number[];
   };
+  createdAt?: any; // Can be a server timestamp
 };
 
 export type Category = {
@@ -33,14 +34,21 @@ export type Order = {
   id: string;
   customerName: string;
   customerEmail: string;
-  date: string;
-  total: number;
+  orderDate: string;
+  totalAmount: number;
   status: OrderStatus;
   productName: string;
 };
 
 export type User = {
+  id: string;
   name: string;
   email: string;
-  avatarUrl: string;
+  phone?: string;
+  address?: string;
+  cpf?: string;
+  birthDate?: Date;
+  companyName?: string;
+  tradingName?: string;
+  cnpj?: string;
 };

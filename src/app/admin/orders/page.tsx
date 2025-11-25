@@ -1,11 +1,13 @@
+'use client';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { orders } from "@/lib/data";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { Order } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
+import { collection, query } from "firebase/firestore";
 import { ListFilter } from "lucide-react";
 
 const statusColors = {
@@ -17,6 +19,21 @@ const statusColors = {
 };
 
 export default function AdminOrdersPage() {
+    const firestore = useFirestore();
+    const ordersQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, "orders_items"));
+    }, [firestore]);
+    const { data: orders, isLoading } = useCollection<Order>(ordersQuery);
+
+    if (isLoading) {
+        return <div>Carregando pedidos...</div>
+    }
+
+    if (!orders) {
+        return <div>Nenhum pedido encontrado.</div>
+    }
+
     return (
         <>
             <div className="flex items-center">
@@ -85,10 +102,10 @@ export default function AdminOrdersPage() {
                                 </Badge>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
-                                {new Date(order.date).toLocaleDateString('pt-BR')}
+                                {new Date(order.orderDate).toLocaleDateString('pt-BR')}
                             </TableCell>
                             <TableCell className="text-right">
-                                {order.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                {order.totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </TableCell>
                         </TableRow>
                     ))}

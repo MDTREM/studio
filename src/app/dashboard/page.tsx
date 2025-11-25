@@ -1,9 +1,11 @@
-import { orders } from "@/lib/data";
-import { Order } from "@/lib/definitions";
+'use client';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
+import { Order } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
+import { collection, query, where } from "firebase/firestore";
 
 const statusColors = {
   'Em análise': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
@@ -14,7 +16,19 @@ const statusColors = {
 };
 
 export default function DashboardPage() {
-  const userOrders = orders.slice(0, 3); // Simulating orders for a logged-in user
+    const { user } = useUser();
+    const firestore = useFirestore();
+
+    const userOrdersQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return query(collection(firestore, "orders_items"), where("customerId", "==", user.uid));
+    }, [firestore, user]);
+    
+    const { data: userOrders, isLoading } = useCollection<Order>(userOrdersQuery);
+    
+    if (isLoading) {
+        return <div>Carregando seus pedidos...</div>
+    }
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-12">
@@ -40,7 +54,7 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {userOrders.map((order: Order) => (
+              {userOrders && userOrders.map((order: Order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">{order.id}</TableCell>
                   <TableCell>{order.productName}</TableCell>
@@ -49,12 +63,17 @@ export default function DashboardPage() {
                       {order.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{new Date(order.date).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell>{new Date(order.orderDate).toLocaleDateString('pt-BR')}</TableCell>
                   <TableCell className="text-right">
-                    {order.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    {order.totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </TableCell>
                 </TableRow>
               ))}
+              {!userOrders && (
+                <TableRow>
+                    <TableCell colSpan={5} className="text-center">Nenhum pedido encontrado.</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>

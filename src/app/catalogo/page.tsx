@@ -1,6 +1,8 @@
+'use client';
 import ProductCard from '@/components/shared/ProductCard';
-import { products } from '@/lib/data';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { Product } from '@/lib/definitions';
+import { collection, query, where } from 'firebase/firestore';
 import { Filter } from 'lucide-react';
 
 export default function CatalogoPage({
@@ -9,10 +11,18 @@ export default function CatalogoPage({
   searchParams?: { categoria?: string };
 }) {
   const currentCategory = searchParams?.categoria;
+  const firestore = useFirestore();
 
-  const filteredProducts = currentCategory
-    ? products.filter((p) => p.category === currentCategory)
-    : products;
+  const productsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    const productsCollection = collection(firestore, 'products');
+    if (currentCategory) {
+      return query(productsCollection, where('categoryId', '==', currentCategory));
+    }
+    return query(productsCollection);
+  }, [firestore, currentCategory]);
+
+  const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-12">
@@ -31,12 +41,15 @@ export default function CatalogoPage({
           {currentCategory ? `Categoria: ${currentCategory}` : 'Todos os produtos'}
         </span>
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-        {filteredProducts.map((product: Product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+        {isLoading && <p>Carregando produtos...</p>}
+        {products && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                {products.map((product: Product) => (
+                <ProductCard key={product.id} product={product} />
+                ))}
+            </div>
+        )}
+        {!products && !isLoading && <p>Nenhum produto encontrado.</p>}
     </div>
   );
 }

@@ -1,5 +1,4 @@
 'use client';
-import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,13 +11,30 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { LayoutDashboard, LogIn, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, LogOut, User } from 'lucide-react';
+import { useAuth, useUser } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export default function UserNav() {
-  // TODO: Replace with real authentication state
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
 
-  if (!isLoggedIn) {
+  const handleLogout = () => {
+    signOut(auth);
+  };
+
+  if (isUserLoading) {
+    return (
+        <div className="flex items-center gap-2 text-sm font-medium text-white">
+            <User className="h-6 w-6" />
+            <div>
+                <span className="text-gray-300">Carregando...</span>
+            </div>
+        </div>
+    )
+  }
+
+  if (!user) {
     return (
         <Link href="/login" className="flex items-center gap-2 text-sm font-medium hover:text-primary text-white">
             <User className="h-6 w-6" />
@@ -36,17 +52,17 @@ export default function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src="https://picsum.photos/seed/user/100/100" alt="@shadcn" data-ai-hint="person face" />
-            <AvatarFallback>OU</AvatarFallback>
+            <AvatarImage src={user.photoURL || "https://picsum.photos/seed/user/100/100"} alt={user.displayName || user.email || 'User'} data-ai-hint="person face" />
+            <AvatarFallback>{user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Usuário</p>
+            <p className="text-sm font-medium leading-none">{user.displayName || 'Usuário'}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              usuario@exemplo.com
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -58,6 +74,7 @@ export default function UserNav() {
               <span>Painel</span>
             </DropdownMenuItem>
           </Link>
+          {/* TODO: Add logic to show admin link only for admins */}
           <Link href="/admin">
             <DropdownMenuItem>
               <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -66,7 +83,7 @@ export default function UserNav() {
           </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>
         </DropdownMenuItem>

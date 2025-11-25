@@ -21,7 +21,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
       <div className="relative">
         <Link href={`/produto/${product.id}`}>
           <div className="relative aspect-square w-full overflow-hidden bg-primary flex items-center justify-center">
-            {/* Placeholder for image */}
+            <Image src={product.imageUrl} alt={product.name} fill className="object-cover" data-ai-hint={product.imageHint} />
           </div>
         </Link>
         <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full h-8 w-8">
@@ -30,7 +30,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
       </div>
       
       <CardContent className="p-4 flex flex-col flex-grow">
-        <p className="text-xs text-primary font-medium mb-1 uppercase">{product.category}</p>
+        <p className="text-xs text-primary font-medium mb-1 uppercase">{product.categoryId}</p>
         <h3 className="font-bold text-base mb-1 truncate">{product.name}</h3>
         <div className="flex items-center gap-1 mb-2">
             <div className="flex items-center">
