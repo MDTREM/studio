@@ -15,9 +15,6 @@ export default function BestsellersSection() {
             <div className="container max-w-7xl mx-auto px-4">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Mais Vendidos</h2>
-                    <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-                        Confira os produtos que são sucesso de vendas.
-                    </p>
                 </div>
                 <Carousel
                     opts={{
