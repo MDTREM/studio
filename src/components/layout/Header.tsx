@@ -67,7 +67,9 @@ export default function Header() {
                             </Link>
                         ))}
                         </nav>
-                        <UserNav />
+                        <div className="mt-auto">
+                          <UserNav />
+                        </div>
                     </div>
                 </SheetContent>
             </Sheet>

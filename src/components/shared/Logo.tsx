@@ -1,14 +1,16 @@
-import { Gem } from 'lucide-react';
+import Image from "next/image";
 
 export default function Logo() {
   return (
     <div className="flex items-center gap-2 text-lg font-bold">
-      <div className="p-2 bg-primary rounded-md">
-        <Gem className="h-5 w-5 text-primary-foreground" />
-      </div>
-      <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-        Ouro Gráfica
-      </span>
+      <Image
+        src="https://i.imgur.com/nDzOzwX.png"
+        alt="Ouro Gráfica Logo"
+        width={180}
+        height={40}
+        className="w-auto h-10"
+        priority
+      />
     </div>
   );
 }
