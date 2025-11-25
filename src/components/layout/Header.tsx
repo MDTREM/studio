@@ -8,6 +8,8 @@ import { Menu, Search, ShoppingCart, MessageSquare, ChevronDown, Truck, User, Ph
 import {
   Sheet,
   SheetContent,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
 import TopBanner from './TopBanner';
@@ -101,11 +103,12 @@ export default function Header() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="bg-black text-white p-0 flex flex-col">
-                <div className="p-6">
-                    <Link href="/">
-                        <Logo />
-                    </Link>
-                </div>
+                <SheetHeader className="p-6">
+                  <SheetTitle className="sr-only">Menu Principal</SheetTitle>
+                  <Link href="/">
+                      <Logo />
+                  </Link>
+                </SheetHeader>
                 <div className="overflow-y-auto flex-1">
                     <nav className="flex flex-col text-base font-medium">
                         <Accordion type="multiple" className="w-full">
