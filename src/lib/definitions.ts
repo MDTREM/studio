@@ -64,6 +64,12 @@ export type CartItem = {
   totalPrice: number;
 };
 
+export type Favorite = {
+  id: string;
+  productId: string;
+  createdAt: any;
+}
+
 
 // Add the 'createdAt' field to the Product entity in backend.json
 // This is important for sorting new products.

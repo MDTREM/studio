@@ -114,6 +114,20 @@ service cloud.firestore {
         allow update: if isExistingOwner(userId) && isImmutable('customerId');
         allow delete: if isExistingOwner(userId);
       }
+
+      /**
+       * @description A user's favorite products (wishlist).
+       * @path /users/{userId}/favorites/{productId}
+       * @allow (get, list, create, delete) User 'user123' can manage their own favorites.
+       * @deny (get) User 'user456' tries to access the favorites of 'user123'.
+       * @principle Path-based security for user-owned subcollections.
+       */
+      match /favorites/{productId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.productId == productId;
+        allow delete: if isOwner(userId);
+        allow update: if false; // Favorites are either there or not, no updates needed.
+      }
     }
 
     /**
