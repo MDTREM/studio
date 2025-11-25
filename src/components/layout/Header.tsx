@@ -140,9 +140,9 @@ export default function Header() {
                             </AccordionItem>
                              <AccordionItem value="services" className="border-b-0">
                                 <div className="p-6 flex flex-col gap-4">
-                                    {mobileServiceLinks.map((link) => (
+                                    {mobileServiceLinks.map((link, index) => (
                                     <Link
-                                        key={link.href}
+                                        key={`${link.label}-${index}`}
                                         href={link.href}
                                         className="flex items-center gap-3 transition-colors hover:text-primary"
                                     >
