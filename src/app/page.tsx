@@ -3,6 +3,7 @@ import BestsellersSection from "@/components/sections/home/BestsellersSection";
 import CategoriesSection from "@/components/sections/home/CategoriesSection";
 import Hero from "@/components/sections/home/Hero";
 import InfoCarousel from "@/components/sections/home/InfoCarousel";
+import NewReleasesSection from "@/components/sections/home/NewReleasesSection";
 import PromoBanners from "@/components/sections/home/PromoBanners";
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
       <BestsellersSection />
       <CategoriesSection />
       <AgendasSection />
+      <NewReleasesSection />
     </>
   );
 }
