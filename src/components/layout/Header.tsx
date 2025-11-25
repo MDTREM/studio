@@ -111,9 +111,9 @@ export default function Header() {
                         <Accordion type="multiple" className="w-full">
                             <AccordionItem value="user-links" className="border-b border-white/20">
                                 <div className="p-6 flex flex-col gap-4">
-                                {mobileUserLinks.map((link) => (
+                                {mobileUserLinks.map((link, index) => (
                                 <Link
-                                    key={link.href}
+                                    key={`${link.label}-${index}`}
                                     href={link.href}
                                     className="flex items-center gap-3 transition-colors hover:text-primary"
                                 >
