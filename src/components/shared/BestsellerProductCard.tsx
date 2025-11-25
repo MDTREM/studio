@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Product } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart } from 'lucide-react';
+import { Heart, Star } from 'lucide-react';
 import Link from 'next/link';
 
 interface BestsellerProductCardProps {
@@ -12,6 +12,9 @@ interface BestsellerProductCardProps {
 
 export default function BestsellerProductCard({ product }: BestsellerProductCardProps) {
   const minQuantity = product.variations.quantities[0] || 1;
+  // Hardcoded rating for now, this can be added to the product definition later
+  const rating = 4.5;
+  const reviewCount = 14;
 
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group">
@@ -33,22 +36,24 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
         </Button>
       </div>
       
-      <CardContent className="p-4 flex flex-col flex-grow text-center">
-        <h3 className="font-semibold text-sm mb-2 truncate">{product.name}</h3>
-        <div className="flex-grow">
-          <p className="text-2xl font-bold text-primary">
-            {product.basePrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-          </p>
-          <p className="text-xs text-muted-foreground">
-             / {minQuantity} unidades
-          </p>
+      <CardContent className="p-4 flex flex-col flex-grow">
+        <p className="text-xs text-primary font-semibold mb-1 uppercase">{product.category}</p>
+        <h3 className="font-bold text-base mb-1 truncate">{product.name}</h3>
+        <div className="flex items-center gap-1 mb-2">
+            <div className="flex items-center">
+                {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                ))}
+            </div>
+            <span className="text-xs text-muted-foreground">({reviewCount} avaliações)</span>
         </div>
-        <div className="mt-4 flex flex-col gap-2">
-            <Button size="sm" asChild>
-                <Link href={`/orcamento?produto=${product.id}`}>
-                    Comprar agora mesmo
-                </Link>
-            </Button>
+        <p className="text-sm text-muted-foreground mb-4 h-10 overflow-hidden">{product.shortDescription}</p>
+
+        <div className="mt-auto">
+            <p className="text-2xl font-bold text-primary">
+                {product.basePrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                <span className="text-sm font-normal text-muted-foreground"> / {minQuantity} unidade</span>
+            </p>
         </div>
       </CardContent>
     </Card>
