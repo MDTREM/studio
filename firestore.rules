@@ -87,7 +87,7 @@ service cloud.firestore {
      * @description A user's profile document. The owner can manage their own data. Admins have read-only access.
      * @path /users/{userId}
      * @allow (get) Owner or an admin can read the profile.
-     * @deny (list) Regular users cannot list all users. Admins can.
+     * @allow (list) Regular users cannot list all users. Admins can.
      * @allow (create, update, delete) Only the owner can modify their profile.
      * @principle Enforces data privacy while allowing for administrative oversight.
      */
