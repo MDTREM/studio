@@ -37,19 +37,19 @@ export default function Header() {
             <span>Primeira compra? Use o cupom OURO5</span>
         </div>
       </TopBanner>
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background text-foreground">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
         <div className="container flex h-20 max-w-7xl items-center justify-between gap-4">
           
           {/* Mobile Header */}
           <div className="md:hidden flex items-center gap-2">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="shrink-0">
+                <Button variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/10 hover:text-white">
                   <Menu className="h-6 w-6" />
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="bg-background text-foreground">
+              <SheetContent side="left" className="bg-black text-white">
                 <div className="flex flex-col gap-6 pt-10">
                   <Link href="/" className="flex items-center gap-2">
                     <Logo />
@@ -71,7 +71,7 @@ export default function Header() {
                 </div>
               </SheetContent>
             </Sheet>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white">
                 <Search className="h-6 w-6" />
             </Button>
           </div>
@@ -83,7 +83,7 @@ export default function Header() {
           </div>
           
           <div className="flex items-center gap-2">
-             <Button variant="ghost" size="icon" className="relative h-10 w-10 md:hidden">
+             <Button variant="ghost" size="icon" className="relative h-10 w-10 md:hidden text-white hover:bg-white/10 hover:text-white">
                 <ShoppingCart className="h-6 w-6" />
                 <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">0</span>
                 <span className="sr-only">Carrinho</span>
@@ -94,8 +94,8 @@ export default function Header() {
           {/* Desktop Header */}
           <div className="hidden md:flex flex-1 max-w-xl">
             <div className="relative w-full">
-                <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-muted/40 text-foreground border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-muted-foreground" />
-                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full hover:bg-muted">
+                <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-white/20 text-white border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-gray-300" />
+                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full text-white hover:bg-white/10 hover:text-white">
                     <Search className="h-5 w-5" />
                 </Button>
             </div>
@@ -105,25 +105,25 @@ export default function Header() {
                 <Link href="#" className="flex items-center gap-2 text-sm font-medium hover:text-primary">
                     <MessageSquare className="h-6 w-6" />
                     <div>
-                        <span className="text-muted-foreground text-xs">Central de</span> <br/> <strong>Atendimento</strong>
+                        <span className="text-gray-300 text-xs">Central de</span> <br/> <strong>Atendimento</strong>
                     </div>
                 </Link>
                 <UserNav />
-                 <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-muted rounded-full">
+                 <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
                     <ShoppingCart className="h-6 w-6" />
                     <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">0</span>
                     <span className="sr-only">Carrinho</span>
                 </Button>
           </div>
         </div>
-        <div className="hidden md:block border-t border-border/40">
+        <div className="hidden md:block border-t border-white/20">
             <div className="container max-w-7xl">
                 <nav className="flex items-center gap-6 text-sm font-medium h-12">
                 {secondaryNavLinks.map((link) => (
                     <Link
                     key={link.href}
                     href={link.href}
-                    className="flex items-center gap-1 transition-colors hover:text-primary"
+                    className="flex items-center gap-1 transition-colors text-gray-300 hover:text-primary"
                     >
                     {link.icon}
                     {link.label}

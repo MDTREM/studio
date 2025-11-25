@@ -20,10 +20,10 @@ export default function UserNav() {
 
   if (!isLoggedIn) {
     return (
-        <Link href="/login" className="flex items-center gap-2 text-sm font-medium hover:text-primary">
+        <Link href="/login" className="flex items-center gap-2 text-sm font-medium hover:text-primary text-white">
             <User className="h-6 w-6" />
             <div>
-                <span className="text-muted-foreground">Bem-vindo(a)</span>
+                <span className="text-gray-300">Bem-vindo(a)</span>
                 <br/>
                 <strong>Entrar ou Cadastrar</strong>
             </div>
