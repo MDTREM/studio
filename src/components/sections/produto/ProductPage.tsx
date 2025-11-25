@@ -23,6 +23,10 @@ export default function ProductPage({ product }: ProductPageProps) {
   const [quantity, setQuantity] = useState(product.variations.quantities[0] || 1);
   const [mainImage, setMainImage] = useState(product.imageUrl);
   const [artworkOption, setArtworkOption] = useState('professional-check');
+  const [selectedMaterial, setSelectedMaterial] = useState(product.variations.materials?.[0] || '');
+  const [selectedFormat, setSelectedFormat] = useState(product.variations.formats[0] || '');
+  const [selectedColor, setSelectedColor] = useState(product.variations.colors?.[0] || '');
+  const [selectedFinishing, setSelectedFinishing] = useState(product.variations.finishings?.[0] || '');
 
   // Hardcoded rating for now
   const rating = 4.5;
@@ -120,7 +124,7 @@ export default function ProductPage({ product }: ProductPageProps) {
             {product.variations.materials && product.variations.materials.length > 0 && (
                  <div className="grid gap-3">
                     <Label className='font-semibold text-base'>Material</Label>
-                    <RadioGroup defaultValue={product.variations.materials[0]} className="flex flex-wrap gap-2">
+                    <RadioGroup value={selectedMaterial} onValueChange={setSelectedMaterial} className="flex flex-wrap gap-2">
                         {product.variations.materials.map(material => (
                              <Label key={material} htmlFor={`material-${material}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
                                 <RadioGroupItem value={material} id={`material-${material}`} className="sr-only" />
@@ -133,7 +137,7 @@ export default function ProductPage({ product }: ProductPageProps) {
             {product.variations.formats && product.variations.formats.length > 0 && (
                 <div className="grid gap-3">
                     <Label htmlFor="format" className='font-semibold text-base'>Formato</Label>
-                    <RadioGroup defaultValue={product.variations.formats[0]} className="flex flex-wrap gap-2">
+                    <RadioGroup value={selectedFormat} onValueChange={setSelectedFormat} className="flex flex-wrap gap-2">
                         {product.variations.formats.map(f => (
                             <Label key={f} htmlFor={`format-${f}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
                                 <RadioGroupItem value={f} id={`format-${f}`} className="sr-only" />
@@ -146,7 +150,7 @@ export default function ProductPage({ product }: ProductPageProps) {
             {product.variations.colors && product.variations.colors.length > 0 && (
                  <div className="grid gap-3">
                     <Label className='font-semibold text-base'>Cor</Label>
-                    <RadioGroup defaultValue={product.variations.colors[0]} className="flex flex-wrap gap-2">
+                    <RadioGroup value={selectedColor} onValueChange={setSelectedColor} className="flex flex-wrap gap-2">
                         {product.variations.colors.map(color => (
                              <Label key={color} htmlFor={`color-${color}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
                                 <RadioGroupItem value={color} id={`color-${color}`} className="sr-only" />
@@ -159,7 +163,7 @@ export default function ProductPage({ product }: ProductPageProps) {
             {product.variations.finishings && product.variations.finishings.length > 0 && (
                 <div className="grid gap-3">
                     <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento</Label>
-                    <RadioGroup defaultValue={product.variations.finishings[0]} className="flex flex-wrap gap-2">
+                    <RadioGroup value={selectedFinishing} onValueChange={setSelectedFinishing} className="flex flex-wrap gap-2">
                         {product.variations.finishings.map(f => (
                             <Label key={f} htmlFor={`finishing-${f}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
                                 <RadioGroupItem value={f} id={`finishing-${f}`} className="sr-only" />
@@ -268,13 +272,32 @@ export default function ProductPage({ product }: ProductPageProps) {
                     <p className='text-sm text-muted-foreground'>Calcule o frete e o prazo de entrega estimados para sua região.</p>
                 </div>
             </div>
+             <div className='space-y-4'>
+                <h3 className="text-lg font-semibold mt-6 mb-2">Especificações do Produto</h3>
+                <div className='border rounded-lg'>
+                  <div className='flex justify-between items-center p-3 border-b'>
+                    <span className='font-medium'>Prazo de produção</span>
+                    <span className='text-muted-foreground'>4 dias úteis + frete <Info className='inline w-4 h-4 text-blue-500' /></span>
+                  </div>
+                  <div className='flex justify-between items-center p-3 border-b'>
+                    <span className='font-medium'>Material</span>
+                    <span className='text-muted-foreground'>{selectedMaterial}</span>
+                  </div>
+                  <div className='flex justify-between items-center p-3 border-b'>
+                    <span className='font-medium'>Formato</span>
+                    <span className='text-muted-foreground'>{selectedFormat}</span>
+                  </div>
+                  <div className='flex justify-between items-center p-3 border-b'>
+                    <span className='font-medium'>Cor de Impressão</span>
+                    <span className='text-muted-foreground'>{selectedColor}</span>
+                  </div>
+                  <div className='flex justify-between items-center p-3'>
+                    <span className='font-medium'>Acabamento</span>
+                    <span className='text-muted-foreground'>{selectedFinishing}</span>
+                  </div>
+                </div>
+            </div>
              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="item-1">
-                <AccordionTrigger>Especificações do Produto</AccordionTrigger>
-                <AccordionContent>
-                    {product.description || 'Descrição detalhada do produto não disponível.'}
-                </AccordionContent>
-                </AccordionItem>
                 <AccordionItem value="item-2">
                 <AccordionTrigger>Utilize o gabarito</AccordionTrigger>
                 <AccordionContent className='flex flex-col items-start gap-4'>
