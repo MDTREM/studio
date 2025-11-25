@@ -186,7 +186,7 @@ export default function Header() {
         </div>
         <div className="hidden md:block border-t border-white/20">
             <div className="container max-w-7xl">
-                <nav className="flex items-center gap-6 text-sm font-medium h-12">
+                <nav className="flex items-center justify-center gap-6 text-sm font-medium h-12">
                 {secondaryNavLinks.map((link) => (
                     <Link
                     key={link.href}
