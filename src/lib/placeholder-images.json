@@ -1,3 +1,94 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-banner-1",
+      "description": "Black Friday Promotion Banner",
+      "imageUrl": "https://images.unsplash.com/photo-1700847304964-9fe563059742?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzYWxlJTIwcHJvbW90aW9ufGVufDB8fHx8MTc2NDA2NjQyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sale promotion"
+    },
+    {
+      "id": "hero-banner-2",
+      "description": "Christmas Promotion Banner",
+      "imageUrl": "https://images.unsplash.com/photo-1639420482727-e5706c91cbc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjaHJpc3RtYXMlMjBnaWZ0fGVufDB8fHx8MTc2NDA3NDYxOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "christmas gift"
+    },
+    {
+      "id": "hero-banner-3",
+      "description": "New Year Promotion Banner",
+      "imageUrl": "https://images.unsplash.com/photo-1513546493312-0066d7de3fd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxuZXclMjB5ZWFyJTIwY2VsZWJyYXRpb258ZW58MHx8fHwxNzY0MDc0NjE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "new year celebration"
+    },
+    {
+      "id": "category-stickers",
+      "description": "Adesivos",
+      "imageUrl": "https://images.unsplash.com/photo-1627870197520-48e93bd60a57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdGlja2VyJTIwZGVzaWdufGVufDB8fHx8MTc2NDA1MTE1MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sticker design"
+    },
+    {
+      "id": "category-banners",
+      "description": "Banners",
+      "imageUrl": "https://images.unsplash.com/photo-1713937187977-740e826d6c1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y29uZmVyZW5jZSUyMGJhbm5lcnxlbnwwfHx8fDE3NjQwNzQ2MTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "conference banner"
+    },
+    {
+      "id": "category-flyers",
+      "description": "Panfletos",
+      "imageUrl": "https://images.unsplash.com/photo-1644352739408-a191ed85e513?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmbHllciUyMG1vY2t1cHxlbnwwfHx8fDE3NjQwNzQ2MTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "flyer mockup"
+    },
+    {
+      "id": "category-signs",
+      "description": "Placas",
+      "imageUrl": "https://images.unsplash.com/photo-1740829436544-166d2861e46f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxzdG9yZSUyMHNpZ258ZW58MHx8fHwxNzYzOTc1NTI3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "store sign"
+    },
+    {
+      "id": "category-labels",
+      "description": "Etiquetas Promocionais",
+      "imageUrl": "https://images.unsplash.com/photo-1700893417216-44e85c0a77d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwcm9kdWN0JTIwbGFiZWx8ZW58MHx8fHwxNzYzOTk1MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "product label"
+    },
+    {
+      "id": "category-gifts",
+      "description": "Brindes Corporativos",
+      "imageUrl": "https://images.unsplash.com/photo-1638725073353-7fa130c0edc5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y29ycG9yYXRlJTIwZ2lmdHN8ZW58MHx8fHwxNzY0MDc0NjIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "corporate gifts"
+    },
+    {
+      "id": "product-business-card",
+      "description": "Cartão de Visita",
+      "imageUrl": "https://images.unsplash.com/photo-1718670013921-2f144aba173a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YnVzaW5lc3MlMjBjYXJkfGVufDB8fHx8MTc2NDA3NDYxOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "business card"
+    },
+    {
+      "id": "product-flyer",
+      "description": "Panfleto A5",
+      "imageUrl": "https://images.unsplash.com/photo-1630734242335-1555e4a438a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmbHllciUyMGRlc2lnbnxlbnwwfHx8fDE3NjQwNzQ2MTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "flyer design"
+    },
+    {
+      "id": "product-sticker",
+      "description": "Adesivo Vinil",
+      "imageUrl": "https://images.unsplash.com/photo-1712129009000-4598d040c201?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx2aW55bCUyMHN0aWNrZXJ8ZW58MHx8fHwxNzY0MDc0NjE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vinyl sticker"
+    },
+    {
+      "id": "product-banner",
+      "description": "Banner Roll-up",
+      "imageUrl": "https://images.unsplash.com/photo-1667788000545-307448207f5c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cm9sbHVwJTIwYmFubmVyfGVufDB8fHx8MTc2NDA3NDYxOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "rollup banner"
+    },
+    {
+      "id": "product-mug",
+      "description": "Caneca Personalizada",
+      "imageUrl": "https://images.unsplash.com/photo-1624875374578-6a766e51531a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjdXN0b20lMjBtdWd8ZW58MHx8fHwxNzY0MDc0NjE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "custom mug"
+    },
+    {
+      "id": "product-tshirt",
+      "description": "Camiseta Personalizada",
+      "imageUrl": "https://images.unsplash.com/photo-1523380886783-80fdd1fce62d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjdXN0b20lMjB0LXNoaXJ0fGVufDB8fHx8MTc2NDA1NjgxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "custom t-shirt"
+    }
+  ]
 }
