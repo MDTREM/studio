@@ -26,6 +26,8 @@ export default function UserNav() {
 
   useEffect(() => {
     if (user) {
+      // Use getIdTokenResult(user, true) to force a refresh of the token
+      // This ensures we get the latest custom claims.
       getIdTokenResult(user, true).then((idTokenResult) => {
         setIsAdmin(!!idTokenResult.claims.isAdmin);
       });
