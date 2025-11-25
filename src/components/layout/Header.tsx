@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/shared/Logo';
 import UserNav from '@/components/shared/UserNav';
-import { Menu, Search, ShoppingCart, MessageSquare, ChevronDown, Truck } from 'lucide-react';
+import { Menu, Search, ShoppingCart, MessageSquare, ChevronDown, Truck, User, Phone, Heart, Package, Wrench } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sheet';
 import TopBanner from './TopBanner';
 import { Input } from '../ui/input';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -19,8 +20,42 @@ const navLinks = [
   { href: '/orcamento', label: 'Orçamento Online' },
 ];
 
+const mobileUserLinks = [
+    { href: '/login', label: 'Entrar / Cadastro', icon: <User className="h-5 w-5" /> },
+    { href: '#', label: 'Central de Atendimento', icon: <MessageSquare className="h-5 w-5" /> },
+    { href: '/dashboard', label: 'Minha Conta', icon: <User className="h-5 w-5" /> },
+    { href: '/dashboard', label: 'Meus Pedidos', icon: <Package className="h-5 w-5" /> },
+    { href: '#', label: 'Desejos', icon: <Heart className="h-5 w-5" /> },
+    { href: '#', label: 'Rastrear Pedido', icon: <Truck className="h-5 w-5" /> },
+];
+
+const mobileServiceLinks = [
+    { href: '#', label: 'Aluguel de Impressoras', icon: <Phone className="h-5 w-5" /> },
+    { href: '#', label: 'Conserto de Impressoras', icon: <Wrench className="h-5 w-5" /> },
+]
+
+const categoryLinks = [
+    { href: '/catalogo', label: 'Todos os produtos' },
+    { href: '/catalogo?categoria=adesivos', label: 'Adesivos' },
+    { href: '/catalogo?categoria=agendas', label: 'Agendas' },
+    { href: '/catalogo?categoria=backdrop', label: 'Backdrop' },
+    { href: '/catalogo?categoria=banners', label: 'Banners' },
+    { href: '/catalogo?categoria=blocos-anotacoes', label: 'Blocos de anotações' },
+    { href: '/catalogo?categoria=cardapios', label: 'Cardápios' },
+    { href: '/catalogo?categoria=cartoes-agradecimento', label: 'Cartões de agradecimento' },
+    { href: '/catalogo?categoria=cartoes-visita', label: 'Cartões de visitas' },
+    { href: '/catalogo?categoria=crachas', label: 'Crachás' },
+    { href: '/catalogo?categoria=etiquetas-tags', label: 'Etiquetas ou Tags' },
+    { href: '/catalogo?categoria=panfletos', label: 'Panfletos' },
+    { href: '/catalogo?categoria=placas', label: 'Placas' },
+    { href: '/catalogo?categoria=plaquinhas-pix', label: 'Plaquinhas Pix' },
+    { href: '/catalogo?categoria=plotagens', label: 'Plotagens' },
+    { href: '/catalogo?categoria=taloes-comandas', label: 'Talões ou comandas' },
+    { href: '/catalogo?categoria=wind-banner', label: 'Wind Banner' },
+];
+
 const secondaryNavLinks = [
-    { href: '#', label: 'Todos os produtos', icon: <Menu className="h-5 w-5" /> },
+    { href: '/catalogo', label: 'Todos os produtos', icon: <Menu className="h-5 w-5" /> },
     { href: '/catalogo?categoria=agendas', label: 'Agendas', dropdown: true },
     { href: '/catalogo?categoria=banners', label: 'Banners' },
     { href: '/catalogo?categoria=cadernos', label: 'Cadernos para colorir' },
@@ -49,25 +84,57 @@ export default function Header() {
                   <span className="sr-only">Toggle Menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="bg-black text-white">
-                <div className="flex flex-col gap-6 pt-10">
-                  <Link href="/" className="flex items-center gap-2">
-                    <Logo />
-                  </Link>
-                  <nav className="flex flex-col gap-4 text-lg font-medium">
-                    {navLinks.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="transition-colors hover:text-primary"
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
-                  </nav>
-                  <div className="mt-auto">
-                    <UserNav />
-                  </div>
+              <SheetContent side="left" className="bg-black text-white p-0 flex flex-col">
+                <div className="p-6">
+                    <Link href="/">
+                        <Logo />
+                    </Link>
+                </div>
+                <div className="overflow-y-auto flex-1">
+                    <nav className="flex flex-col text-base font-medium">
+                        <Accordion type="multiple" className="w-full">
+                            <AccordionItem value="user-links" className="border-b border-white/20">
+                                <div className="p-6 flex flex-col gap-4">
+                                {mobileUserLinks.map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className="flex items-center gap-3 transition-colors hover:text-primary"
+                                >
+                                    {link.icon}
+                                    {link.label}
+                                </Link>
+                                ))}
+                                </div>
+                            </AccordionItem>
+                            <AccordionItem value="categories" className="border-b border-white/20">
+                                <AccordionTrigger className="p-6 hover:no-underline text-base">Categorias</AccordionTrigger>
+                                <AccordionContent className="bg-white/10">
+                                    <div className="flex flex-col gap-4 p-6">
+                                        {categoryLinks.map((link) => (
+                                            <Link key={link.href} href={link.href} className="transition-colors hover:text-primary">
+                                                {link.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="services" className="border-b-0">
+                                <div className="p-6 flex flex-col gap-4">
+                                    {mobileServiceLinks.map((link) => (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href}
+                                        className="flex items-center gap-3 transition-colors hover:text-primary"
+                                    >
+                                        {link.icon}
+                                        {link.label}
+                                    </Link>
+                                    ))}
+                                </div>
+                            </AccordionItem>
+                        </Accordion>
+                    </nav>
                 </div>
               </SheetContent>
             </Sheet>
