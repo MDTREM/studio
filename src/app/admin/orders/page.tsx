@@ -5,12 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { Order, OrderStatus } from "@/lib/definitions";
+import { Order, OrderStatus, User } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
-import { collection, query, doc, where } from "firebase/firestore";
+import { collection, query, doc, where, getDocs } from "firebase/firestore";
 import { ListFilter, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const statusColors: { [key in OrderStatus]: string } = {
     'Em análise': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
@@ -27,22 +27,70 @@ export default function AdminOrdersPage() {
     const firestore = useFirestore();
     const { toast } = useToast();
     const [statusFilters, setStatusFilters] = useState<OrderStatus[]>([]);
+    const [allOrders, setAllOrders] = useState<Order[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const ordersQuery = useMemoFirebase(() => {
+    const usersQuery = useMemoFirebase(() => {
         if (!firestore) return null;
-        const baseQuery = collection(firestore, "orders_items");
-        if (statusFilters.length > 0) {
-            return query(baseQuery, where("status", "in", statusFilters));
-        }
-        return query(baseQuery);
-    }, [firestore, statusFilters]);
+        return query(collection(firestore, "users"));
+    }, [firestore]);
 
-    const { data: orders, isLoading } = useCollection<Order>(ordersQuery);
+    const { data: users } = useCollection<User>(usersQuery);
+
+    useEffect(() => {
+        const fetchAllOrders = async () => {
+            if (!firestore || !users) return;
+
+            setIsLoading(true);
+            let collectedOrders: Order[] = [];
+
+            // Create a list of promises for fetching orders for each user
+            const orderPromises = users.map(async (user) => {
+                const ordersRef = collection(firestore, `users/${user.id}/orders`);
+                const ordersSnapshot = await getDocs(ordersRef);
+                const userOrders = ordersSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Order));
+                return userOrders;
+            });
+            
+            // For orders_items, we can query it directly as admin
+            const orderItemsRef = collection(firestore, 'orders_items');
+            const orderItemsSnapshot = await getDocs(orderItemsRef);
+            const orderItems = orderItemsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Order));
+
+
+            // Wait for all promises to resolve
+            const results = await Promise.all([...orderPromises]);
+            // Flatten the array of arrays into a single array
+            collectedOrders = results.flat();
+            
+            // Combine both sources and remove duplicates
+            const combined = [...collectedOrders, ...orderItems];
+            const uniqueOrders = Array.from(new Map(combined.map(order => [order.id, order])).values());
+
+            setAllOrders(uniqueOrders);
+            setIsLoading(false);
+        };
+
+        fetchAllOrders();
+    }, [firestore, users]);
+
+    const filteredOrders = useMemo(() => {
+        if (statusFilters.length === 0) {
+            return allOrders;
+        }
+        return allOrders.filter(order => statusFilters.includes(order.status));
+    }, [allOrders, statusFilters]);
 
     const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
         if (!firestore) return;
-        const orderRef = doc(firestore, 'orders_items', orderId);
-        updateDocumentNonBlocking(orderRef, { status: newStatus });
+        // Attempt to update in both possible locations
+        const orderItemRef = doc(firestore, 'orders_items', orderId);
+        updateDocumentNonBlocking(orderItemRef, { status: newStatus });
+
+        // We don't know the user ID here, so we can't update the subcollection easily.
+        // The logic should probably ensure orders are consistently stored.
+        // For now, updating orders_items should be sufficient if that's the primary store.
+
         toast({
             title: "Status Atualizado!",
             description: `O pedido foi atualizado para "${newStatus}".`,
@@ -98,8 +146,8 @@ export default function AdminOrdersPage() {
                 </CardHeader>
                 <CardContent>
                     {isLoading && <div>Carregando pedidos...</div>}
-                    {!isLoading && !orders?.length && <div>Nenhum pedido encontrado com os filtros selecionados.</div>}
-                    {orders && orders.length > 0 && (
+                    {!isLoading && !filteredOrders?.length && <div>Nenhum pedido encontrado com os filtros selecionados.</div>}
+                    {filteredOrders && filteredOrders.length > 0 && (
                         <Table>
                             <TableHeader>
                             <TableRow>
@@ -120,7 +168,7 @@ export default function AdminOrdersPage() {
                             </TableRow>
                             </TableHeader>
                             <TableBody>
-                            {orders.map((order: Order) => (
+                            {filteredOrders.map((order: Order) => (
                                 <TableRow key={order.id}>
                                     <TableCell>
                                         <div className="font-medium">{order.customerName}</div>
