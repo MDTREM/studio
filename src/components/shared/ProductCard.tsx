@@ -15,7 +15,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <CardHeader className="p-0">
         <div className="relative aspect-video">
           <Image
-            src={product.imageUrl}
+            src={product.imageUrls[0]}
             alt={`Imagem do produto ${product.name}`}
             fill
             className="object-cover"

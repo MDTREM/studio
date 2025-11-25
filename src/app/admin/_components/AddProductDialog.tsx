@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, PlusCircle } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -34,7 +34,9 @@ const productFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   shortDescription: z.string().min(10, { message: 'A descrição curta deve ter pelo menos 10 caracteres.' }),
   description: z.string().optional(),
-  imageUrl: z.string().url({ message: 'Por favor, insira uma URL de imagem válida.' }),
+  imageUrls: z.array(
+    z.object({ value: z.string().url({ message: 'Por favor, insira uma URL válida.' }) })
+  ).min(1, 'Adicione pelo menos uma URL de imagem.'),
   imageHint: z.string().optional(),
   basePrice: z.coerce.number().positive({ message: 'O preço deve ser um número positivo.' }),
   categoryId: z.string().min(1, { message: 'A categoria é obrigatória.' }),
@@ -58,7 +60,7 @@ export default function AddProductDialog() {
         name: '',
         shortDescription: '',
         description: '',
-        imageUrl: '',
+        imageUrls: [{ value: '' }],
         imageHint: '',
         basePrice: 0,
         categoryId: '',
@@ -70,12 +72,18 @@ export default function AddProductDialog() {
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "imageUrls"
+  });
+
   const onSubmit = (data: ProductFormValues) => {
     if (!firestore) return;
 
     const productData = {
         ...data,
         createdAt: serverTimestamp(),
+        imageUrls: data.imageUrls.map(url => url.value), // Extract string values
         variations: {
             ...data.variations,
             // Convert comma-separated strings to arrays
@@ -177,8 +185,7 @@ export default function AddProductDialog() {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
+            <FormField
                 control={form.control}
                 name="basePrice"
                 render={({ field }) => (
@@ -191,19 +198,42 @@ export default function AddProductDialog() {
                     </FormItem>
                 )}
                 />
-                 <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>URL da Imagem</FormLabel>
-                    <FormControl>
+
+            <div>
+              <Label>URLs das Imagens</Label>
+              {fields.map((field, index) => (
+                <FormField
+                  key={field.id}
+                  control={form.control}
+                  name={`imageUrls.${index}.value`}
+                  render={({ field }) => (
+                    <FormItem className='flex items-center gap-2 mt-2'>
+                      <FormControl>
                         <Input placeholder="https://..." {...field} />
-                    </FormControl>
-                    <FormMessage />
+                      </FormControl>
+                      {fields.length > 1 && (
+                        <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <FormMessage />
                     </FormItem>
-                )}
+                  )}
                 />
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => append({ value: '' })}
+                disabled={fields.length >= 10}
+              >
+                Adicionar outra URL
+              </Button>
+               <FormMessage>
+                {form.formState.errors.imageUrls?.root?.message}
+              </FormMessage>
             </div>
             
             <h4 className="font-medium text-lg mt-4">Variações do Produto</h4>

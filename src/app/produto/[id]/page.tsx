@@ -21,5 +21,12 @@ export default function Page({ params }: { params: { id: string } }) {
         notFound();
     }
 
-    return <ProductPage product={product} />;
+    // This is a temporary fix to ensure imageUrls is an array.
+    // The data from Firestore might still be a string.
+    const productData = {
+        ...product,
+        imageUrls: Array.isArray(product.imageUrls) ? product.imageUrls : [product.imageUrls],
+    };
+
+    return <ProductPage product={productData} />;
 }

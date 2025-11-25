@@ -22,7 +22,7 @@ interface ProductPageProps {
 
 export default function ProductPage({ product }: ProductPageProps) {
   const [quantity, setQuantity] = useState(product.variations.quantities[0] || 1);
-  const [mainImage, setMainImage] = useState(product.imageUrl);
+  const [mainImage, setMainImage] = useState(product.imageUrls[0]);
   const [artworkOption, setArtworkOption] = useState('professional-check');
   const [selectedMaterial, setSelectedMaterial] = useState(product.variations.materials?.[0] || '');
   const [selectedFormat, setSelectedFormat] = useState(product.variations.formats[0] || '');
@@ -78,14 +78,14 @@ export default function ProductPage({ product }: ProductPageProps) {
             {/* Imagens do Produto */}
             <div className="flex flex-col-reverse md:flex-row gap-4">
                 <div className="flex md:flex-col gap-2 w-full md:w-20">
-                    {Array.from({ length: 4 }).map((_, i) => (
+                    {product.imageUrls.slice(0, 4).map((url, i) => (
                     <div 
                         key={i} 
                         className="aspect-square relative bg-secondary/50 rounded-md cursor-pointer hover:ring-2 hover:ring-primary"
-                        onClick={() => setMainImage(`https://picsum.photos/seed/${product.id}-${i}/600/600`)}
+                        onClick={() => setMainImage(url)}
                     >
                         <Image
-                            src={`https://picsum.photos/seed/${product.id}-${i}/200/200`}
+                            src={url}
                             alt={`${product.name} thumbnail ${i+1}`}
                             fill
                             className="object-cover rounded-md"
@@ -318,7 +318,7 @@ export default function ProductPage({ product }: ProductPageProps) {
 
         <Separator className="my-12" />
 
-        <RelatedProductsSection category={product.category} currentProductId={product.id} />
+        <RelatedProductsSection category={product.categoryId} currentProductId={product.id} />
 
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-[0_-2px_10px_rgba(0,0,0,0.1)] p-4 z-50">
                 <div className="container max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
