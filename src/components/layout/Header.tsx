@@ -14,6 +14,8 @@ import TopBanner from './TopBanner';
 import { Input } from '../ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { useCart } from '@/contexts/CartContext';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -67,6 +69,17 @@ const secondaryNavLinks = [
 
 export default function Header() {
   const { cartCount } = useCart();
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/catalogo?q=${searchQuery.trim()}`);
+    }
+  };
+
+
   return (
     <>
       <TopBanner>
@@ -164,14 +177,14 @@ export default function Header() {
 
 
           {/* Desktop Header */}
-          <div className="hidden md:flex flex-1 max-w-xl">
+          <form className="hidden md:flex flex-1 max-w-xl" onSubmit={handleSearch}>
             <div className="relative w-full">
-                <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-white/20 text-white border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-gray-300" />
-                <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full text-white hover:bg-white/10 hover:text-white">
+                <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-white/20 text-white border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-gray-300" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                <Button type="submit" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full text-white hover:bg-white/10 hover:text-white">
                     <Search className="h-5 w-5" />
                 </Button>
             </div>
-          </div>
+          </form>
 
           <div className="hidden md:flex items-center gap-4">
                 <Link href="#" className="flex items-center gap-2 text-sm font-medium hover:text-primary">

@@ -18,6 +18,7 @@ export type Product = {
     finishings: string[];
     quantities: number[];
   };
+  keywords?: string[];
   createdAt?: any; // Can be a server timestamp
 };
 

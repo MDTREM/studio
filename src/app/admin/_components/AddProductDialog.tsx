@@ -49,6 +49,34 @@ const productFormSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
+const generateKeywords = (name: string): string[] => {
+    if (!name) return [];
+    const nameLower = name.toLowerCase();
+    const words = nameLower.split(' ');
+    const keywords = new Set<string>();
+
+    // Add full name
+    keywords.add(nameLower);
+
+    // Add individual words
+    words.forEach(word => {
+        if (word.length > 2) { // Avoid very short words
+            keywords.add(word);
+        }
+    });
+
+    // Add partial strings
+    for (const word of words) {
+        if (word.length > 3) {
+            for (let i = 3; i < word.length; i++) {
+                keywords.add(word.substring(0, i));
+            }
+        }
+    }
+
+    return Array.from(keywords);
+}
+
 export default function AddProductDialog() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
@@ -83,6 +111,7 @@ export default function AddProductDialog() {
     const productData = {
         ...data,
         createdAt: serverTimestamp(),
+        keywords: generateKeywords(data.name),
         imageUrls: data.imageUrls.map(url => url.value), // Extract string values
         variations: {
             ...data.variations,
