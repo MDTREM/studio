@@ -15,6 +15,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import RelatedProductsSection from './RelatedProductsSection';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductPageProps {
   product: Product;
@@ -28,6 +30,8 @@ export default function ProductPage({ product }: ProductPageProps) {
   const [selectedFormat, setSelectedFormat] = useState(product.variations.formats[0] || '');
   const [selectedColor, setSelectedColor] = useState(product.variations.colors?.[0] || '');
   const [selectedFinishing, setSelectedFinishing] = useState(product.variations.finishings?.[0] || '');
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   // Hardcoded rating for now
   const rating = 4.5;
@@ -59,6 +63,21 @@ export default function ProductPage({ product }: ProductPageProps) {
 
   const selectedPrice = useMemo(() => getPriceForQuantity(quantity), [quantity, product]);
 
+  const handleAddToCart = () => {
+    const cartItem = {
+      id: `${product.id}-${selectedFormat}-${selectedFinishing}`, // More unique ID
+      product,
+      quantity,
+      selectedFormat,
+      selectedFinishing,
+      totalPrice: selectedPrice.totalPrice,
+    };
+    addToCart(cartItem);
+    toast({
+      title: "Produto adicionado!",
+      description: `${product.name} foi adicionado ao seu carrinho.`,
+    });
+  };
 
   return (
     <TooltipProvider>
@@ -334,7 +353,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </div>
                     </div>
 
-                    <Button size="lg" className="w-full md:w-auto text-lg">
+                    <Button size="lg" className="w-full md:w-auto text-lg" onClick={handleAddToCart}>
                         <ShoppingCart className="mr-2 h-5 w-5" />
                         Comprar
                     </Button>

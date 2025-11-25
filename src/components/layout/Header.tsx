@@ -13,6 +13,7 @@ import {
 import TopBanner from './TopBanner';
 import { Input } from '../ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { useCart } from '@/contexts/CartContext';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -65,6 +66,7 @@ const secondaryNavLinks = [
 ]
 
 export default function Header() {
+  const { cartCount } = useCart();
   return (
     <>
       <TopBanner>
@@ -153,7 +155,7 @@ export default function Header() {
           <div className="flex items-center gap-2">
              <Button variant="ghost" size="icon" className="relative h-10 w-10 md:hidden text-white hover:bg-white/10 hover:text-white">
                 <ShoppingCart className="h-6 w-6" />
-                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">0</span>
+                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>
                 <span className="sr-only">Carrinho</span>
             </Button>
           </div>
@@ -179,7 +181,7 @@ export default function Header() {
                 <UserNav />
                  <Button variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
                     <ShoppingCart className="h-6 w-6" />
-                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">0</span>
+                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>
                     <span className="sr-only">Carrinho</span>
                 </Button>
           </div>

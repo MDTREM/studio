@@ -53,6 +53,16 @@ export type User = {
   cnpj?: string;
 };
 
+export type CartItem = {
+  id: string; // Unique ID for the cart item
+  product: Product;
+  quantity: number;
+  selectedFormat: string;
+  selectedFinishing: string;
+  totalPrice: number;
+};
+
+
 // Add the 'createdAt' field to the Product entity in backend.json
 // This is important for sorting new products.
 // "createdAt": {
