@@ -3,26 +3,21 @@ import Link from "next/link";
 import { Package, ShoppingCart, Users, Tags } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import UserNav from "@/components/shared/UserNav";
-import { FirebaseClientProvider, useDoc, useFirestore, useUser } from "@/firebase";
-import { User as AppUser } from '@/lib/definitions';
-import { useMemoFirebase } from "@/firebase/provider";
-import { doc } from "firebase/firestore";
+import { FirebaseClientProvider, useUser } from "@/firebase";
 
 function AdminNavLinks() {
   const { user } = useUser();
-  const firestore = useFirestore();
 
-  const userDocRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
+  // In a custom claims setup, we can't know if a user is an admin on the client-side
+  // without refreshing the token. The simplest way to handle this is to assume if they
+  // navigate to /admin, they *might* be an admin, and let Firestore rules do the actual
+  // security check. If they lack permissions, the pages will show errors or no data.
+  // A more advanced setup might involve a specific function to check claims.
 
-  const { data: appUser } = useDoc<AppUser>(userDocRef);
-
-  if (!appUser?.isAdmin) {
+  if (!user) {
     return (
       <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-        <p className="px-3 py-2 text-muted-foreground">Você não tem permissão para acessar esta área.</p>
+        <p className="px-3 py-2 text-muted-foreground">Você precisa estar logado para acessar esta área.</p>
       </nav>
     );
   }

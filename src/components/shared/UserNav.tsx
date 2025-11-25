@@ -13,14 +13,26 @@ import {
 import Link from 'next/link';
 import { LayoutDashboard, LogOut, User } from 'lucide-react';
 import { useAuth, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { signOut } from 'firebase/auth';
+import { signOut, getIdTokenResult } from 'firebase/auth';
 import type { User as AppUser } from '@/lib/definitions';
 import { doc } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
 
 export default function UserNav() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      getIdTokenResult(user, true).then((idTokenResult) => {
+        setIsAdmin(!!idTokenResult.claims.isAdmin);
+      });
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -72,7 +84,7 @@ export default function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || appUser?.name || 'Usuário'}</p>
+            <p className="text-sm font-medium leading-none">{appUser?.name || user.displayName || 'Usuário'}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
@@ -86,7 +98,7 @@ export default function UserNav() {
               <span>Painel</span>
             </DropdownMenuItem>
           </Link>
-          {appUser?.isAdmin && (
+          {isAdmin && (
             <Link href="/admin">
               <DropdownMenuItem>
                 <LayoutDashboard className="mr-2 h-4 w-4" />
