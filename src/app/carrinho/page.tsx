@@ -4,18 +4,77 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Image from 'next/image';
-import { Trash2, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Trash2, ShoppingCart, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { addDocumentNonBlocking, useAuth, useFirestore } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { collection } from 'firebase/firestore';
+import { useState } from 'react';
 
 export default function CartPage() {
-  const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount, clearCart } = useCart();
+  const { user } = useAuth();
+  const firestore = useFirestore();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleQuantityChange = (itemId: string, currentQuantity: number) => {
-    // This is a simple implementation. For more complex scenarios,
-    // you might want to find the closest valid quantity from product variations.
     updateQuantity(itemId, currentQuantity);
+  };
+
+  const handleCheckout = async () => {
+    if (!user) {
+        toast({
+            variant: 'destructive',
+            title: 'Você precisa estar logado!',
+            description: 'Por favor, faça login para finalizar a compra.',
+        });
+        router.push('/login');
+        return;
+    }
+    if (!firestore) return;
+
+    setIsSubmitting(true);
+
+    const orderPromises = cartItems.map(item => {
+        const orderData = {
+            customerId: user.uid,
+            customerName: user.displayName || user.email,
+            customerEmail: user.email,
+            orderDate: new Date().toISOString(),
+            status: 'Em análise',
+            productName: item.product.name,
+            quantity: item.quantity,
+            totalAmount: item.totalPrice,
+            variation: {
+                format: item.selectedFormat,
+                finishing: item.selectedFinishing,
+            }
+        };
+        return addDocumentNonBlocking(collection(firestore, "orders_items"), orderData);
+    });
+
+    try {
+        await Promise.all(orderPromises);
+        toast({
+            title: 'Pedido realizado com sucesso!',
+            description: 'Você será redirecionado para o seu painel.',
+        });
+        clearCart();
+        router.push('/dashboard');
+    } catch (error) {
+        console.error("Error creating order: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Erro ao criar pedido',
+            description: 'Houve um problema ao salvar seu pedido. Tente novamente.',
+        });
+        setIsSubmitting(false);
+    }
   };
   
   if (cartCount === 0) {
@@ -83,7 +142,6 @@ export default function CartPage() {
                                         value={item.quantity}
                                         onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value))}
                                         className="w-20 text-center"
-                                        // You might want to add step to align with product quantity options
                                     />
                                     </div>
                                 </TableCell>
@@ -128,8 +186,11 @@ export default function CartPage() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                <Button size="lg" className="w-full">
-                    Finalizar Compra
+                <Button size="lg" className="w-full" onClick={handleCheckout} disabled={isSubmitting}>
+                    {isSubmitting ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    {isSubmitting ? 'Finalizando...' : 'Finalizar Compra'}
                 </Button>
                 </CardFooter>
             </Card>
