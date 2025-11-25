@@ -30,7 +30,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
       </div>
       
       <CardContent className="p-4 flex flex-col flex-grow">
-        <p className="text-xs text-primary font-semibold mb-1 uppercase">{product.category}</p>
+        <p className="text-xs text-primary font-medium mb-1 uppercase">{product.category}</p>
         <h3 className="font-bold text-base mb-1 truncate">{product.name}</h3>
         <div className="flex items-center gap-1 mb-2">
             <div className="flex items-center">
