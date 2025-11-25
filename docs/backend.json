@@ -153,6 +153,10 @@
         "address": {
           "type": "string",
           "description": "Address of the user."
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Determines if the user has administrative privileges."
         }
       },
       "required": [

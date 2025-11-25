@@ -12,15 +12,27 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { LayoutDashboard, LogOut, User } from 'lucide-react';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
+import type { User as AppUser } from '@/lib/definitions';
+import { doc } from 'firebase/firestore';
 
 export default function UserNav() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: appUser } = useDoc<AppUser>(userDocRef);
 
   const handleLogout = () => {
-    signOut(auth);
+    if (auth) {
+      signOut(auth);
+    }
   };
 
   if (isUserLoading) {
@@ -60,7 +72,7 @@ export default function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || 'Usuário'}</p>
+            <p className="text-sm font-medium leading-none">{user.displayName || appUser?.name || 'Usuário'}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
@@ -74,13 +86,14 @@ export default function UserNav() {
               <span>Painel</span>
             </DropdownMenuItem>
           </Link>
-          {/* TODO: Add logic to show admin link only for admins */}
-          <Link href="/admin">
-            <DropdownMenuItem>
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              <span>Admin</span>
-            </DropdownMenuItem>
-          </Link>
+          {appUser?.isAdmin && (
+            <Link href="/admin">
+              <DropdownMenuItem>
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                <span>Admin</span>
+              </DropdownMenuItem>
+            </Link>
+          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>

@@ -51,6 +51,7 @@ export type User = {
   companyName?: string;
   tradingName?: string;
   cnpj?: string;
+  isAdmin?: boolean;
 };
 
 export type CartItem = {
