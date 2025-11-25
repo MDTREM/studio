@@ -1,8 +1,66 @@
+'use client';
 import Link from "next/link";
 import { Package, ShoppingCart, Users, Tags } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import UserNav from "@/components/shared/UserNav";
-import { FirebaseClientProvider } from "@/firebase";
+import { FirebaseClientProvider, useDoc, useFirestore, useUser } from "@/firebase";
+import { User as AppUser } from '@/lib/definitions';
+import { useMemoFirebase } from "@/firebase/provider";
+import { doc } from "firebase/firestore";
+
+function AdminNavLinks() {
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: appUser } = useDoc<AppUser>(userDocRef);
+
+  if (!appUser?.isAdmin) {
+    return (
+      <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+        <p className="px-3 py-2 text-muted-foreground">Você não tem permissão para acessar esta área.</p>
+      </nav>
+    );
+  }
+
+  return (
+    <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+      <Link
+        href="/admin"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+      >
+        <Package className="h-4 w-4" />
+        Produtos
+      </Link>
+      <Link
+        href="/admin/categories"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+      >
+        <Tags className="h-4 w-4" />
+        Categorias
+      </Link>
+      <Link
+        href="/admin/orders"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+      >
+        <ShoppingCart className="h-4 w-4" />
+        Pedidos
+      </Link>
+      <Link
+        href="/admin/customers"
+        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+      >
+        <Users className="h-4 w-4" />
+        Clientes
+      </Link>
+    </nav>
+  );
+}
+
 
 export default function AdminLayout({
   children,
@@ -20,36 +78,7 @@ export default function AdminLayout({
               </Link>
             </div>
             <div className="flex-1">
-              <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-                >
-                  <Package className="h-4 w-4" />
-                  Produtos
-                </Link>
-                <Link
-                  href="/admin/categories"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-                >
-                  <Tags className="h-4 w-4" />
-                  Categorias
-                </Link>
-                <Link
-                  href="/admin/orders"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-                >
-                  <ShoppingCart className="h-4 w-4" />
-                  Pedidos
-                </Link>
-                <Link
-                  href="/admin/customers"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-                >
-                  <Users className="h-4 w-4" />
-                  Clientes
-                </Link>
-              </nav>
+              <AdminNavLinks />
             </div>
           </div>
         </div>
