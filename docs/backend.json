@@ -73,8 +73,7 @@
   "auth": {
     "providers": [
       "anonymous",
-      "email-password",
-      "google.com"
+      "email-password"
     ]
   },
   "firestore": {
