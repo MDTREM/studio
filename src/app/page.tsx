@@ -1,12 +1,14 @@
 import CategoriesSection from "@/components/sections/home/CategoriesSection";
 import Hero from "@/components/sections/home/Hero";
 import InfoCarousel from "@/components/sections/home/InfoCarousel";
+import PromoBanners from "@/components/sections/home/PromoBanners";
 
 export default function Home() {
   return (
     <>
       <Hero />
       <InfoCarousel />
+      <PromoBanners />
       <CategoriesSection />
     </>
   );
