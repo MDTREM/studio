@@ -61,7 +61,7 @@ export default function ProductPage({ product }: ProductPageProps) {
     // Effect to safely initialize state when product data is available.
     useEffect(() => {
         if (product) {
-            setMainImage(product.imageUrls?.[0] || '/placeholder.png');
+            setMainImage(product.imageUrls?.[0] || null);
             if (product.variations?.quantities && product.variations.quantities.length > 0) {
               setQuantity(product.variations.quantities[0]);
             }
