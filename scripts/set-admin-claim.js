@@ -47,7 +47,7 @@ if (!email) {
 
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
-      console.error('\x1b[31m%s\xbil[0m', `Erro: Usuário com o e-mail "${email}" não encontrado.`);
+      console.error('\x1b[31m%s\x1b[0m', `Erro: Usuário com o e-mail "${email}" não encontrado.`);
     } else {
       console.error('\x1b[31m%s\x1b[0m', 'Ocorreu um erro inesperado:');
       console.error(error);
