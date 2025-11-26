@@ -7,11 +7,12 @@ import { notFound } from "next/navigation";
 
 export default function Page({ params }: { params: { id: string } }) {
     const firestore = useFirestore();
+    const productId = params.id;
     
     const productRef = useMemoFirebase(() => {
-        if (!firestore || !params.id) return null;
-        return doc(firestore, "products", params.id);
-    }, [firestore, params.id]);
+        if (!firestore || !productId) return null;
+        return doc(firestore, "products", productId);
+    }, [firestore, productId]);
 
     const { data: product, isLoading } = useDoc<Product>(productRef);
 
