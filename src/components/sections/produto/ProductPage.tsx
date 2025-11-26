@@ -65,19 +65,19 @@ export default function ProductPage({ product }: ProductPageProps) {
     useEffect(() => {
         if (product) {
             setMainImage(product.imageUrls?.[0] || null);
-            if (product.variations?.quantities && product.variations.quantities.length > 0) {
+            if (product.variations?.quantities?.[0]) {
               setQuantity(product.variations.quantities[0]);
             }
-            if (product.variations?.materials && product.variations.materials.length > 0) {
+            if (product.variations?.materials?.[0]) {
                 setSelectedMaterial(product.variations.materials[0]);
             }
-            if (product.variations?.formats && product.variations.formats.length > 0) {
+            if (product.variations?.formats?.[0]) {
                 setSelectedFormat(product.variations.formats[0]);
             }
-            if (product.variations?.colors && product.variations.colors.length > 0) {
+            if (product.variations?.colors?.[0]) {
                 setSelectedColor(product.variations.colors[0]);
             }
-            if (product.variations?.finishings && product.variations.finishings.length > 0) {
+            if (product.variations?.finishings?.[0]) {
                 setSelectedFinishing(product.variations.finishings[0]);
             }
         }
@@ -205,10 +205,12 @@ export default function ProductPage({ product }: ProductPageProps) {
                             <Label className='font-semibold text-base'>Material</Label>
                             <RadioGroup value={selectedMaterial} onValueChange={setSelectedMaterial} className="flex flex-wrap gap-2">
                                 {product.variations.materials!.map(material => (
-                                    <Label key={material} htmlFor={`material-${material}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
+                                    <div key={material}>
                                         <RadioGroupItem value={material} id={`material-${material}`} className="sr-only" />
-                                        {material}
-                                    </Label>
+                                        <Label htmlFor={`material-${material}`} className={cn("border rounded-md px-4 py-2 cursor-pointer transition-colors", selectedMaterial === material && "bg-primary text-primary-foreground border-primary")}>
+                                            {material}
+                                        </Label>
+                                    </div>
                                 ))}
                             </RadioGroup>
                         </div>
@@ -218,10 +220,12 @@ export default function ProductPage({ product }: ProductPageProps) {
                             <Label htmlFor="format" className='font-semibold text-base'>Formato</Label>
                             <RadioGroup value={selectedFormat} onValueChange={setSelectedFormat} className="flex flex-wrap gap-2">
                                 {product.variations.formats!.map(f => (
-                                    <Label key={f} htmlFor={`format-${f}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
+                                    <div key={f}>
                                         <RadioGroupItem value={f} id={`format-${f}`} className="sr-only" />
-                                        {f}
-                                    </Label>
+                                        <Label htmlFor={`format-${f}`} className={cn("border rounded-md px-4 py-2 cursor-pointer transition-colors", selectedFormat === f && "bg-primary text-primary-foreground border-primary")}>
+                                          {f}
+                                        </Label>
+                                    </div>
                                 ))}
                             </RadioGroup>
                         </div>
@@ -231,10 +235,12 @@ export default function ProductPage({ product }: ProductPageProps) {
                             <Label className='font-semibold text-base'>Cor</Label>
                             <RadioGroup value={selectedColor} onValueChange={setSelectedColor} className="flex flex-wrap gap-2">
                                 {product.variations.colors!.map(color => (
-                                    <Label key={color} htmlFor={`color-${color}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
+                                    <div key={color}>
                                         <RadioGroupItem value={color} id={`color-${color}`} className="sr-only" />
-                                        {color}
-                                    </Label>
+                                        <Label htmlFor={`color-${color}`} className={cn("border rounded-md px-4 py-2 cursor-pointer transition-colors", selectedColor === color && "bg-primary text-primary-foreground border-primary")}>
+                                            {color}
+                                        </Label>
+                                    </div>
                                 ))}
                             </RadioGroup>
                         </div>
@@ -244,10 +250,12 @@ export default function ProductPage({ product }: ProductPageProps) {
                             <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento</Label>
                             <RadioGroup value={selectedFinishing} onValueChange={setSelectedFinishing} className="flex flex-wrap gap-2">
                                 {product.variations.finishings!.map(f => (
-                                    <Label key={f} htmlFor={`finishing-${f}`} className="border rounded-md px-4 py-2 has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:border-primary cursor-pointer transition-colors">
+                                    <div key={f}>
                                         <RadioGroupItem value={f} id={`finishing-${f}`} className="sr-only" />
-                                        {f}
-                                    </Label>
+                                        <Label htmlFor={`finishing-${f}`} className={cn("border rounded-md px-4 py-2 cursor-pointer transition-colors", selectedFinishing === f && "bg-primary text-primary-foreground border-primary")}>
+                                          {f}
+                                        </Label>
+                                    </div>
                                 ))}
                             </RadioGroup>
                         </div>
@@ -260,10 +268,10 @@ export default function ProductPage({ product }: ProductPageProps) {
                 <div className="grid gap-4 mb-8">
                     <Label className='font-semibold text-base'>Como você quer sua arte?</Label>
                     <RadioGroup value={artworkOption} onValueChange={setArtworkOption} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Label htmlFor="professional-design" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-orange-500 has-[:checked]:ring-2 has-[:checked]:ring-orange-200", artworkOption === 'professional-design' ? 'border-orange-500' : 'border-border')}>
+                        <Label htmlFor="professional-design" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:ring-2 has-[:checked]:ring-ring", artworkOption === 'professional-design' ? 'border-primary' : 'border-border')}>
                             <RadioGroupItem value="professional-design" id="professional-design" className="sr-only" />
                             <div className='flex gap-4 items-start'>
-                            <div className="text-orange-500">
+                            <div className="text-primary">
                                 <Lightbulb className="w-8 h-8" />
                             </div>
                             <div>
@@ -272,17 +280,17 @@ export default function ProductPage({ product }: ProductPageProps) {
                             </div>
                             </div>
                             <div className='flex items-center gap-2 mt-2'>
-                                <p className='font-bold text-lg'>R$ 35,00</p>
+                                <p className='font-bold text-lg'>R$ {ART_DESIGN_COST.toFixed(2).replace('.', ',')}</p>
                                 <Tooltip>
-                                <TooltipTrigger><Info className='w-4 h-4 text-blue-500'/></TooltipTrigger>
+                                <TooltipTrigger type='button' onClick={e => e.preventDefault()}><Info className='w-4 h-4 text-blue-500'/></TooltipTrigger>
                                 <TooltipContent><p>Nossa equipe criará a arte para você.</p></TooltipContent>
                                 </Tooltip>
                             </div>
                         </Label>
-                        <Label htmlFor="i-have-design" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-orange-500 has-[:checked]:ring-2 has-[:checked]:ring-orange-200", artworkOption === 'i-have-design' ? 'border-orange-500' : 'border-border')}>
+                        <Label htmlFor="i-have-design" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-primary has-[:checked]:ring-2 has-[:checked]:ring-ring", artworkOption === 'i-have-design' ? 'border-primary' : 'border-border')}>
                             <RadioGroupItem value="i-have-design" id="i-have-design" className="sr-only" />
                              <div className='flex gap-4 items-start'>
-                                <FileUp className="w-8 h-8 text-orange-500" />
+                                <FileUp className="w-8 h-8 text-primary" />
                                 <div>
                                     <p className='font-bold'>Já tenho o design</p>
                                     <p className='text-muted-foreground text-sm mt-1'>Vou enviar meu arquivo pronto para impressão.</p>
@@ -355,7 +363,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                         <div className='border rounded-lg'>
                         <div className='flex justify-between items-center p-3 border-b'>
                             <span className='font-medium'>Prazo de produção</span>
-                            <span className='text-muted-foreground'>4 dias úteis + frete <Info className='inline w-4 h-4 text-blue-500' /></span>
+                            <span className='text-muted-foreground'>4 dias úteis + frete <Tooltip><TooltipTrigger type='button' onClick={e => e.preventDefault()}><Info className='inline w-4 h-4 text-blue-500'/></TooltipTrigger><TooltipContent><p>O prazo pode variar.</p></TooltipContent></Tooltip></span>
                         </div>
                          {selectedMaterial && <div className='flex justify-between items-center p-3 border-b'>
                             <span className='font-medium'>Material</span>
