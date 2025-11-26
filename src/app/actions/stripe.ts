@@ -9,15 +9,18 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     
     try {
         const line_items = items.map(item => {
-            // Lógica de cálculo corrigida:
-            // 1. Calcula o preço por unidade a partir do totalPrice e da quantidade.
-            // 2. Multiplica por 100 para converter para centavos.
-            // 3. Usa Math.round() para garantir que seja um número inteiro.
-            const unitAmountInCents = Math.round((item.totalPrice / item.quantity) * 100);
+            // Lógica de cálculo robusta para o preço unitário em centavos.
+            // 1. O item.totalPrice já tem o valor correto para a quantidade.
+            // 2. Dividimos pelo número de itens para obter o preço unitário.
+            // 3. Multiplicamos por 100 para converter para centavos.
+            // 4. Usamos Math.round() para garantir que é um número inteiro.
+            const unitAmount = item.totalPrice / item.quantity;
+            const unitAmountInCents = Math.round(unitAmount * 100);
 
-            // Garante que o valor seja pelo menos 1 centavo para evitar erros com produtos de valor muito baixo.
+            // Garante que o valor seja pelo menos o mínimo aceitável pela Stripe (ex: R$0,50 ou BRL 50 centavos)
+            // Stripe pode ter mínimos dependendo da moeda. 1 é um valor seguro para evitar 0.
             if (unitAmountInCents <= 0) {
-                throw new Error(`O valor para o produto ${item.product.name} é inválido.`);
+                 throw new Error(`O valor calculado para o produto ${item.product.name} é inválido.`);
             }
 
             const validImages = item.product.imageUrls.filter(url => url && url.startsWith('http'));
@@ -57,7 +60,9 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
 
         return { sessionId: session.id };
     } catch (error: any) {
+        // Log do erro detalhado no servidor para diagnóstico
         console.error("Erro ao criar sessão de checkout da Stripe:", error.message);
+        // Retorna uma mensagem de erro clara para o cliente
         return { error: `Não foi possível criar a sessão de pagamento: ${error.message}` };
     }
 }
