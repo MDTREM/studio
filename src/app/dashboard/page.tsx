@@ -5,9 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { Order } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
-import { collection, query, where } from "firebase/firestore";
+import { collection, query, where, orderBy } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 const statusColors = {
   'Em análise': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
@@ -32,14 +33,19 @@ export default function DashboardPage() {
     const userOrdersQuery = useMemoFirebase(() => {
         // Só cria a query se o usuário estiver carregado e existir.
         if (!firestore || !user) return null;
-        return query(collection(firestore, "orders_items"), where("customerId", "==", user.uid));
+        return query(collection(firestore, "users", user.uid, "orders"), orderBy("orderDate", "desc"));
     }, [firestore, user]);
     
     const { data: userOrders, isLoading: areOrdersLoading } = useCollection<Order>(userOrdersQuery);
     
     // Mostra o estado de carregamento enquanto o usuário ou os pedidos estão sendo carregados.
-    if (isUserLoading || areOrdersLoading) {
-        return <div className="container max-w-7xl mx-auto px-4 py-12 text-center">Carregando seus dados...</div>
+    if (isUserLoading || (user && areOrdersLoading)) {
+        return (
+          <div className="container max-w-7xl mx-auto px-4 py-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
+            <p className="text-lg text-muted-foreground">Carregando seus dados...</p>
+          </div>
+        );
     }
 
     // Se o carregamento terminou e ainda não há usuário, não renderize nada (o useEffect irá redirecionar).
@@ -87,7 +93,9 @@ export default function DashboardPage() {
                 </TableRow>
               )) : (
                 <TableRow>
-                    <TableCell colSpan={5} className="text-center">Nenhum pedido encontrado.</TableCell>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      Você ainda não fez nenhum pedido.
+                    </TableCell>
                 </TableRow>
               )}
             </TableBody>

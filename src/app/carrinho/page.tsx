@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { addDocumentNonBlocking, useAuth, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { collection } from 'firebase/firestore';
+import { collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
 
 export default function CartPage() {
@@ -40,6 +40,8 @@ export default function CartPage() {
 
     setIsSubmitting(true);
 
+    const ordersCollectionRef = collection(firestore, "users", user.uid, "orders");
+
     const orderPromises = cartItems.map(item => {
         const orderData = {
             customerId: user.uid,
@@ -53,9 +55,11 @@ export default function CartPage() {
             variation: {
                 format: item.selectedFormat,
                 finishing: item.selectedFinishing,
-            }
+            },
+            // Adicionando um timestamp do servidor para ordenação futura
+            createdAt: serverTimestamp(), 
         };
-        return addDocumentNonBlocking(collection(firestore, "orders_items"), orderData);
+        return addDocumentNonBlocking(ordersCollectionRef, orderData);
     });
 
     try {
@@ -73,7 +77,8 @@ export default function CartPage() {
             title: 'Erro ao criar pedido',
             description: 'Houve um problema ao salvar seu pedido. Tente novamente.',
         });
-        setIsSubmitting(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
   

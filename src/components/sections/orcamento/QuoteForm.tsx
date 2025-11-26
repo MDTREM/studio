@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Product } from '@/lib/definitions';
 import { ArrowRight, Check, FileUp, Loader2, Phone } from 'lucide-react';
 import { useAuth, useFirestore, addDocumentNonBlocking } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, serverTimestamp } from 'firebase/firestore';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 
@@ -47,7 +47,6 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
   useEffect(() => {
     if (selectedProduct && quantity) {
       const calculatePrice = () => {
-        let price = selectedProduct.basePrice;
         const qty = parseInt(quantity);
         const baseQuantity = selectedProduct.variations.quantities[0] || 1;
         const discountFactor = Math.log10(qty / baseQuantity + 1) / 2;
@@ -81,35 +80,37 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
 
     setIsSubmitting(true);
     
+    // Define the collection reference. If the user is logged in, save to their subcollection.
+    // Otherwise, save to a general 'quotes' collection.
+    const collectionRef = user 
+      ? collection(firestore, 'users', user.uid, 'orders')
+      : collection(firestore, 'orders_items');
+
     const orderData = {
         customerId: user?.uid || 'anonymous',
         customerName: user?.displayName || 'Cliente Anônimo',
         customerEmail: user?.email || '',
         orderDate: new Date().toISOString(),
         status: 'Em análise',
-        items: [
-            {
-                productId: selectedProduct.id,
-                productName: selectedProduct.name,
-                quantity: parseInt(quantity),
-                price: estimatedPrice,
-                variation: {
-                    size,
-                    finishing,
-                }
-            }
-        ],
+        productName: selectedProduct.name,
+        quantity: parseInt(quantity),
         totalAmount: estimatedPrice,
+        variation: {
+            size,
+            finishing,
+        },
         artworkUrl: '', // Artwork will be sent separately
+        createdAt: serverTimestamp(),
     };
 
-    addDocumentNonBlocking(collection(firestore, 'orders_items'), orderData)
+    addDocumentNonBlocking(collectionRef, orderData)
       .then(() => {
-        setIsSubmitting(false);
         setIsSubmitted(true);
       })
       .catch((error) => {
         console.error("Error writing document: ", error);
+      })
+      .finally(() => {
         setIsSubmitting(false);
       });
   }

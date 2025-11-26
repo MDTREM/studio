@@ -5,12 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { Order, OrderStatus } from "@/lib/definitions";
+import { Order, OrderStatus, User } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
-import { collection, query, doc, where, orderBy } from "firebase/firestore";
+import { collection, query, doc, where, orderBy, getDocs, collectionGroup } from "firebase/firestore";
 import { ListFilter, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const statusColors: { [key in OrderStatus]: string } = {
     'Em análise': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
@@ -22,7 +22,6 @@ const statusColors: { [key in OrderStatus]: string } = {
 
 const availableStatuses: OrderStatus[] = ['Em análise', 'Em produção', 'Pronto para retirada', 'Entregue', 'Cancelado'];
 
-// Adicionando as props injetadas pelo AdminLayout
 interface AdminOrdersPageProps {
     isCheckingAdmin?: boolean;
     isAdmin?: boolean;
@@ -34,25 +33,24 @@ export default function AdminOrdersPage({ isCheckingAdmin, isAdmin }: AdminOrder
     const [statusFilters, setStatusFilters] = useState<OrderStatus[]>([]);
 
     const allOrdersQuery = useMemoFirebase(() => {
-        // Apenas executa a query se a verificação de admin terminou e o usuário é admin
         if (!firestore || isCheckingAdmin || !isAdmin) return null;
         
+        const baseQuery = collectionGroup(firestore, 'orders');
         const queryConstraints: any[] = [orderBy("orderDate", "desc")];
         
         if (statusFilters.length > 0) {
             queryConstraints.push(where("status", "in", statusFilters));
         }
 
-        return query(collection(firestore, 'orders_items'), ...queryConstraints);
-
+        return query(baseQuery, ...queryConstraints);
     }, [firestore, statusFilters, isCheckingAdmin, isAdmin]);
 
     const { data: allOrders, isLoading } = useCollection<Order>(allOrdersQuery);
     
-    const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
+    const handleStatusChange = (orderId: string, customerId: string, newStatus: OrderStatus) => {
         if (!firestore) return;
-        const orderItemRef = doc(firestore, 'orders_items', orderId);
-        updateDocumentNonBlocking(orderItemRef, { status: newStatus });
+        const orderDocRef = doc(firestore, 'users', customerId, 'orders', orderId);
+        updateDocumentNonBlocking(orderDocRef, { status: newStatus });
 
         toast({
             title: "Status Atualizado!",
@@ -167,7 +165,7 @@ export default function AdminOrdersPage({ isCheckingAdmin, isAdmin }: AdminOrder
                                                 {availableStatuses.map(status => (
                                                     <DropdownMenuItem 
                                                         key={status} 
-                                                        onClick={() => handleStatusChange(order.id, status)}
+                                                        onClick={() => handleStatusChange(order.id, order.customerId, status)}
                                                         disabled={order.status === status}
                                                     >
                                                         {status}

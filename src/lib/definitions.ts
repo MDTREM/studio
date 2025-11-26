@@ -33,6 +33,7 @@ export type OrderStatus = 'Em análise' | 'Em produção' | 'Pronto para retirad
 
 export type Order = {
   id: string;
+  customerId: string; // Adicionado para rastrear o dono do pedido
   customerName: string;
   customerEmail: string;
   orderDate: string;
