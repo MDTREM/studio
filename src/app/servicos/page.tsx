@@ -1,7 +1,15 @@
+'use client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, HardHat, Printer } from "lucide-react";
 import Link from "next/link";
+
+const whatsappNumber = "5531982190935"; // Seu número de WhatsApp
+
+const getWhatsAppLink = (serviceTitle: string) => {
+  const message = `Olá! Gostaria de um orçamento para o serviço de ${serviceTitle}.`;
+  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+};
 
 const services = [
   {
@@ -14,7 +22,7 @@ const services = [
       "Contratos flexíveis",
       "Suporte técnico especializado",
     ],
-    link: "/contato?assunto=Aluguel"
+    link: getWhatsAppLink("Aluguel de Impressoras")
   },
   {
     icon: <HardHat className="h-10 w-10 text-primary" />,
@@ -26,7 +34,7 @@ const services = [
       "Garantia no serviço prestado",
       "Atendimento no local ou em nosso laboratório",
     ],
-    link: "/contato?assunto=Conserto"
+    link: getWhatsAppLink("Conserto de Impressoras")
   },
 ];
 
@@ -60,7 +68,7 @@ export default function ServicosPage() {
             </CardContent>
             <CardFooter>
               <Button asChild className="w-full">
-                <Link href={service.link}>
+                <Link href={service.link} target="_blank" rel="noopener noreferrer">
                   Solicitar Orçamento
                 </Link>
               </Button>
