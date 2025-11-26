@@ -145,7 +145,7 @@ export default function ProductPage({ product }: ProductPageProps) {
 
             {/* Variações */}
             <div className="space-y-6">
-                {product.variations?.materials?.length > 0 && (
+                {product.variations?.materials && product.variations.materials.length > 0 && (
                     <div className="grid gap-3">
                         <Label className='font-semibold text-base'>Material</Label>
                         <RadioGroup value={selectedMaterial} onValueChange={setSelectedMaterial} className="flex flex-wrap gap-2">
@@ -158,7 +158,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </RadioGroup>
                     </div>
                 )}
-                {product.variations?.formats?.length > 0 && (
+                {product.variations?.formats && product.variations.formats.length > 0 && (
                     <div className="grid gap-3">
                         <Label htmlFor="format" className='font-semibold text-base'>Formato</Label>
                         <RadioGroup value={selectedFormat} onValueChange={setSelectedFormat} className="flex flex-wrap gap-2">
@@ -171,7 +171,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </RadioGroup>
                     </div>
                 )}
-                {product.variations?.colors?.length > 0 && (
+                {product.variations?.colors && product.variations.colors.length > 0 && (
                     <div className="grid gap-3">
                         <Label className='font-semibold text-base'>Cor</Label>
                         <RadioGroup value={selectedColor} onValueChange={setSelectedColor} className="flex flex-wrap gap-2">
@@ -184,7 +184,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </RadioGroup>
                     </div>
                 )}
-                {product.variations?.finishings?.length > 0 && (
+                {product.variations?.finishings && product.variations.finishings.length > 0 && (
                     <div className="grid gap-3">
                         <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento</Label>
                         <RadioGroup value={selectedFinishing} onValueChange={setSelectedFinishing} className="flex flex-wrap gap-2">
@@ -248,7 +248,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                 </RadioGroup>
             </div>
             
-            {product.variations?.quantities?.length > 0 && (
+            {product.variations?.quantities && product.variations.quantities.length > 0 && (
             <div className="grid gap-4 mb-8">
                 <Label className="font-semibold text-base">Escolha a quantidade</Label>
                 <RadioGroup value={quantity.toString()} onValueChange={(val) => setQuantity(parseInt(val))}>
@@ -366,6 +366,8 @@ export default function ProductPage({ product }: ProductPageProps) {
     </TooltipProvider>
   );
 }
+
+    
 
     
 
