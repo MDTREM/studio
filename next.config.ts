@@ -8,13 +8,11 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    // This is needed to allow cross-origin requests in development.
-    // The value is the domain of the Cloud Workstation.
-    allowedDevOrigins: [
-      '6000-firebase-studio-1764070301810.cluster-lr6dwlc2lzbcctqhqorax5zmro.cloudworkstations.dev',
-    ],
-  },
+  // This is needed to allow cross-origin requests in development.
+  // The value is the domain of the Cloud Workstation.
+  allowedDevOrigins: [
+    '6000-firebase-studio-1764070301810.cluster-lr6dwlc2lzbcctqhqorax5zmro.cloudworkstations.dev',
+  ],
   images: {
     remotePatterns: [
       {
