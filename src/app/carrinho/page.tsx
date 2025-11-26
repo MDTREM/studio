@@ -8,7 +8,7 @@ import { Trash2, ShoppingCart, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { addDocumentNonBlocking, useAuth, useFirestore } from '@/firebase';
+import { addDocumentNonBlocking, useUser, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { collection, serverTimestamp } from 'firebase/firestore';
@@ -16,7 +16,7 @@ import { useState } from 'react';
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
