@@ -21,7 +21,7 @@ export default function Page() {
     if (isLoading) {
         // Shows a loading state while Firestore fetches the data.
         // This prevents the page from jumping to 404 prematurely.
-        return <div>Carregando produto...</div>;
+        return <div className="container mx-auto text-center py-20">Carregando produto...</div>;
     }
 
     if (!product) {
