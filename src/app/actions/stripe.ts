@@ -9,7 +9,16 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     
     try {
         const line_items = items.map(item => {
+            // Lógica de cálculo corrigida:
+            // 1. Calcula o preço por unidade a partir do totalPrice e da quantidade.
+            // 2. Multiplica por 100 para converter para centavos.
+            // 3. Usa Math.round() para garantir que seja um número inteiro.
             const unitAmountInCents = Math.round((item.totalPrice / item.quantity) * 100);
+
+            // Garante que o valor seja pelo menos 1 centavo para evitar erros com produtos de valor muito baixo.
+            if (unitAmountInCents <= 0) {
+                throw new Error(`O valor para o produto ${item.product.name} é inválido.`);
+            }
 
             const validImages = item.product.imageUrls.filter(url => url && url.startsWith('http'));
 
