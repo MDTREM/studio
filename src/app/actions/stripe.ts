@@ -9,11 +9,8 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     
     try {
         const line_items = items.map(item => {
-            // CÁLCULO CORRIGIDO: O preço unitário deve ser baseado no preço total do item no carrinho,
-            // que já considera os descontos por volume. E o valor deve ser arredondado para um inteiro.
             const unitAmountInCents = Math.round((item.totalPrice / item.quantity) * 100);
 
-            // Garante que a imagem é uma URL válida e pública antes de enviar para a Stripe
             const validImages = item.product.imageUrls.filter(url => url && url.startsWith('http'));
 
             return {
@@ -24,7 +21,7 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
                         description: `${item.selectedFormat} / ${item.selectedFinishing}`,
                         ...(validImages.length > 0 && { images: [validImages[0]] })
                     },
-                    unit_amount: unitAmountInCents, // Preço por unidade em centavos (inteiro)
+                    unit_amount: unitAmountInCents,
                 },
                 quantity: item.quantity,
             };
@@ -36,12 +33,11 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
             mode: 'payment',
             success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/checkout/cancel`,
-            client_reference_id: userId, // Adiciona o ID do usuário do Firebase
+            client_reference_id: userId, 
             metadata: {
-                // Converte o carrinho para uma string JSON para ser armazenado nos metadados
                 cartItems: JSON.stringify(items.map(item => ({
                     productId: item.product.id,
-                    productName: item.product.name, // Adicionado para referência no webhook
+                    productName: item.product.name,
                     quantity: item.quantity,
                     totalPrice: item.totalPrice,
                     selectedFormat: item.selectedFormat,
@@ -52,7 +48,7 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
 
         return { sessionId: session.id };
     } catch (error: any) {
-        console.error("Stripe Action Error:", error);
-        return { error: "Não foi possível criar a sessão de pagamento." };
+        console.error("Erro ao criar sessão de checkout da Stripe:", error.message);
+        return { error: `Não foi possível criar a sessão de pagamento: ${error.message}` };
     }
 }
