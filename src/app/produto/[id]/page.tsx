@@ -2,7 +2,7 @@ import ProductPage from "@/components/sections/produto/ProductPage";
 import { Product } from "@/lib/definitions";
 import { doc, getDoc } from "firebase/firestore";
 import { notFound } from "next/navigation";
-import { getSdks } from "@/firebase";
+import { getSdks } from "@/firebase/server";
 
 // Fetch data on the server
 async function getProduct(productId: string): Promise<Product | null> {
@@ -16,15 +16,12 @@ async function getProduct(productId: string): Promise<Product | null> {
         return null;
     }
 
-    const productData = productSnap.data() as Product;
-    // Ensure imageUrls is always an array
-    const imageUrls = Array.isArray(productData.imageUrls) ? productData.imageUrls : [productData.imageUrls];
+    const productData = productSnap.data();
 
     return {
         id: productSnap.id,
         ...productData,
-        imageUrls,
-    };
+    } as Product;
 }
 
 

@@ -4,6 +4,7 @@ import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'
+import { getSdks as getClientSdks } from './server';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -25,21 +26,11 @@ export function initializeFirebase() {
       firebaseApp = initializeApp(firebaseConfig);
     }
 
-    return getSdks(firebaseApp);
+    return getClientSdks(firebaseApp);
   }
 
   // If already initialized, return the SDKs with the already initialized App
-  return getSdks(getApp());
-}
-
-export function getSdks(firebaseApp: FirebaseApp) {
-  const auth = getAuth(firebaseApp);
-  auth.languageCode = 'pt';
-  return {
-    firebaseApp,
-    auth: auth,
-    firestore: getFirestore(firebaseApp)
-  };
+  return getClientSdks(getApp());
 }
 
 export * from './provider';
