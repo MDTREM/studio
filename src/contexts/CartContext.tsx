@@ -20,7 +20,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = (item: CartItem) => {
     setCartItems(prevItems => {
-        // Check if a similar item already exists
+        // Check if a similar item already exists (based on product, format, and finishing)
         const existingItemIndex = prevItems.findIndex(
             i => i.product.id === item.product.id && 
                  i.selectedFormat === item.selectedFormat && 
@@ -32,7 +32,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             const updatedItems = [...prevItems];
             const existingItem = updatedItems[existingItemIndex];
             existingItem.quantity += item.quantity;
-            existingItem.totalPrice += item.totalPrice;
+            existingItem.totalPrice += item.totalPrice; // Simply add the new total price
             return updatedItems;
         } else {
             // Add new item
@@ -49,15 +49,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId) {
-          // Find the original price per unit from the product variations
+          // Recalculate price based on the new quantity. 
+          // This logic should mirror the price calculation on the product page.
           const baseQuantity = item.product.variations.quantities[0] || 1;
-          const discountFactor = Math.log10(newQuantity / baseQuantity + 1) / 2;
-          const pricePerUnit = item.product.basePrice / baseQuantity * (1 - discountFactor);
-          
+          const pricePerUnit = item.product.basePrice / baseQuantity;
+          const newTotalPrice = pricePerUnit * newQuantity;
+
           return {
             ...item,
             quantity: newQuantity,
-            totalPrice: pricePerUnit * newQuantity
+            totalPrice: newTotalPrice, // Update the total price for this item
           };
         }
         return item;

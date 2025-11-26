@@ -6,7 +6,7 @@ import { Product, Review } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Check, ChevronRight, Download, Home, Info, Lightbulb, Minus, PackageSearch, Pencil, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
+import { Check, ChevronRight, Download, FileUp, Home, Info, Lightbulb, Minus, PackageSearch, Pencil, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -27,7 +27,8 @@ interface ProductPageProps {
 export default function ProductPage({ product }: ProductPageProps) {
     const [quantity, setQuantity] = useState<number>(1);
     const [mainImage, setMainImage] = useState<string | null>(null);
-    const [artworkOption, setArtworkOption] = useState('professional-check');
+    const [artworkOption, setArtworkOption] = useState('i-have-design');
+    const [artworkFile, setArtworkFile] = useState<File | null>(null);
     const [selectedMaterial, setSelectedMaterial] = useState<string>('');
     const [selectedFormat, setSelectedFormat] = useState<string>('');
     const [selectedColor, setSelectedColor] = useState<string>('');
@@ -36,6 +37,8 @@ export default function ProductPage({ product }: ProductPageProps) {
     const { addToCart } = useCart();
     const { toast } = useToast();
     const firestore = useFirestore();
+
+    const ART_DESIGN_COST = 35.00;
 
     // Fetch reviews for the current product
     const reviewsQuery = useMemoFirebase(() => {
@@ -96,7 +99,13 @@ export default function ProductPage({ product }: ProductPageProps) {
         return { pricePerUnit, totalPrice };
     }
 
-    const selectedPrice = useMemo(() => getPriceForQuantity(quantity), [quantity, product]);
+    const selectedPrice = useMemo(() => {
+        let finalPrice = getPriceForQuantity(quantity).totalPrice;
+        if (artworkOption === 'professional-design') {
+            finalPrice += ART_DESIGN_COST;
+        }
+        return finalPrice;
+    }, [quantity, product, artworkOption]);
 
     const handleAddToCart = () => {
         const cartItem = {
@@ -105,7 +114,7 @@ export default function ProductPage({ product }: ProductPageProps) {
             quantity,
             selectedFormat,
             selectedFinishing,
-            totalPrice: selectedPrice.totalPrice,
+            totalPrice: selectedPrice,
         };
         addToCart(cartItem);
         toast({
@@ -251,47 +260,46 @@ export default function ProductPage({ product }: ProductPageProps) {
                 <div className="grid gap-4 mb-8">
                     <Label className='font-semibold text-base'>Como você quer sua arte?</Label>
                     <RadioGroup value={artworkOption} onValueChange={setArtworkOption} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Label htmlFor="professional-design" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-orange-500 has-[:checked]:ring-2 has-[:checked]:ring-orange-200", artworkOption === 'professional-design' ? 'border-orange-500' : 'border-border')}>
-                        <RadioGroupItem value="professional-design" id="professional-design" className="sr-only" />
-                        <div className='flex justify-between items-start'>
-                            <div className='flex gap-4'>
+                        <Label htmlFor="professional-design" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-orange-500 has-[:checked]:ring-2 has-[:checked]:ring-orange-200", artworkOption === 'professional-design' ? 'border-orange-500' : 'border-border')}>
+                            <RadioGroupItem value="professional-design" id="professional-design" className="sr-only" />
+                            <div className='flex gap-4 items-start'>
                             <div className="text-orange-500">
-                                <Lightbulb className="w-6 h-6" />
-                                <Pencil className="w-6 h-6 -mt-2 ml-2" />
+                                <Lightbulb className="w-8 h-8" />
                             </div>
                             <div>
                                 <p className='font-bold'>Designer Profissional</p>
+                                <p className='text-muted-foreground text-sm mt-1'>Não tenho o arquivo, preciso de criação profissional.</p>
                             </div>
                             </div>
-                            <div className='text-xs font-bold bg-yellow-300 text-yellow-900 px-2 py-0.5 rounded-md'>NOVO</div>
-                        </div>
-                        <p className='text-muted-foreground text-sm mt-2'>Não tenho o arquivo, preciso de criação profissional.</p>
-                        <div className='flex items-center gap-2 mt-2'>
-                            <p className='font-bold text-lg'>R$ 45,99 *</p>
-                            <Tooltip>
-                            <TooltipTrigger><Info className='w-4 h-4 text-blue-500'/></TooltipTrigger>
-                            <TooltipContent><p>Informação sobre o serviço</p></TooltipContent>
-                            </Tooltip>
-                        </div>
-                    </Label>
-                    <Label htmlFor="professional-check" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-orange-500 has-[:checked]:ring-2 has-[:checked]:ring-orange-200", artworkOption === 'professional-check' ? 'border-orange-500' : 'border-border')}>
-                        <RadioGroupItem value="professional-check" id="professional-check" className="sr-only" />
-                        <div className='flex gap-4 items-start'>
-                            <PackageSearch className="w-8 h-8 text-orange-500" />
-                            <div>
-                                <p className='font-bold'>Checagem Profissional</p>
+                            <div className='flex items-center gap-2 mt-2'>
+                                <p className='font-bold text-lg'>R$ 35,00</p>
+                                <Tooltip>
+                                <TooltipTrigger><Info className='w-4 h-4 text-blue-500'/></TooltipTrigger>
+                                <TooltipContent><p>Nossa equipe criará a arte para você.</p></TooltipContent>
+                                </Tooltip>
                             </div>
+                        </Label>
+                        <Label htmlFor="i-have-design" className={cn("border-2 rounded-lg p-4 cursor-pointer transition-all has-[:checked]:border-orange-500 has-[:checked]:ring-2 has-[:checked]:ring-orange-200", artworkOption === 'i-have-design' ? 'border-orange-500' : 'border-border')}>
+                            <RadioGroupItem value="i-have-design" id="i-have-design" className="sr-only" />
+                             <div className='flex gap-4 items-start'>
+                                <FileUp className="w-8 h-8 text-orange-500" />
+                                <div>
+                                    <p className='font-bold'>Já tenho o design</p>
+                                    <p className='text-muted-foreground text-sm mt-1'>Vou enviar meu arquivo pronto para impressão.</p>
+                                </div>
                             </div>
-                        <p className='text-muted-foreground text-sm mt-2'>Já tenho o arquivo mas quero uma conferência profissional.</p>
-                        <div className='flex items-center gap-2 mt-2'>
-                            <p className='font-bold text-lg'>R$ 16,99</p>
-                            <Tooltip>
-                            <TooltipTrigger><Info className='w-4 h-4 text-blue-500'/></TooltipTrigger>
-                            <TooltipContent><p>Informação sobre o serviço</p></TooltipContent>
-                            </Tooltip>
-                        </div>
-                    </Label>
+                            <div className='flex items-center gap-2 mt-2'>
+                                <p className='font-bold text-lg'>Grátis</p>
+                            </div>
+                        </Label>
                     </RadioGroup>
+                    {artworkOption === 'i-have-design' && (
+                        <div className="grid w-full max-w-sm items-center gap-1.5 mt-4">
+                            <Label htmlFor="artwork-file">Anexar arte</Label>
+                            <Input id="artwork-file" type="file" onChange={(e) => setArtworkFile(e.target.files ? e.target.files[0] : null)} />
+                            <p className="text-xs text-muted-foreground">Formatos aceitos: PDF, AI, CDR, JPG, PNG.</p>
+                        </div>
+                    )}
                 </div>
                 
                 {hasVariations('quantities') && (
@@ -397,7 +405,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                             <div className="text-right">
                                 <p className="text-sm text-muted-foreground">Total</p>
                                 <p className="text-2xl font-bold text-primary">
-                                    {selectedPrice.totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    {selectedPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </p>
                             </div>
                         </div>
