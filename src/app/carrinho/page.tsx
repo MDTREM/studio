@@ -54,6 +54,17 @@ export default function CartPage() {
         if (!stripe) {
             throw new Error('Stripe.js não carregou.');
         }
+        
+        // This is a workaround for the iframe issue in the development environment.
+        if (process.env.NODE_ENV === 'development') {
+            const checkoutUrl = `https://checkout.stripe.com/c/pay/${sessionId}#fidkdWxOYHwnPyd1blppbHNgWjA0Vl1vMHc1YzBVV29SVTRKZlY0XFRiaT1SYVVCXXU8NVBpVzFJRFRqc2BsYGRMVGwxTlBKbF80Q1N8N29rZG1rTGk3R2xtQ25tUkdza0FdZnJzXGpddDJKNTV9cGpzVzJHMScpJ2hsYXYnP34naHBsYSc/J0tEJykndmxhJz8nS0QnKSdicGxhJz8nS0QneCknZ2BxZHYnP15YKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSd3YGNgd3dgd0p3bGJsayc/J21xcXV2PyoqMzU1NShjbHdgZ2R2YCh2cXBhbGooNDIzMTUyNTY1ND00NStmaXB2cWB3KGl3M2FyaWY3aX9nZmZxdG10andkfTB/aHdqK2ZpanBhcmp3bnZxZHFsamt2K2Fgcyd4JSUl`;
+            if (window.top) {
+                window.top.location.href = checkoutUrl;
+            } else {
+                window.location.href = checkoutUrl;
+            }
+            return;
+        }
 
         const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
 
