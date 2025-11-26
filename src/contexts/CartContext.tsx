@@ -49,8 +49,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId && newQuantity > 0) {
-            const baseQuantity = item.product.variations.quantities[0] || 1;
-            const pricePerUnit = item.product.basePrice / baseQuantity;
+            // Re-implement the same pricing logic from the product page
+            const { basePrice, variations } = item.product;
+            const baseQuantity = variations.quantities[0] || 1;
+            
+            // Avoid division by zero
+            const safeBaseQuantity = baseQuantity > 0 ? baseQuantity : 1;
+            
+            // Calculate a discount factor that increases with quantity
+            const discountFactor = Math.log10(newQuantity / safeBaseQuantity + 1) / 2;
+            
+            // Calculate price per unit with discount, ensuring it doesn't go below a certain threshold
+            const pricePerUnit = (basePrice / safeBaseQuantity) * (1 - Math.min(discountFactor, 0.75)); // Cap discount at 75%
+
             const newTotalPrice = pricePerUnit * newQuantity;
 
             return { ...item, quantity: newQuantity, totalPrice: newTotalPrice };
@@ -58,7 +69,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         return item;
       }).filter(item => item.quantity > 0)
     );
-};
+  };
+
 
   const clearCart = () => {
     setCartItems([]);
