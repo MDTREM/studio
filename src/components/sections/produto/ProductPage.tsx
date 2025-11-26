@@ -26,7 +26,7 @@ interface ProductPageProps {
 
 export default function ProductPage({ product }: ProductPageProps) {
     const [quantity, setQuantity] = useState<number>(1);
-    const [mainImage, setMainImage] = useState<string>('');
+    const [mainImage, setMainImage] = useState<string | null>(null);
     const [artworkOption, setArtworkOption] = useState('professional-check');
     const [selectedMaterial, setSelectedMaterial] = useState<string>('');
     const [selectedFormat, setSelectedFormat] = useState<string>('');
@@ -115,8 +115,8 @@ export default function ProductPage({ product }: ProductPageProps) {
     };
     
     // Helper to check if a variation array is valid and not empty
-    const hasVariations = (key: 'materials' | 'formats' | 'colors' | 'finishings' | 'quantities') => {
-        return product?.variations?.[key] && Array.isArray(product.variations[key]) && (product.variations[key] as any[]).length > 0;
+    const hasVariations = (key: 'models' | 'materials' | 'formats' | 'colors' | 'finishings' | 'quantities') => {
+        return product?.variations?.[key] && Array.isArray(product.variations[key]) && (product.variations[key] as any[]).length > 0 && (product.variations[key] as any[])[0] !== '';
     }
 
     return (
@@ -154,13 +154,16 @@ export default function ProductPage({ product }: ProductPageProps) {
                         ))}
                     </div>
                     <div className="aspect-square w-full relative bg-secondary rounded-lg">
-                        <Image
-                        src={mainImage}
-                        alt={product.name}
-                        fill
-                        className="object-cover rounded-lg"
-                        data-ai-hint={product.imageHint}
-                        />
+                        {mainImage && (
+                            <Image
+                                src={mainImage}
+                                alt={product.name}
+                                fill
+                                className="object-cover rounded-lg"
+                                data-ai-hint={product.imageHint}
+                                priority
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -409,5 +412,3 @@ export default function ProductPage({ product }: ProductPageProps) {
         </TooltipProvider>
       );
 }
-
-    
