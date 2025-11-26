@@ -1,39 +1,43 @@
-'use client';
 import ProductPage from "@/components/sections/produto/ProductPage";
-import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { Product } from "@/lib/definitions";
-import { doc } from "firebase/firestore";
-import { notFound, useParams } from "next/navigation";
+import { doc, getDoc } from "firebase/firestore";
+import { notFound } from "next/navigation";
+import { getSdks } from "@/firebase";
 
-// The params object is passed as a prop to the page component
-export default function Page() {
-    const firestore = useFirestore();
-    const params = useParams();
-    const productId = params.id as string;
-    
-    const productRef = useMemoFirebase(() => {
-        if (!firestore || !productId) return null;
-        return doc(firestore, "products", productId);
-    }, [firestore, productId]);
+// Fetch data on the server
+async function getProduct(productId: string): Promise<Product | null> {
+    // We need to initialize a temporary admin-like instance here to fetch data on the server.
+    // This is a read-only operation and is safe.
+    const { firestore } = getSdks();
+    const productRef = doc(firestore, "products", productId);
+    const productSnap = await getDoc(productRef);
 
-    const { data: product, isLoading } = useDoc<Product>(productRef);
-
-    if (isLoading) {
-        // Shows a loading state while Firestore fetches the data.
-        // This prevents the page from jumping to 404 prematurely.
-        return <div className="container mx-auto text-center py-20">Carregando produto...</div>;
+    if (!productSnap.exists()) {
+        return null;
     }
 
+    const productData = productSnap.data() as Product;
+    // Ensure imageUrls is always an array
+    const imageUrls = Array.isArray(productData.imageUrls) ? productData.imageUrls : [productData.imageUrls];
+
+    return {
+        id: productSnap.id,
+        ...productData,
+        imageUrls,
+    };
+}
+
+
+// This is now a Server Component by default
+export default async function Page({ params }: { params: { id: string } }) {
+    const productId = params.id;
+    const product = await getProduct(productId);
+
     if (!product) {
-        // Only calls notFound() if loading is finished and the product was not found.
+        // If the product is not found after server-side fetching, then show 404.
         notFound();
     }
 
-    // Ensures imageUrls is always an array, even if it comes as a string from the DB.
-    const productData = {
-        ...product,
-        imageUrls: Array.isArray(product.imageUrls) ? product.imageUrls : [product.imageUrls],
-    };
-
-    return <ProductPage product={productData} />;
+    // Pass the fetched product data as a prop to the client component.
+    return <ProductPage product={product} />;
 }
