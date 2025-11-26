@@ -3,11 +3,12 @@ import ProductPage from "@/components/sections/produto/ProductPage";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { Product } from "@/lib/definitions";
 import { doc } from "firebase/firestore";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 
-export default function Page({ params }: { params: { id: string } }) {
+export default function Page() {
     const firestore = useFirestore();
-    const productId = params.id;
+    const params = useParams(); // Use o hook useParams
+    const productId = params.id as string; // Obtenha o id
     
     const productRef = useMemoFirebase(() => {
         if (!firestore || !productId) return null;
