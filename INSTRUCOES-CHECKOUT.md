@@ -24,7 +24,7 @@ Para que o pagamento funcione, você precisa configurar as chaves de API da Stri
 
     # ===============================================
     # STRIPE WEBHOOK SECRET
-    # Encontre em: https://dashboard.stripe.com/webhooks
+    # Encontre em: https://dashboard.stripe.com/webhooks (após criar o endpoint)
     # ===============================================
     STRIPE_WEBHOOK_SECRET=
     ```
@@ -54,13 +54,15 @@ O webhook é a forma como a Stripe notifica seu aplicativo sobre eventos, como u
 
 1.  **Acesse a seção de Webhooks:** Vá para [https://dashboard.stripe.com/webhooks](https://dashboard.stripe.com/webhooks).
 2.  Clique em "**Adicionar um endpoint**".
-3.  **URL do endpoint:** Esta é a parte mais importante. Cole a URL do seu site **seguida de `/api/webhooks/stripe`**.
+3.  **URL do endpoint:** Cole a URL do seu site **seguida de `/api/webhooks/stripe`**.
     *   **Em produção:** `https://www.seu-dominio.com.br/api/webhooks/stripe`
-    *   **Para desenvolvimento local:** Você precisará usar a [Stripe CLI](https://stripe.com/docs/stripe-cli) para encaminhar os eventos para sua máquina local. O comando seria `stripe listen --forward-to localhost:9002/api/webhooks/stripe`.
+    *   **Para desenvolvimento local:** Use a [Stripe CLI](https://stripe.com/docs/stripe-cli) com o comando `stripe listen --forward-to localhost:9003/api/webhooks/stripe`.
 4.  **Descrição:** Dê um nome para sua referência, como `Webhook da Loja Ouro Gráfica`.
-5.  **Selecionar eventos:** Clique em "**Selecionar eventos**". Na caixa de pesquisa, procure e selecione o evento **`checkout.session.completed`**. Este é o único evento que precisamos por enquanto.
-6.  Clique em "**Adicionar eventos**" e, em seguida, em "**Adicionar endpoint**" na parte inferior.
-7.  **Copie o segredo do webhook:** Após criar o endpoint, você verá uma seção "**Segredo de assinatura**". Clique para revelar e copie o valor que começa com `whsec_...`.
+5.  **Selecionar eventos:** Clique em "**Selecionar eventos**". Na caixa de pesquisa, procure e selecione o evento **`checkout.session.completed`**. Este é o único evento que precisamos.
+6.  Clique em "**Adicionar eventos**" e, em seguida, em "**Adicionar endpoint**".
+
+7.  **Copie o segredo do webhook:** Após criar o endpoint, você será levado à página de detalhes dele. Procure a seção **"Segredo de assinatura"** (Signing secret) e clique em **"Clique para revelar"**. Copie o valor que começa com `whsec_...`.
+
 8.  **Adicione ao `.env.local`:** Cole este segredo no seu arquivo `.env.local`:
     ```env
     STRIPE_WEBHOOK_SECRET=whsec_SEU_VALOR_DO_SEGREDO_DO_WEBHOOK
