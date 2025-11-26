@@ -23,10 +23,10 @@ Para que o pagamento funcione, você precisa configurar as chaves de API da Stri
     STRIPE_SECRET_KEY=
 
     # ===============================================
-    # STRIPE WEBHOOK SECRET (OPCIONAL, MAS RECOMENDADO)
+    # STRIPE WEBHOOK SECRET
     # Encontre em: https://dashboard.stripe.com/webhooks
     # ===============================================
-    # STRIPE_WEBHOOK_SECRET=
+    STRIPE_WEBHOOK_SECRET=
     ```
 
 ### Passo 2: Obter Suas Chaves da Stripe
@@ -48,11 +48,28 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_SEU_VALOR_DA_CHAVE_PUBLICA
 STRIPE_SECRET_KEY=sk_test_SEU_VALOR_DA_CHAVE_SECRETA
 ```
 
-### Passo 4: Reiniciar o Servidor de Desenvolvimento
+### Passo 4: Configurar o Webhook
+
+O webhook é a forma como a Stripe notifica seu aplicativo sobre eventos, como um pagamento bem-sucedido. É essencial para registrar os pedidos no banco de dados de forma confiável.
+
+1.  **Acesse a seção de Webhooks:** Vá para [https://dashboard.stripe.com/webhooks](https://dashboard.stripe.com/webhooks).
+2.  Clique em "**Adicionar um endpoint**".
+3.  **URL do endpoint:** Cole a URL do seu site seguida de `/api/webhooks/stripe`.
+    *   Para desenvolvimento local, a Stripe CLI pode ser necessária para encaminhar eventos para sua máquina.
+    *   Em produção, será algo como: `https://www.seu-dominio.com.br/api/webhooks/stripe`
+4.  **Selecionar eventos:** Clique em "**Selecionar eventos**". Na caixa de pesquisa, procure e selecione o evento **`checkout.session.completed`**. Este é o único evento que precisamos.
+5.  Clique em "**Adicionar eventos**" e, em seguida, em "**Adicionar endpoint**" na parte inferior.
+6.  **Copie o segredo do webhook:** Após criar o endpoint, você verá uma seção "**Segredo de assinatura**". Clique para revelar e copie o valor que começa com `whsec_...`.
+7.  **Adicione ao `.env.local`:** Cole este segredo no seu arquivo `.env.local`:
+    ```env
+    STRIPE_WEBHOOK_SECRET=whsec_SEU_VALOR_DO_SEGREDO_DO_WEBHOOK
+    ```
+
+### Passo 5: Reiniciar o Servidor de Desenvolvimento
 
 Para que as novas variáveis de ambiente sejam carregadas, você precisa **parar e iniciar novamente** o servidor de desenvolvimento.
 
 1.  No terminal onde o projeto está rodando, pressione `Ctrl + C`.
 2.  Inicie o servidor novamente com `npm run dev`.
 
-Pronto! Seu projeto agora está configurado para se comunicar com a Stripe e processar pagamentos.
+Pronto! Seu projeto agora está configurado para se comunicar com a Stripe e processar pagamentos de forma segura.
