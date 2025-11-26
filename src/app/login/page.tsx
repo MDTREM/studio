@@ -29,22 +29,26 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
+  const handleLoginError = (error: AuthError) => {
+    console.error('Error signing in:', error);
+    let description = 'Ocorreu um erro desconhecido. Tente novamente.';
+    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        description = 'E-mail ou senha inválidos. Por favor, verifique suas credenciais.';
+    }
+    toast({
+      variant: 'destructive',
+      title: 'Erro ao entrar',
+      description: description,
+    });
+    setIsSubmitting(false); // Re-enable the form
+  }
+
   const handleLogin = async () => {
     if (!auth) return;
     setIsSubmitting(true);
-    try {
-      // initiateEmailSignIn is non-blocking. The useEffect above will handle the redirect.
-      initiateEmailSignIn(auth, email, password);
-    } catch (error) {
-      console.error('Error signing in:', error);
-      const authError = error as AuthError;
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao entrar',
-        description: authError.message,
-      });
-      setIsSubmitting(false);
-    }
+    // initiateEmailSignIn is non-blocking. The useEffect above will handle the redirect on success.
+    // We now pass an error handler callback.
+    initiateEmailSignIn(auth, email, password, handleLoginError);
   };
 
   return (
