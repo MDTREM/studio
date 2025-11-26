@@ -18,12 +18,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import { useCart } from '@/contexts/CartContext';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { Category } from '@/lib/definitions';
+import { collection, query } from 'firebase/firestore';
 
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/catalogo', label: 'Catálogo' },
-  { href: '/orcamento', label: 'Orçamento Online' },
-];
 
 const mobileUserLinks = [
     { href: '/login', label: 'Entrar / Cadastro', icon: <User className="h-5 w-5" /> },
@@ -39,40 +37,29 @@ const mobileServiceLinks = [
     { href: '/servicos', label: 'Conserto de Impressoras', icon: <Wrench className="h-5 w-5" /> },
 ]
 
-const categoryLinks = [
-    { href: '/catalogo', label: 'Todos os produtos' },
-    { href: '/catalogo?categoria=adesivos', label: 'Adesivos' },
-    { href: '/catalogo?categoria=agendas', label: 'Agendas' },
-    { href: '/catalogo?categoria=backdrop', label: 'Backdrop' },
-    { href: '/catalogo?categoria=banners', label: 'Banners' },
-    { href: '/catalogo?categoria=blocos-anotacoes', label: 'Blocos de anotações' },
-    { href: '/catalogo?categoria=cardapios', label: 'Cardápios' },
-    { href: '/catalogo?categoria=cartoes-agradecimento', label: 'Cartões de agradecimento' },
-    { href: '/catalogo?categoria=cartoes-visita', label: 'Cartões de visitas' },
-    { href: '/catalogo?categoria=crachas', label: 'Crachás' },
-    { href: '/catalogo?categoria=etiquetas-tags', label: 'Etiquetas ou Tags' },
-    { href: '/catalogo?categoria=panfletos', label: 'Panfletos' },
-    { href: '/catalogo?categoria=placas', label: 'Placas' },
-    { href: '/catalogo?categoria=plaquinhas-pix', label: 'Plaquinhas Pix' },
-    { href: '/catalogo?categoria=plotagens', label: 'Plotagens' },
-    { href: '/catalogo?categoria=taloes-comandas', label: 'Talões ou comandas' },
-    { href: '/catalogo?categoria=wind-banner', label: 'Wind Banner' },
-];
-
-const secondaryNavLinks = [
-    { href: '/catalogo', label: 'Todos os produtos', icon: <Menu className="h-5 w-5" />, dropdown: true },
-    { href: '/catalogo?categoria=adesivos', label: 'Adesivos' },
-    { href: '/catalogo?categoria=banners', label: 'Banners' },
-    { href: '/catalogo?categoria=cartoes-visita', label: 'Cartões de Visitas' },
-    { href: '/catalogo?categoria=panfletos', label: 'Panfletos' },
-    { href: '/catalogo?categoria=placas', label: 'Placas' },
-    { href: '/catalogo?categoria=wind-banner', label: 'Wind Banner' },
-]
-
 export default function Header() {
   const { cartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+  const firestore = useFirestore();
+
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'categories'));
+  }, [firestore]);
+
+  const { data: categories } = useCollection<Category>(categoriesQuery);
+
+  const categoryLinks = categories ? [
+    { href: '/catalogo', label: 'Todos os produtos' },
+    ...categories.map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
+  ] : [{ href: '/catalogo', label: 'Todos os produtos' }];
+  
+  const secondaryNavLinks = categories ? [
+      { href: '/catalogo', label: 'Todos os produtos', icon: <Menu className="h-5 w-5" />, dropdown: true },
+      ...categories.slice(0, 5).map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
+  ] : [];
+
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
