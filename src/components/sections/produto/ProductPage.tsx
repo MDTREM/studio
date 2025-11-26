@@ -23,13 +23,13 @@ interface ProductPageProps {
 }
 
 export default function ProductPage({ product }: ProductPageProps) {
-  const [quantity, setQuantity] = useState(product.variations.quantities[0] || 1);
-  const [mainImage, setMainImage] = useState(product.imageUrls[0]);
+  const [quantity, setQuantity] = useState(product.variations?.quantities?.[0] || 1);
+  const [mainImage, setMainImage] = useState(product.imageUrls?.[0] || '/placeholder.png');
   const [artworkOption, setArtworkOption] = useState('professional-check');
-  const [selectedMaterial, setSelectedMaterial] = useState(product.variations.materials?.[0] || '');
-  const [selectedFormat, setSelectedFormat] = useState(product.variations.formats[0] || '');
-  const [selectedColor, setSelectedColor] = useState(product.variations.colors?.[0] || '');
-  const [selectedFinishing, setSelectedFinishing] = useState(product.variations.finishings?.[0] || '');
+  const [selectedMaterial, setSelectedMaterial] = useState(product.variations?.materials?.[0] || '');
+  const [selectedFormat, setSelectedFormat] = useState(product.variations?.formats?.[0] || '');
+  const [selectedColor, setSelectedColor] = useState(product.variations?.colors?.[0] || '');
+  const [selectedFinishing, setSelectedFinishing] = useState(product.variations?.finishings?.[0] || '');
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -39,11 +39,15 @@ export default function ProductPage({ product }: ProductPageProps) {
 
   const handleQuantityChange = (amount: number) => {
     const newQuantity = Math.max(1, quantity + amount);
-    // Find the closest quantity from the available options
-    const closestQuantity = product.variations.quantities.reduce((prev, curr) => 
-        Math.abs(curr - newQuantity) < Math.abs(prev - newQuantity) ? curr : prev
-    );
-    setQuantity(closestQuantity);
+    if (product.variations.quantities?.length) {
+        // Find the closest quantity from the available options
+        const closestQuantity = product.variations.quantities.reduce((prev, curr) => 
+            Math.abs(curr - newQuantity) < Math.abs(prev - newQuantity) ? curr : prev
+        );
+        setQuantity(closestQuantity);
+    } else {
+        setQuantity(newQuantity);
+    }
   }
   
   const breadcrumbs = [
@@ -54,9 +58,8 @@ export default function ProductPage({ product }: ProductPageProps) {
 
   // Dummy price calculation logic, you can adjust this
   const getPriceForQuantity = (q: number) => {
-    const baseQuantity = product.variations.quantities[0] || 1;
-    const discountFactor = Math.log10(q / baseQuantity + 1) / 2;
-    const pricePerUnit = product.basePrice / baseQuantity * (1 - discountFactor);
+    const baseQuantity = product.variations?.quantities?.[0] || 1;
+    const pricePerUnit = (product.basePrice / baseQuantity);
     const totalPrice = pricePerUnit * q;
     return { pricePerUnit, totalPrice };
   }
@@ -97,7 +100,7 @@ export default function ProductPage({ product }: ProductPageProps) {
             {/* Imagens do Produto */}
             <div className="flex flex-col-reverse md:flex-row gap-4">
                 <div className="flex md:flex-col gap-2 w-full md:w-20">
-                    {product.imageUrls.slice(0, 4).map((url, i) => (
+                    {product.imageUrls?.slice(0, 4).map((url, i) => (
                     <div 
                         key={i} 
                         className="aspect-square relative bg-secondary/50 rounded-md cursor-pointer hover:ring-2 hover:ring-primary"
@@ -142,7 +145,7 @@ export default function ProductPage({ product }: ProductPageProps) {
 
             {/* Variações */}
             <div className="space-y-6">
-                {product.variations.materials && product.variations.materials.length > 0 && (
+                {product.variations?.materials?.length > 0 && (
                     <div className="grid gap-3">
                         <Label className='font-semibold text-base'>Material</Label>
                         <RadioGroup value={selectedMaterial} onValueChange={setSelectedMaterial} className="flex flex-wrap gap-2">
@@ -155,7 +158,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </RadioGroup>
                     </div>
                 )}
-                {product.variations.formats && product.variations.formats.length > 0 && (
+                {product.variations?.formats?.length > 0 && (
                     <div className="grid gap-3">
                         <Label htmlFor="format" className='font-semibold text-base'>Formato</Label>
                         <RadioGroup value={selectedFormat} onValueChange={setSelectedFormat} className="flex flex-wrap gap-2">
@@ -168,7 +171,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </RadioGroup>
                     </div>
                 )}
-                {product.variations.colors && product.variations.colors.length > 0 && (
+                {product.variations?.colors?.length > 0 && (
                     <div className="grid gap-3">
                         <Label className='font-semibold text-base'>Cor</Label>
                         <RadioGroup value={selectedColor} onValueChange={setSelectedColor} className="flex flex-wrap gap-2">
@@ -181,7 +184,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </RadioGroup>
                     </div>
                 )}
-                {product.variations.finishings && product.variations.finishings.length > 0 && (
+                {product.variations?.finishings?.length > 0 && (
                     <div className="grid gap-3">
                         <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento</Label>
                         <RadioGroup value={selectedFinishing} onValueChange={setSelectedFinishing} className="flex flex-wrap gap-2">
@@ -245,43 +248,43 @@ export default function ProductPage({ product }: ProductPageProps) {
                 </RadioGroup>
             </div>
             
-
-            {/* Quantidade */}
-                <div className="grid gap-4 mb-8">
-                    <Label className="font-semibold text-base">Escolha a quantidade</Label>
-                    <RadioGroup value={quantity.toString()} onValueChange={(val) => setQuantity(parseInt(val))}>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[200px]">Quantidade</TableHead>
-                                    <TableHead>Valor por unidade</TableHead>
-                                    <TableHead className="text-right">Valor Total</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {product.variations.quantities.map((q) => {
-                                    const { pricePerUnit, totalPrice } = getPriceForQuantity(q);
-                                    return (
-                                        <TableRow key={q}>
-                                            <TableCell>
-                                                <Label htmlFor={`quantity-${q}`} className="flex items-center gap-3 font-medium cursor-pointer">
-                                                    <RadioGroupItem value={q.toString()} id={`quantity-${q}`} />
-                                                    {q} unidades
-                                                </Label>
-                                            </TableCell>
-                                            <TableCell>
-                                                {pricePerUnit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/un
-                                            </TableCell>
-                                            <TableCell className="text-right font-medium">
-                                                {totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </RadioGroup>
-                </div>
+            {product.variations?.quantities?.length > 0 && (
+            <div className="grid gap-4 mb-8">
+                <Label className="font-semibold text-base">Escolha a quantidade</Label>
+                <RadioGroup value={quantity.toString()} onValueChange={(val) => setQuantity(parseInt(val))}>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[200px]">Quantidade</TableHead>
+                                <TableHead>Valor por unidade</TableHead>
+                                <TableHead className="text-right">Valor Total</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {product.variations.quantities.map((q) => {
+                                const { pricePerUnit, totalPrice } = getPriceForQuantity(q);
+                                return (
+                                    <TableRow key={q}>
+                                        <TableCell>
+                                            <Label htmlFor={`quantity-${q}`} className="flex items-center gap-3 font-medium cursor-pointer">
+                                                <RadioGroupItem value={q.toString()} id={`quantity-${q}`} />
+                                                {q} unidades
+                                            </Label>
+                                        </TableCell>
+                                        <TableCell>
+                                            {pricePerUnit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}/un
+                                        </TableCell>
+                                        <TableCell className="text-right font-medium">
+                                            {totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </RadioGroup>
+            </div>
+            )}
 
 
             {/* Preço e Compra */}
@@ -363,5 +366,7 @@ export default function ProductPage({ product }: ProductPageProps) {
     </TooltipProvider>
   );
 }
+
+    
 
     
