@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast";
+import ImportProductsDialog from "./_components/ImportProductsDialog";
 
 
 export default function AdminProductsPage() {
@@ -69,6 +70,7 @@ export default function AdminProductsPage() {
       <div className="flex items-center">
         <h1 className="text-lg font-semibold md:text-2xl">Produtos</h1>
         <div className="ml-auto flex items-center gap-2">
+            <ImportProductsDialog />
             <AddProductDialog />
         </div>
       </div>
