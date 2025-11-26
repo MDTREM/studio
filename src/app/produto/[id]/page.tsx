@@ -1,6 +1,6 @@
 import ProductPage from "@/components/sections/produto/ProductPage";
 import { Product } from "@/lib/definitions";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { notFound } from "next/navigation";
 import { getSdks } from "@/firebase/server";
 
@@ -17,6 +17,11 @@ async function getProduct(productId: string): Promise<Product | null> {
     }
 
     const productData = productSnap.data();
+
+    // Convert Firestore Timestamp to a serializable format (ISO string)
+    if (productData.createdAt && productData.createdAt instanceof Timestamp) {
+        productData.createdAt = productData.createdAt.toDate().toISOString();
+    }
 
     return {
         id: productSnap.id,
