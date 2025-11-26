@@ -22,34 +22,27 @@ interface ProductPageProps {
   product: Product;
 }
 
-// Helper function to safely get the first item of an array or a default value
-const getFirst = <T,>(arr: T[] | undefined, defaultValue: T): T => {
-    return (arr && arr.length > 0) ? arr[0] : defaultValue;
-};
-
-
 export default function ProductPage({ product }: ProductPageProps) {
-    // Safely initialize state
-    const [quantity, setQuantity] = useState(() => getFirst(product.variations?.quantities, 1));
-    const [mainImage, setMainImage] = useState(() => getFirst(product.imageUrls, '/placeholder.png'));
+    const [quantity, setQuantity] = useState<number>(1);
+    const [mainImage, setMainImage] = useState<string>('');
     const [artworkOption, setArtworkOption] = useState('professional-check');
-    const [selectedMaterial, setSelectedMaterial] = useState(() => getFirst(product.variations?.materials, ''));
-    const [selectedFormat, setSelectedFormat] = useState(() => getFirst(product.variations?.formats, ''));
-    const [selectedColor, setSelectedColor] = useState(() => getFirst(product.variations?.colors, ''));
-    const [selectedFinishing, setSelectedFinishing] = useState(() => getFirst(product.variations?.finishings, ''));
+    const [selectedMaterial, setSelectedMaterial] = useState<string>('');
+    const [selectedFormat, setSelectedFormat] = useState<string>('');
+    const [selectedColor, setSelectedColor] = useState<string>('');
+    const [selectedFinishing, setSelectedFinishing] = useState<string>('');
 
     const { addToCart } = useCart();
     const { toast } = useToast();
 
-    // Set initial state based on product variations once the component mounts
+    // Effect to safely initialize state when product data is available.
     useEffect(() => {
         if (product) {
-            setQuantity(getFirst(product.variations?.quantities, 1));
-            setMainImage(getFirst(product.imageUrls, '/placeholder.png'));
-            setSelectedMaterial(getFirst(product.variations?.materials, ''));
-            setSelectedFormat(getFirst(product.variations?.formats, ''));
-            setSelectedColor(getFirst(product.variations?.colors, ''));
-            setSelectedFinishing(getFirst(product.variations?.finishings, ''));
+            setMainImage(product.imageUrls?.[0] || '/placeholder.png');
+            setQuantity(product.variations?.quantities?.[0] || 1);
+            setSelectedMaterial(product.variations?.materials?.[0] || '');
+            setSelectedFormat(product.variations?.formats?.[0] || '');
+            setSelectedColor(product.variations?.colors?.[0] || '');
+            setSelectedFinishing(product.variations?.finishings?.[0] || '');
         }
     }, [product]);
 
@@ -63,10 +56,11 @@ export default function ProductPage({ product }: ProductPageProps) {
         { label: product.name, href: `/produto/${product.id}` },
     ];
 
-    // Dummy price calculation logic, now safer
     const getPriceForQuantity = (q: number) => {
-        if (!product || !q) return { pricePerUnit: 0, totalPrice: 0 };
-        const baseQuantity = getFirst(product.variations?.quantities, 1);
+        if (!product?.variations?.quantities || !product.basePrice || q <= 0) {
+            return { pricePerUnit: product.basePrice || 0, totalPrice: (product.basePrice || 0) * q };
+        }
+        const baseQuantity = product.variations.quantities[0] || 1;
         const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1));
         const totalPrice = pricePerUnit * q;
         return { pricePerUnit, totalPrice };
@@ -76,7 +70,7 @@ export default function ProductPage({ product }: ProductPageProps) {
 
     const handleAddToCart = () => {
         const cartItem = {
-            id: `${product.id}-${selectedFormat}-${selectedFinishing}`, // More unique ID
+            id: `${product.id}-${selectedFormat}-${selectedFinishing}`,
             product,
             quantity,
             selectedFormat,
@@ -89,9 +83,10 @@ export default function ProductPage({ product }: ProductPageProps) {
             description: `${product.name} foi adicionado ao seu carrinho.`,
         });
     };
-
+    
+    // Helper to check if a variation array is valid and not empty
     const hasVariations = (key: 'materials' | 'formats' | 'colors' | 'finishings' | 'quantities') => {
-        return product.variations?.[key] && Array.isArray(product.variations[key]) && (product.variations[key] as any[]).length > 0;
+        return product?.variations?.[key] && Array.isArray(product.variations[key]) && (product.variations[key] as any[]).length > 0;
     }
 
     return (
