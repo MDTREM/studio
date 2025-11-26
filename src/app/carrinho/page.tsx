@@ -30,7 +30,7 @@ export default function CartPage() {
     updateQuantity(itemId, newQuantity);
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!user) {
         toast({
             variant: 'destructive',
@@ -40,39 +40,45 @@ export default function CartPage() {
         router.push('/login?redirect=/carrinho');
         return;
     }
-    
+
     setIsSubmitting(true);
 
-    try {
-        const { sessionId, error } = await createCheckoutSession(cartItems, user.uid);
+    // This function will handle the async operations
+    const performCheckout = async () => {
+        try {
+            const { sessionId, error } = await createCheckoutSession(cartItems, user.uid);
 
-        if (error || !sessionId) {
-            console.error("Server-side error:", error);
-            throw new Error(error || 'Não foi possível criar a sessão de checkout.');
-        }
+            if (error || !sessionId) {
+                console.error("Server-side error:", error);
+                throw new Error(error || 'Não foi possível criar a sessão de checkout.');
+            }
 
-        const stripe = await stripePromise;
-        if (!stripe) {
-            throw new Error('Stripe.js não carregou.');
-        }
-        
-        const checkoutUrl = `https://checkout.stripe.com/pay/${sessionId}`;
-        
-        if (window.top) {
-            window.top.location.href = checkoutUrl;
-        } else {
-            window.location.href = checkoutUrl;
-        }
+            const stripe = await stripePromise;
+            if (!stripe) {
+                throw new Error('Stripe.js não carregou.');
+            }
+            
+            // Use the official redirectToCheckout method
+            const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
 
-    } catch (error: any) {
-        console.error("Error creating checkout session: ", error);
-        toast({
-            variant: 'destructive',
-            title: 'Erro ao iniciar a compra',
-            description: error.message || 'Houve um problema ao conectar com o sistema de pagamento. Tente novamente.',
-        });
-        setIsSubmitting(false);
-    }
+            if (stripeError) {
+                console.error("Stripe redirection error: ", stripeError);
+                throw new Error(stripeError.message);
+            }
+
+        } catch (error: any) {
+            console.error("Error during checkout process: ", error);
+            toast({
+                variant: 'destructive',
+                title: 'Erro ao iniciar a compra',
+                description: error.message || 'Houve um problema ao conectar com o sistema de pagamento. Tente novamente.',
+            });
+            setIsSubmitting(false); // Only re-enable form on error
+        }
+    };
+    
+    // Call the async function
+    performCheckout();
   };
   
   if (cartCount === 0) {
