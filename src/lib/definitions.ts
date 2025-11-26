@@ -69,7 +69,17 @@ export type Favorite = {
   id: string;
   productId: string;
   createdAt: any;
-}
+};
+
+export type Review = {
+  id: string;
+  productId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment?: string;
+  createdAt: any;
+};
 
 
 // Add the 'createdAt' field to the Product entity in backend.json
@@ -79,3 +89,5 @@ export type Favorite = {
 //   "format": "date-time",
 //   "description": "Timestamp when the product was created."
 // }
+
+    

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { Product } from '@/lib/definitions';
+import { Product, Review } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -17,6 +17,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import RelatedProductsSection from './RelatedProductsSection';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
 
 interface ProductPageProps {
   product: Product;
@@ -33,22 +35,50 @@ export default function ProductPage({ product }: ProductPageProps) {
 
     const { addToCart } = useCart();
     const { toast } = useToast();
+    const firestore = useFirestore();
+
+    // Fetch reviews for the current product
+    const reviewsQuery = useMemoFirebase(() => {
+        if (!firestore || !product?.id) return null;
+        return query(collection(firestore, 'products', product.id, 'reviews'));
+    }, [firestore, product?.id]);
+
+    const { data: reviews } = useCollection<Review>(reviewsQuery);
+    
+    // Calculate average rating and review count
+    const { averageRating, reviewCount } = useMemo(() => {
+        if (!reviews || reviews.length === 0) {
+            return { averageRating: 0, reviewCount: 0 };
+        }
+        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+        return {
+            averageRating: totalRating / reviews.length,
+            reviewCount: reviews.length,
+        };
+    }, [reviews]);
+
 
     // Effect to safely initialize state when product data is available.
     useEffect(() => {
         if (product) {
             setMainImage(product.imageUrls?.[0] || '/placeholder.png');
-            setQuantity(product.variations?.quantities?.[0] || 1);
-            setSelectedMaterial(product.variations?.materials?.[0] || '');
-            setSelectedFormat(product.variations?.formats?.[0] || '');
-            setSelectedColor(product.variations?.colors?.[0] || '');
-            setSelectedFinishing(product.variations?.finishings?.[0] || '');
+            if (product.variations?.quantities && product.variations.quantities.length > 0) {
+              setQuantity(product.variations.quantities[0]);
+            }
+            if (product.variations?.materials && product.variations.materials.length > 0) {
+                setSelectedMaterial(product.variations.materials[0]);
+            }
+            if (product.variations?.formats && product.variations.formats.length > 0) {
+                setSelectedFormat(product.variations.formats[0]);
+            }
+            if (product.variations?.colors && product.variations.colors.length > 0) {
+                setSelectedColor(product.variations.colors[0]);
+            }
+            if (product.variations?.finishings && product.variations.finishings.length > 0) {
+                setSelectedFinishing(product.variations.finishings[0]);
+            }
         }
     }, [product]);
-
-    // Hardcoded rating for now
-    const rating = 4.5;
-    const reviewCount = 192;
     
     const breadcrumbs = [
         { label: 'Início', href: '/' },
@@ -140,12 +170,18 @@ export default function ProductPage({ product }: ProductPageProps) {
                 <p className="text-muted-foreground mt-2">{product.shortDescription}</p>
 
                 <div className="flex items-center gap-2 mt-4">
-                    <div className="flex items-center">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={i} className={`h-5 w-5 ${i < Math.floor(rating) ? 'text-primary fill-primary' : 'text-gray-300'}`} />
-                        ))}
-                    </div>
-                    <span className="text-sm text-muted-foreground">({reviewCount} avaliações)</span>
+                    {reviewCount > 0 ? (
+                        <>
+                            <div className="flex items-center">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <Star key={i} className={`h-5 w-5 ${i < Math.floor(averageRating) ? 'text-primary fill-primary' : 'text-gray-300'}`} />
+                                ))}
+                            </div>
+                            <span className="text-sm text-muted-foreground">({reviewCount} avaliações)</span>
+                        </>
+                    ) : (
+                        <span className="text-sm text-muted-foreground">Nenhuma avaliação ainda.</span>
+                    )}
                 </div>
 
                 <Separator className="my-6" />
@@ -373,3 +409,5 @@ export default function ProductPage({ product }: ProductPageProps) {
         </TooltipProvider>
       );
 }
+
+    
