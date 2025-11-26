@@ -28,7 +28,7 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
         });
 
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card', 'boleto'],
+            payment_method_types: ['card'],
             line_items,
             mode: 'payment',
             success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
