@@ -3,12 +3,12 @@ import ProductPage from "@/components/sections/produto/ProductPage";
 import { useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { Product } from "@/lib/definitions";
 import { doc } from "firebase/firestore";
-import { notFound, useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 
-export default function Page() {
+// The params object is passed as a prop to the page component
+export default function Page({ params }: { params: { id: string } }) {
     const firestore = useFirestore();
-    const params = useParams(); // Use o hook useParams
-    const productId = params.id as string; // Obtenha o id
+    const productId = params.id; // Directly access id from props
     
     const productRef = useMemoFirebase(() => {
         if (!firestore || !productId) return null;
@@ -18,17 +18,17 @@ export default function Page() {
     const { data: product, isLoading } = useDoc<Product>(productRef);
 
     if (isLoading) {
-        // Mostra um estado de carregamento enquanto o Firestore busca os dados.
-        // Isso impede que a página pule para o 404 antes da hora.
+        // Shows a loading state while Firestore fetches the data.
+        // This prevents the page from jumping to 404 prematurely.
         return <div>Carregando produto...</div>;
     }
 
     if (!product) {
-        // Apenas chama notFound() se o carregamento terminou e o produto realmente não foi encontrado.
+        // Only calls notFound() if loading is finished and the product was not found.
         notFound();
     }
 
-    // Garante que imageUrls seja sempre um array, mesmo que venha como string do DB.
+    // Ensures imageUrls is always an array, even if it comes as a string from the DB.
     const productData = {
         ...product,
         imageUrls: Array.isArray(product.imageUrls) ? product.imageUrls : [product.imageUrls],
