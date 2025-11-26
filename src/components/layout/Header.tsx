@@ -27,16 +27,16 @@ const navLinks = [
 
 const mobileUserLinks = [
     { href: '/login', label: 'Entrar / Cadastro', icon: <User className="h-5 w-5" /> },
-    { href: '#', label: 'Central de Atendimento', icon: <MessageSquare className="h-5 w-5" /> },
+    { href: '/atendimento', label: 'Central de Atendimento', icon: <MessageSquare className="h-5 w-5" /> },
     { href: '/dashboard', label: 'Minha Conta', icon: <User className="h-5 w-5" /> },
     { href: '/dashboard', label: 'Meus Pedidos', icon: <Package className="h-5 w-5" /> },
     { href: '/desejos', label: 'Desejos', icon: <Heart className="h-5 w-5" /> },
-    { href: '#', label: 'Rastrear Pedido', icon: <Truck className="h-5 w-5" /> },
+    { href: '/rastreio', label: 'Rastrear Pedido', icon: <Truck className="h-5 w-5" /> },
 ];
 
 const mobileServiceLinks = [
-    { href: '#', label: 'Aluguel de Impressoras', icon: <Phone className="h-5 w-5" /> },
-    { href: '#', label: 'Conserto de Impressoras', icon: <Wrench className="h-5 w-5" /> },
+    { href: '/servicos', label: 'Aluguel de Impressoras', icon: <Phone className="h-5 w-5" /> },
+    { href: '/servicos', label: 'Conserto de Impressoras', icon: <Wrench className="h-5 w-5" /> },
 ]
 
 const categoryLinks = [
@@ -190,7 +190,7 @@ export default function Header() {
           </form>
 
           <div className="hidden md:flex items-center gap-4">
-                <Link href="#" className="flex items-center gap-2 text-sm font-medium hover:text-primary">
+                <Link href="/atendimento" className="flex items-center gap-2 text-sm font-medium hover:text-primary">
                     <MessageSquare className="h-6 w-6" />
                     <div>
                         <span className="text-gray-300 text-xs">Central de</span> <br/> <strong>Atendimento</strong>
