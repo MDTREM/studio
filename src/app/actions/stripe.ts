@@ -9,10 +9,9 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     
     try {
         const line_items = items.map(item => {
-            // Lógica de cálculo do preço unitário correta, espelhando a da página do produto.
-            const baseQuantity = item.product.variations.quantities[0] || 1;
-            const pricePerUnit = (item.product.basePrice / (baseQuantity > 0 ? baseQuantity : 1));
-            const unitAmountInCents = Math.round(pricePerUnit * 100);
+            // CÁLCULO CORRIGIDO: O preço unitário deve ser baseado no preço total do item no carrinho,
+            // que já considera os descontos por volume.
+            const unitAmountInCents = Math.round((item.totalPrice / item.quantity) * 100);
 
             // Garante que a imagem é uma URL válida e pública antes de enviar para a Stripe
             const validImages = item.product.imageUrls.filter(url => url && url.startsWith('http'));
