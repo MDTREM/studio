@@ -2,18 +2,16 @@
  * Core Philosophy: This ruleset implements a hybrid security model tailored for the Ouro Gráfica marketplace.
  * Publicly accessible data, such as the product and category catalogs, is readable by anyone, ensuring a smooth browsing experience.
  * All user-specific data, including profiles and order histories, is strictly private and governed by a user-ownership model, where users can only access their own information.
- * An admin role is implemented to allow privileged access for store management.
+ * An admin role is implemented via Firebase Auth Custom Claims to allow privileged access for store management.
  *
  * Data Structure: The data is organized into logical, top-level collections for public catalogs (`products`, `categories`) and transactional data (`orders_items`).
  * All private user information is hierarchically nested under the `/users/{userId}` path, creating a clear and secure boundary for personal data.
  *
  * Key Security Decisions:
- * - Admin Access: Users with a custom claim or a specific field (`isAdmin: true`) in their profile document have elevated privileges.
+ * - Admin Access: Users with a custom claim `isAdmin: true` on their authentication token have elevated privileges. This is checked by the isAdmin() function.
  * - User Enumeration Disabled for Non-Admins: Listing users from the top-level `/users` collection is forbidden for regular users to protect privacy.
  * - Public Catalogs: `products` and `categories` are world-readable. Write operations are restricted to admins.
  * - Strict Ownership: All documents within `/users/{userId}` are accessible only to the authenticated user whose UID matches the `userId` in the path, or by an admin.
- *
- * Denormalization for Authorization: To ensure fast and secure access control, this ruleset relies on denormalization. For example, the `customerId` (the user's UID) is stored on each `orders_items` document. This avoids slow cross-collection `get()` calls and allows for direct ownership checks.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -40,10 +38,11 @@ service cloud.firestore {
 
     /**
      * Checks if the currently authenticated user has admin privileges.
-     * It does this by checking for an `isAdmin` flag in the user's own profile document.
+     * It does this by checking for an `isAdmin` custom claim on the user's auth token.
+     * This is faster and more secure than reading a document.
      */
     function isAdmin() {
-      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      return isSignedIn() && request.auth.token.isAdmin == true;
     }
 
     /**
@@ -62,9 +61,6 @@ service cloud.firestore {
     /**
      * @description Products are public for browsing but can only be modified by admins.
      * @path /products/{productId}
-     * @allow (get, list) Any user, signed in or not, can view products.
-     * @allow (create, update, delete) Only admins can manage the product catalog.
-     * @principle Public read access for catalog, with writes restricted to trusted roles.
      */
     match /products/{productId} {
       allow get, list: if true;
@@ -74,9 +70,6 @@ service cloud.firestore {
     /**
      * @description Categories are public for browsing but can only be modified by admins.
      * @path /categories/{categoryId}
-     * @allow (get, list) Any user, signed in or not, can view a category.
-     * @allow (create, update, delete) Only admins can manage categories.
-     * @principle Public read access for catalog, with writes restricted to trusted roles.
      */
     match /categories/{categoryId} {
       allow get, list: if true;
@@ -84,26 +77,24 @@ service cloud.firestore {
     }
 
     /**
-     * @description A user's profile document. The owner can manage their own data. Admins have read-only access.
+     * @description A user's profile document. Owners can manage their data. Admins have read access.
      * @path /users/{userId}
-     * @allow (get) Owner or an admin can read the profile.
-     * @allow (list) Regular users cannot list all users. Admins can.
-     * @allow (create, update, delete) Only the owner can modify their profile.
-     * @principle Enforces data privacy while allowing for administrative oversight.
      */
     match /users/{userId} {
+      // Owners or admins can read a profile.
       allow get: if isOwner(userId) || isAdmin();
+      // Only admins can list all users.
       allow list: if isAdmin();
+      // Only the owner can create their own profile.
       allow create: if isOwner(userId) && request.resource.data.id == userId;
+      // Only the owner can update their own profile.
       allow update: if isOwner(userId) && isImmutable('id');
+      // Only the owner can delete their own profile.
       allow delete: if isOwner(userId);
 
       /**
        * @description A user's orders. Only the owner or an admin can access them.
        * @path /users/{userId}/orders/{orderId}
-       * @allow (get, list) Owner or admin can view orders.
-       * @allow (create, update, delete) Only the owner can manage their orders.
-       * @principle Path-based security inherited from parent, plus admin override.
        */
       match /orders/{orderId} {
         allow get, list: if isOwner(userId) || isAdmin();
@@ -115,8 +106,6 @@ service cloud.firestore {
       /**
        * @description A user's favorite products (wishlist).
        * @path /users/{userId}/favorites/{productId}
-       * @allow (get, list, create, delete) Only the user can manage their own favorites. Admins do not need access here.
-       * @principle Strict path-based security for personal, non-critical data.
        */
       match /favorites/{productId} {
         allow get, list: if isOwner(userId);
@@ -129,14 +118,10 @@ service cloud.firestore {
     /**
      * @description Individual items within an order. Access is granted to the owner or an admin.
      * @path /orders_items/{orderItemId}
-     * @allow (get) The user who owns the order item or an admin can read it.
-     * @allow (list) Admins can list all order items for the admin dashboard.
-     * @allow (create) The owner can create an order item.
-     * @allow (update, delete) The owner or an admin can modify or delete the order item.
-     * @principle Relies on denormalized data (`customerId`) for secure, high-performance checks with an admin override.
      */
     match /orders_items/{orderItemId} {
       allow get: if isOwner(resource.data.customerId) || isAdmin();
+      // Allow admins to list all order items for the dashboard.
       allow list: if isAdmin();
       allow create: if isOwner(request.resource.data.customerId);
       allow update: if (isOwner(resource.data.customerId) || isAdmin()) && isImmutable('customerId');
