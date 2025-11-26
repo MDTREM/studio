@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { collection, query, doc, where, orderBy } from "firebase/firestore";
 import { ListFilter, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 
 const statusColors: { [key in OrderStatus]: string } = {
     'Em análise': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
@@ -22,15 +22,22 @@ const statusColors: { [key in OrderStatus]: string } = {
 
 const availableStatuses: OrderStatus[] = ['Em análise', 'Em produção', 'Pronto para retirada', 'Entregue', 'Cancelado'];
 
-export default function AdminOrdersPage() {
+// Adicionando as props injetadas pelo AdminLayout
+interface AdminOrdersPageProps {
+    isCheckingAdmin?: boolean;
+    isAdmin?: boolean;
+}
+
+export default function AdminOrdersPage({ isCheckingAdmin, isAdmin }: AdminOrdersPageProps) {
     const firestore = useFirestore();
     const { toast } = useToast();
     const [statusFilters, setStatusFilters] = useState<OrderStatus[]>([]);
 
     const allOrdersQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
+        // Apenas executa a query se a verificação de admin terminou e o usuário é admin
+        if (!firestore || isCheckingAdmin || !isAdmin) return null;
         
-        const queryConstraints = [orderBy("orderDate", "desc")];
+        const queryConstraints: any[] = [orderBy("orderDate", "desc")];
         
         if (statusFilters.length > 0) {
             queryConstraints.push(where("status", "in", statusFilters));
@@ -38,7 +45,7 @@ export default function AdminOrdersPage() {
 
         return query(collection(firestore, 'orders_items'), ...queryConstraints);
 
-    }, [firestore, statusFilters]);
+    }, [firestore, statusFilters, isCheckingAdmin, isAdmin]);
 
     const { data: allOrders, isLoading } = useCollection<Order>(allOrdersQuery);
     
@@ -101,8 +108,8 @@ export default function AdminOrdersPage() {
                 </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {isLoading && <div>Carregando pedidos...</div>}
-                    {!isLoading && !allOrders?.length && <div className="py-8 text-center text-muted-foreground">Nenhum pedido encontrado.</div>}
+                    {(isLoading || isCheckingAdmin) && <div>Carregando pedidos...</div>}
+                    {!isLoading && !isCheckingAdmin && !allOrders?.length && <div className="py-8 text-center text-muted-foreground">Nenhum pedido encontrado.</div>}
                     {allOrders && allOrders.length > 0 && (
                         <Table>
                             <TableHeader>

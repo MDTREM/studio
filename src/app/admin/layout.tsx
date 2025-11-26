@@ -19,14 +19,25 @@ function AdminContent({ children }: { children: React.ReactNode }) {
     }
     if (user) {
       getIdTokenResult(user, true).then((idTokenResult) => {
-        setIsAdmin(!!idTokenResult.claims.isAdmin);
+        const claims = idTokenResult.claims;
+        setIsAdmin(!!claims.isAdmin);
         setIsCheckingAdmin(false);
       });
     } else {
+      // Se não houver usuário, ele não é admin e a verificação terminou.
       setIsAdmin(false);
       setIsCheckingAdmin(false);
     }
   }, [user, isUserLoading]);
+
+  // Passa os estados para os componentes filhos
+  const childrenWithProps = React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      // @ts-ignore
+      return React.cloneElement(child, { isCheckingAdmin, isAdmin });
+    }
+    return child;
+  });
 
   return (
     <div className="flex flex-col">
@@ -53,7 +64,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
                 </p>
            </div>
         )}
-        {!isCheckingAdmin && isAdmin && children}
+        {!isCheckingAdmin && isAdmin && childrenWithProps}
       </main>
     </div>
   );
