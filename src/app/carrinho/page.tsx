@@ -47,6 +47,7 @@ export default function CartPage() {
         const { sessionId, error } = await createCheckoutSession(cartItems, user.uid);
 
         if (error || !sessionId) {
+            console.error("Server-side error:", error);
             throw new Error(error || 'Não foi possível criar a sessão de checkout.');
         }
 
@@ -55,13 +56,11 @@ export default function CartPage() {
             throw new Error('Stripe.js não carregou.');
         }
 
-        // Workaround for iframe security error in development environment
-        const checkoutUrl = `https://checkout.stripe.com/c/pay/${sessionId}#fidkdWxOYHwnPyd1blppbHNgWjA0Vl1vMHc1YzBVV29SVTRKZlY0XFRiaT1SYVVCXXU8NVBpVzFJRFRqc2BsYGRMVGwxTlBKbF80Q1N8N29rZG1rTGk3R2xtQ25tUkdza0FdZnJzXGpddDJKNTV9cGpzVzJHMScpJ2hsYXYnP34naHBsYSc/J0tEJykndmxhJz8nS0QnKSdicGxhJz8nS0QneCknZ2BxZHYnP15YKSdpZHxqcHFRfHVgJz8ndmxrYmlgWmxxYGgnKSd3YGNgd3dgd0p3bGJsayc/J21xcXV2PyoqMzU1NShjbHdgZ2R2YCh2cXBhbGooNDIzMTUyNTY1ND00NStmaXB2cWB3KGl3M2FyaWY3aX9nZmZxdG10andkfTB/aHdqK2ZpanBhcmp3bnZxZHFsamt2K2Fgcyd4JSUl`;
-        if (window.top) {
-            window.top.location.href = checkoutUrl;
-        } else {
-            window.location.href = checkoutUrl;
-        }
+        // This is the workaround for the iframe security error.
+        // Instead of using stripe.redirectToCheckout, we manually construct the URL
+        // and assign it to window.location, which is more permissive.
+        const checkoutUrl = `https://checkout.stripe.com/c/pay/${sessionId}`;
+        window.location.assign(checkoutUrl);
 
     } catch (error: any) {
         console.error("Error creating checkout session: ", error);
@@ -70,7 +69,7 @@ export default function CartPage() {
             title: 'Erro ao iniciar a compra',
             description: error.message || 'Houve um problema ao conectar com o sistema de pagamento. Tente novamente.',
         });
-        setIsSubmitting(false); // Only set to false on error, as success navigates away
+        setIsSubmitting(false);
     }
   };
   
