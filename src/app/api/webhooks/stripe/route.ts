@@ -50,13 +50,15 @@ export async function POST(req: NextRequest) {
 
         // Cria um pedido para cada item no carrinho
         for (const item of cartItems) {
+            const newOrderRef = doc(collection(firestore, 'users', userId, 'orders'));
             const orderData = {
+                id: newOrderRef.id,
                 customerId: userId,
                 customerName: userData.name,
                 customerEmail: userData.email,
                 orderDate: new Date().toISOString(),
                 status: 'Em análise',
-                productName: item.product.name,
+                productName: item.productName,
                 quantity: item.quantity,
                 totalAmount: item.totalPrice,
                 variation: {
@@ -67,8 +69,7 @@ export async function POST(req: NextRequest) {
                 createdAt: serverTimestamp(),
             };
 
-            const ordersCollectionRef = collection(firestore, 'users', userId, 'orders');
-            await addDoc(ordersCollectionRef, orderData);
+            await addDoc(collection(firestore, 'users', userId, 'orders'), orderData);
         }
 
     } catch (error) {

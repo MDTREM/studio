@@ -48,23 +48,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const updateQuantity = (itemId: string, newQuantity: number) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
-        if (item.id === itemId) {
-          // Recalculate price based on the new quantity. 
-          // This logic should mirror the price calculation on the product page.
-          const baseQuantity = item.product.variations.quantities[0] || 1;
-          const pricePerUnit = item.product.basePrice / baseQuantity;
-          const newTotalPrice = pricePerUnit * newQuantity;
+        if (item.id === itemId && newQuantity > 0) {
+            const baseQuantity = item.product.variations.quantities[0] || 1;
+            const pricePerUnit = item.product.basePrice / baseQuantity;
+            const newTotalPrice = pricePerUnit * newQuantity;
 
-          return {
-            ...item,
-            quantity: newQuantity,
-            totalPrice: newTotalPrice, // Update the total price for this item
-          };
+            return { ...item, quantity: newQuantity, totalPrice: newTotalPrice };
         }
         return item;
-      }).filter(item => item.quantity > 0) // Remove item if quantity is 0
+      }).filter(item => item.quantity > 0)
     );
-  };
+};
 
   const clearCart = () => {
     setCartItems([]);

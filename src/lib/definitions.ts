@@ -57,7 +57,7 @@ export type User = {
 };
 
 export type CartItem = {
-  id: string; // Unique ID for the cart item
+  id: string; // Unique ID for the cart item, combines product ID and variations
   product: Product;
   quantity: number;
   selectedFormat: string;

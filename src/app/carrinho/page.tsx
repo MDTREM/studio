@@ -26,8 +26,8 @@ export default function CartPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleQuantityChange = (itemId: string, currentQuantity: number) => {
-    updateQuantity(itemId, currentQuantity);
+  const handleQuantityChange = (itemId: string, newQuantity: number) => {
+    updateQuantity(itemId, newQuantity);
   };
 
   const handleCheckout = async () => {
