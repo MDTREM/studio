@@ -1,5 +1,6 @@
 'use client';
 import Link from "next/link";
+import * as React from "react";
 import { Package, ShoppingCart, Users, Tags, ShieldAlert, Loader2 } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import UserNav from "@/components/shared/UserNav";
