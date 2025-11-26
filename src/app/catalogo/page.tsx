@@ -4,17 +4,12 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { Product } from '@/lib/definitions';
 import { collection, query, where } from 'firebase/firestore';
 import { Filter, Search } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
-export default function CatalogoPage({
-  searchParams,
-}: {
-  searchParams?: { 
-    categoria?: string;
-    q?: string;
-  };
-}) {
-  const currentCategory = searchParams?.categoria;
-  const searchQuery = searchParams?.q;
+export default function CatalogoPage() {
+  const searchParams = useSearchParams();
+  const currentCategory = searchParams.get('categoria');
+  const searchQuery = searchParams.get('q');
   const firestore = useFirestore();
 
   const productsQuery = useMemoFirebase(() => {
