@@ -38,7 +38,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
           <Button asChild>
             <Link href={`/produto/${product.id}`}>
-              Orçar <ArrowRight className="ml-2 h-4 w-4" />
+              Comprar <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </CardFooter>
