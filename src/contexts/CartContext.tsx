@@ -20,7 +20,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = (item: CartItem) => {
     setCartItems(prevItems => {
-        // Check if a similar item already exists (based on product, format, and finishing)
+        // Verifica se um item semelhante já existe (baseado no produto, formato e acabamento)
         const existingItemIndex = prevItems.findIndex(
             i => i.product.id === item.product.id && 
                  i.selectedFormat === item.selectedFormat && 
@@ -28,14 +28,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         );
 
         if (existingItemIndex > -1) {
-            // Update quantity of existing item
+            // Atualiza a quantidade do item existente
             const updatedItems = [...prevItems];
             const existingItem = updatedItems[existingItemIndex];
             existingItem.quantity += item.quantity;
-            existingItem.totalPrice += item.totalPrice; // Simply add the new total price
+            existingItem.totalPrice += item.totalPrice; // Simplesmente adiciona o novo preço total
             return updatedItems;
         } else {
-            // Add new item
+            // Adiciona novo item
             return [...prevItems, item];
         }
     });
@@ -49,28 +49,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId && newQuantity > 0) {
-            // Re-implement the same pricing logic from the product page
+            // Reimplementa a mesma lógica de precificação da página do produto para consistência.
             const { basePrice, variations } = item.product;
-            const baseQuantity = variations.quantities[0] || 1;
+            if (!basePrice || !variations || !variations.quantities || variations.quantities.length === 0) {
+              // Se não houver dados de preço, não é possível calcular. Mantenha o item como está.
+              return { ...item, quantity: newQuantity };
+            }
             
-            // Avoid division by zero
+            const baseQuantity = variations.quantities[0] || 1;
             const safeBaseQuantity = baseQuantity > 0 ? baseQuantity : 1;
             
-            // Calculate a discount factor that increases with quantity
+            // Fator de desconto que aumenta com a quantidade
             const discountFactor = Math.log10(newQuantity / safeBaseQuantity + 1) / 2;
             
-            // Calculate price per unit with discount, ensuring it doesn't go below a certain threshold
-            const pricePerUnit = (basePrice / safeBaseQuantity) * (1 - Math.min(discountFactor, 0.75)); // Cap discount at 75%
+            // Preço por unidade com desconto, com um teto para o desconto
+            const pricePerUnit = (basePrice / safeBaseQuantity) * (1 - Math.min(discountFactor, 0.75));
 
             const newTotalPrice = pricePerUnit * newQuantity;
 
             return { ...item, quantity: newQuantity, totalPrice: newTotalPrice };
         }
         return item;
-      }).filter(item => item.quantity > 0)
+      }).filter(item => item.quantity > 0) // Remove o item se a quantidade for 0
     );
   };
-
 
   const clearCart = () => {
     setCartItems([]);

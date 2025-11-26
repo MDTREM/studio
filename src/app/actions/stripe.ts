@@ -9,15 +9,13 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     
     try {
         const line_items = items.map(item => {
-            // A lógica de preço agora é mais confiável pois vem do CartContext.
-            // Calculamos o preço unitário em centavos a partir do totalPrice do carrinho.
+            // Lógica de preço simplificada e robusta.
+            // O `totalPrice` do carrinho agora é a fonte da verdade, e nós derivamos o preço unitário dele.
             const unitAmount = item.quantity > 0 ? item.totalPrice / item.quantity : 0;
             const unitAmountInCents = Math.round(unitAmount * 100);
 
-            // A Stripe exige um valor mínimo (geralmente 50 centavos para BRL).
-            // Se o valor for menor que o mínimo, a Stripe retornará um erro.
-            // A responsabilidade de definir um preço base que resulte em um valor aceitável
-            // está no cadastro do produto.
+            // Verificação crucial: a Stripe exige um valor mínimo (geralmente 50 centavos para BRL).
+            // Se o valor unitário for menor que isso, a transação falhará.
             if (unitAmountInCents < 50) {
                  throw new Error(`O valor unitário para o produto ${item.product.name} (R$${unitAmount.toFixed(2)}) é menor que o mínimo de R$0,50 permitido para pagamento.`);
             }
