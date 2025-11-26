@@ -6,6 +6,8 @@ import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebas
 import { Order } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { collection, query, where } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const statusColors = {
   'Em análise': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
@@ -16,24 +18,33 @@ const statusColors = {
 };
 
 export default function DashboardPage() {
-    const { user, isUserLoading } = useUser(); // <-- Adicionado isUserLoading
+    const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
+    const router = useRouter();
+
+    useEffect(() => {
+      // Quando o carregamento terminar e não houver usuário, redirecione para o login.
+      if (!isUserLoading && !user) {
+        router.push('/login');
+      }
+    }, [isUserLoading, user, router]);
 
     const userOrdersQuery = useMemoFirebase(() => {
+        // Só cria a query se o usuário estiver carregado e existir.
         if (!firestore || !user) return null;
         return query(collection(firestore, "orders_items"), where("customerId", "==", user.uid));
     }, [firestore, user]);
     
     const { data: userOrders, isLoading: areOrdersLoading } = useCollection<Order>(userOrdersQuery);
     
-    // Aguarda o carregamento inicial do usuário antes de qualquer outra coisa
+    // Mostra o estado de carregamento enquanto o usuário ou os pedidos estão sendo carregados.
     if (isUserLoading || areOrdersLoading) {
-        return <div>Carregando seus pedidos...</div>
+        return <div className="container max-w-7xl mx-auto px-4 py-12 text-center">Carregando seus dados...</div>
     }
 
+    // Se o carregamento terminou e ainda não há usuário, não renderize nada (o useEffect irá redirecionar).
     if (!user) {
-        // Isso pode acontecer brevemente ou se o usuário acessar diretamente sem estar logado
-        return <div>Você precisa estar logado para ver esta página.</div>
+        return null;
     }
 
   return (

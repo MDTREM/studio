@@ -5,12 +5,12 @@ import { Favorite, Product } from '@/lib/definitions';
 import { collection, doc, documentId, getDocs, query, where } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import ProductCard from '@/components/shared/ProductCard';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function DesejosPage() {
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,11 +20,19 @@ export default function DesejosPage() {
     return query(collection(firestore, 'users', user.uid, 'favorites'));
   }, [firestore, user]);
 
-  const { data: favorites } = useCollection<Favorite>(favoritesQuery);
+  const { data: favorites, isLoading: areFavoritesLoading } = useCollection<Favorite>(favoritesQuery);
 
   useEffect(() => {
     const fetchFavoriteProducts = async () => {
-      if (!firestore || !favorites || favorites.length === 0) {
+      if (!firestore || !favorites) {
+        if (!areFavoritesLoading) {
+            setFavoriteProducts([]);
+            setIsLoading(false);
+        }
+        return;
+      }
+      
+      if (favorites.length === 0) {
         setFavoriteProducts([]);
         setIsLoading(false);
         return;
@@ -39,12 +47,19 @@ export default function DesejosPage() {
       setFavoriteProducts(products);
       setIsLoading(false);
     };
+    
+    // Apenas busca produtos se a busca de favoritos já terminou
+    if(!areFavoritesLoading) {
+        fetchFavoriteProducts();
+    }
+  }, [firestore, favorites, areFavoritesLoading]);
 
-    setIsLoading(true);
-    fetchFavoriteProducts();
-  }, [firestore, favorites]);
-
-  if (!user && !isLoading) {
+  // Tela de carregamento principal enquanto o usuário está sendo verificado
+  if (isUserLoading || isLoading) {
+    return <div className="container max-w-7xl mx-auto px-4 py-12 text-center">Carregando sua lista de desejos...</div>;
+  }
+  
+  if (!user) {
     return (
         <div className="container max-w-7xl mx-auto px-4 py-16 text-center">
             <Heart className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
@@ -66,10 +81,6 @@ export default function DesejosPage() {
             </div>
       </div>
     )
-  }
-
-  if (isLoading) {
-    return <div className="container max-w-7xl mx-auto px-4 py-12">Carregando sua lista de desejos...</div>;
   }
   
   if (favoriteProducts.length === 0) {

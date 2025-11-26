@@ -4,15 +4,38 @@ import { Package, ShoppingCart, Users, Tags } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import UserNav from "@/components/shared/UserNav";
 import { FirebaseClientProvider, useUser } from "@/firebase";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getIdTokenResult } from "firebase/auth";
 
 function AdminNavLinks() {
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
 
-  // In a custom claims setup, we can't know if a user is an admin on the client-side
-  // without refreshing the token. The simplest way to handle this is to assume if they
-  // navigate to /admin, they *might* be an admin, and let Firestore rules do the actual
-  // security check. If they lack permissions, the pages will show errors or no data.
-  // A more advanced setup might involve a specific function to check claims.
+  useEffect(() => {
+    if (isUserLoading) {
+      return;
+    }
+    if (user) {
+      getIdTokenResult(user, true).then((idTokenResult) => {
+        setIsAdmin(!!idTokenResult.claims.isAdmin);
+        setIsCheckingAdmin(false);
+      });
+    } else {
+      setIsAdmin(false);
+      setIsCheckingAdmin(false);
+    }
+  }, [user, isUserLoading]);
+
+  // Aguarda a verificação do usuário e do status de admin
+  if (isUserLoading || isCheckingAdmin) {
+    return (
+      <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+        <p className="px-3 py-2 text-muted-foreground">Verificando permissões...</p>
+      </nav>
+    );
+  }
 
   if (!user) {
     return (
@@ -21,7 +44,16 @@ function AdminNavLinks() {
       </nav>
     );
   }
+  
+  if (!isAdmin) {
+     return (
+      <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+        <p className="px-3 py-2 text-destructive">Acesso negado. Você não é um administrador.</p>
+      </nav>
+    );
+  }
 
+  // Se for admin, mostra os links
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
       <Link
@@ -62,6 +94,30 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redireciona se o carregamento terminar e não houver usuário
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isUserLoading, router]);
+
+  // Enquanto carrega, pode-se mostrar um layout skeleton ou uma mensagem global
+  if (isUserLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        Carregando painel administrativo...
+      </div>
+    );
+  }
+
+  // Se não houver usuário, não renderiza o layout para evitar piscar de conteúdo
+  if (!user) {
+    return null;
+  }
+
   return (
     <FirebaseClientProvider>
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
