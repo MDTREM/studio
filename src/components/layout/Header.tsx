@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { Category } from '@/lib/definitions';
 import { collection, query } from 'firebase/firestore';
+import { Skeleton } from '../ui/skeleton';
 
 
 const mobileUserLinks = [
@@ -48,7 +49,7 @@ export default function Header() {
     return query(collection(firestore, 'categories'));
   }, [firestore]);
 
-  const { data: categories } = useCollection<Category>(categoriesQuery);
+  const { data: categories, isLoading: areCategoriesLoading } = useCollection<Category>(categoriesQuery);
 
   const categoryLinks = categories ? [
     { href: '/catalogo', label: 'Todos os produtos' },
@@ -117,7 +118,8 @@ export default function Header() {
                                 <AccordionTrigger className="p-6 hover:no-underline text-base">Categorias</AccordionTrigger>
                                 <AccordionContent className="bg-white/10">
                                     <div className="flex flex-col gap-4 p-6">
-                                        {categoryLinks.map((link) => (
+                                        {areCategoriesLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className='h-6 w-3/4 bg-gray-700' />) 
+                                        : categoryLinks.map((link) => (
                                             <Link key={link.href} href={link.href} className="transition-colors hover:text-primary">
                                                 {link.label}
                                             </Link>
@@ -196,17 +198,21 @@ export default function Header() {
         <div className="hidden md:block border-t border-white/20">
             <div className="container max-w-7xl">
                 <nav className="flex items-center justify-center gap-6 text-sm font-medium h-12">
-                {secondaryNavLinks.map((link) => (
+                {areCategoriesLoading ? (
+                  Array.from({length: 6}).map((_, i) => <Skeleton key={i} className='h-5 w-24 bg-gray-700' />)
+                ) : (
+                  secondaryNavLinks.map((link) => (
                     <Link
-                    key={link.href}
-                    href={link.href}
-                    className="flex items-center gap-1 transition-colors text-gray-300 hover:text-primary"
+                      key={link.href}
+                      href={link.href}
+                      className="flex items-center gap-1 transition-colors text-gray-300 hover:text-primary"
                     >
-                    {link.icon}
-                    {link.label}
-                    {link.dropdown && <ChevronDown className="h-4 w-4" />}
+                      {link.icon}
+                      {link.label}
+                      {link.dropdown && <ChevronDown className="h-4 w-4" />}
                     </Link>
-                ))}
+                  ))
+                )}
                 </nav>
             </div>
         </div>
