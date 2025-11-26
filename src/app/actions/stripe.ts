@@ -10,17 +10,13 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     try {
         const line_items = items.map(item => {
             // Lógica de cálculo robusta para o preço unitário em centavos.
-            // 1. O item.totalPrice já tem o valor correto para a quantidade.
-            // 2. Dividimos pelo número de itens para obter o preço unitário.
-            // 3. Multiplicamos por 100 para converter para centavos.
-            // 4. Usamos Math.round() para garantir que é um número inteiro.
             const unitAmount = item.totalPrice / item.quantity;
             const unitAmountInCents = Math.round(unitAmount * 100);
 
             // Garante que o valor seja pelo menos o mínimo aceitável pela Stripe (ex: R$0,50 ou BRL 50 centavos)
-            // Stripe pode ter mínimos dependendo da moeda. 1 é um valor seguro para evitar 0.
-            if (unitAmountInCents <= 0) {
-                 throw new Error(`O valor calculado para o produto ${item.product.name} é inválido.`);
+            // A Stripe exige um valor mínimo (geralmente 50 centavos para BRL).
+            if (unitAmountInCents < 50) {
+                 throw new Error(`O valor calculado para o produto ${item.product.name} é inválido (menor que o mínimo).`);
             }
 
             const validImages = item.product.imageUrls.filter(url => url && url.startsWith('http'));
