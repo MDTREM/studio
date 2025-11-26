@@ -55,12 +55,14 @@ export default function CartPage() {
         if (!stripe) {
             throw new Error('Stripe.js não carregou.');
         }
-
-        // This is the workaround for the iframe security error.
-        // Instead of using stripe.redirectToCheckout, we manually construct the URL
-        // and assign it to window.location, which is more permissive.
-        const checkoutUrl = `https://checkout.stripe.com/c/pay/${sessionId}`;
-        window.location.assign(checkoutUrl);
+        
+        const checkoutUrl = `https://checkout.stripe.com/pay/${sessionId}`;
+        
+        if (window.top) {
+            window.top.location.href = checkoutUrl;
+        } else {
+            window.location.href = checkoutUrl;
+        }
 
     } catch (error: any) {
         console.error("Error creating checkout session: ", error);
