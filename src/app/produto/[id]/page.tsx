@@ -7,22 +7,26 @@ import { notFound } from "next/navigation";
 
 export default function Page({ params }: { params: { id: string } }) {
     const firestore = useFirestore();
+    
     const productRef = useMemoFirebase(() => {
         if (!firestore || !params.id) return null;
         return doc(firestore, "products", params.id);
     }, [firestore, params.id]);
+
     const { data: product, isLoading } = useDoc<Product>(productRef);
 
     if (isLoading) {
+        // Mostra um estado de carregamento enquanto o Firestore busca os dados.
+        // Isso impede que a página pule para o 404 antes da hora.
         return <div>Carregando produto...</div>;
     }
 
     if (!product) {
+        // Apenas chama notFound() se o carregamento terminou e o produto realmente não foi encontrado.
         notFound();
     }
 
-    // This is a temporary fix to ensure imageUrls is an array.
-    // The data from Firestore might still be a string.
+    // Garante que imageUrls seja sempre um array, mesmo que venha como string do DB.
     const productData = {
         ...product,
         imageUrls: Array.isArray(product.imageUrls) ? product.imageUrls : [product.imageUrls],
