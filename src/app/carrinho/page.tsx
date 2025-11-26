@@ -8,16 +8,20 @@ import { Trash2, ShoppingCart, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { addDocumentNonBlocking, useUser, useFirestore } from '@/firebase';
+import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { collection, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
+import { createCheckoutSession } from '@/app/actions/stripe';
+import { loadStripe } from '@stripe/stripe-js';
+
+// Make sure to add your public key to the .env.local file
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
 
 export default function CartPage() {
-  const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount, clearCart } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
   const { user } = useUser();
-  const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,49 +37,40 @@ export default function CartPage() {
             title: 'Você precisa estar logado!',
             description: 'Por favor, faça login para finalizar a compra.',
         });
-        router.push('/login');
+        router.push('/login?redirect=/carrinho');
         return;
     }
-    if (!firestore) return;
-
+    
     setIsSubmitting(true);
 
-    const ordersCollectionRef = collection(firestore, "users", user.uid, "orders");
-
-    const orderPromises = cartItems.map(item => {
-        const orderData = {
-            customerId: user.uid,
-            customerName: user.displayName || user.email,
-            customerEmail: user.email,
-            orderDate: new Date().toISOString(),
-            status: 'Em análise',
-            productName: item.product.name,
-            quantity: item.quantity,
-            totalAmount: item.totalPrice,
-            variation: {
-                format: item.selectedFormat,
-                finishing: item.selectedFinishing,
-            },
-            // Adicionando um timestamp do servidor para ordenação futura
-            createdAt: serverTimestamp(), 
-        };
-        return addDocumentNonBlocking(ordersCollectionRef, orderData);
-    });
-
     try {
-        await Promise.all(orderPromises);
-        toast({
-            title: 'Pedido realizado com sucesso!',
-            description: 'Você será redirecionado para o seu painel.',
-        });
-        clearCart();
-        router.push('/dashboard');
-    } catch (error) {
-        console.error("Error creating order: ", error);
+        const { sessionId, error } = await createCheckoutSession(cartItems, user.uid);
+
+        if (error || !sessionId) {
+            throw new Error(error || 'Não foi possível criar a sessão de checkout.');
+        }
+
+        const stripe = await stripePromise;
+        if (!stripe) {
+            throw new Error('Stripe.js não carregou.');
+        }
+
+        const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+
+        if (stripeError) {
+            console.error("Stripe redirection error: ", stripeError);
+            toast({
+                variant: 'destructive',
+                title: 'Erro ao redirecionar para o pagamento',
+                description: stripeError.message || 'Tente novamente.',
+            });
+        }
+    } catch (error: any) {
+        console.error("Error creating checkout session: ", error);
         toast({
             variant: 'destructive',
-            title: 'Erro ao criar pedido',
-            description: 'Houve um problema ao salvar seu pedido. Tente novamente.',
+            title: 'Erro ao iniciar a compra',
+            description: error.message || 'Houve um problema ao conectar com o sistema de pagamento. Tente novamente.',
         });
     } finally {
       setIsSubmitting(false);
@@ -195,7 +190,7 @@ export default function CartPage() {
                     {isSubmitting ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    {isSubmitting ? 'Finalizando...' : 'Finalizar Compra'}
+                    {isSubmitting ? 'Processando...' : 'Ir para Pagamento'}
                 </Button>
                 </CardFooter>
             </Card>
