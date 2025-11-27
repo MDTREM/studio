@@ -9,8 +9,8 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     
     try {
         const line_items = items.map(item => {
-            // Lógica de preço simplificada e robusta.
-            // O `totalPrice` do carrinho agora é a fonte da verdade, e nós derivamos o preço unitário dele.
+            // A fonte da verdade para o preço agora é o CartContext, que foi corrigido.
+            // Esta ação agora simplesmente confia no totalPrice e na quantidade.
             const unitAmount = item.quantity > 0 ? item.totalPrice / item.quantity : 0;
             const unitAmountInCents = Math.round(unitAmount * 100);
 

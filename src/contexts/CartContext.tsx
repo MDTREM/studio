@@ -15,12 +15,22 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const getPriceForQuantity = (product: CartItem['product'], quantity: number): number => {
+    if (!product?.basePrice || quantity <= 0) {
+        return 0;
+    }
+    const baseQuantity = product.variations?.quantities?.[0] || 1;
+    const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1));
+    const totalPrice = pricePerUnit * quantity;
+    return totalPrice;
+};
+
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const addToCart = (item: CartItem) => {
     setCartItems(prevItems => {
-        // Verifica se um item semelhante já existe (baseado no produto, formato e acabamento)
         const existingItemIndex = prevItems.findIndex(
             i => i.product.id === item.product.id && 
                  i.selectedFormat === item.selectedFormat && 
@@ -28,14 +38,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         );
 
         if (existingItemIndex > -1) {
-            // Atualiza a quantidade do item existente
             const updatedItems = [...prevItems];
             const existingItem = updatedItems[existingItemIndex];
-            existingItem.quantity += item.quantity;
-            existingItem.totalPrice += item.totalPrice; // Simplesmente adiciona o novo preço total
+            const newQuantity = existingItem.quantity + item.quantity;
+            existingItem.quantity = newQuantity;
+            existingItem.totalPrice = getPriceForQuantity(existingItem.product, newQuantity);
             return updatedItems;
         } else {
-            // Adiciona novo item
             return [...prevItems, item];
         }
     });
@@ -49,32 +58,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId && newQuantity > 0) {
-            // Lógica de precificação robusta, espelhando a da página do produto.
-            const { basePrice, variations } = item.product;
-            
-            // Se não houver dados de preço, retorna o item com a nova quantidade (caso de fallback).
-            if (!basePrice || !variations?.quantities?.length) {
-                return { ...item, quantity: newQuantity };
-            }
-            
-            const baseQuantity = variations.quantities[0] || 1;
-            const safeBaseQuantity = baseQuantity > 0 ? baseQuantity : 1;
-            const basePricePerUnit = basePrice / safeBaseQuantity;
-            
-            // Aplica um fator de desconto que aumenta com a quantidade
-            const discountFactor = Math.log10(newQuantity / safeBaseQuantity + 1) / 2;
-            
-            // Limita o desconto para evitar preços negativos ou muito baixos.
-            const finalDiscount = Math.min(discountFactor, 0.75); // Limite de 75% de desconto
-            
-            const pricePerUnit = basePricePerUnit * (1 - finalDiscount);
-
-            const newTotalPrice = pricePerUnit * newQuantity;
-
+            const newTotalPrice = getPriceForQuantity(item.product, newQuantity);
             return { ...item, quantity: newQuantity, totalPrice: newTotalPrice };
         }
         return item;
-      }).filter(item => item.quantity > 0) // Remove o item se a quantidade for 0
+      }).filter(item => item.quantity > 0)
     );
   };
 
