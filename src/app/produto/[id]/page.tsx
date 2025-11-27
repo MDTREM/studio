@@ -4,6 +4,8 @@ import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { notFound } from "next/navigation";
 import { getSdks } from "@/firebase/server";
 
+export const dynamic = 'force-dynamic';
+
 // Fetch data on the server
 async function getProduct(productId: string): Promise<Product | null> {
     // We need to initialize a temporary admin-like instance here to fetch data on the server.
