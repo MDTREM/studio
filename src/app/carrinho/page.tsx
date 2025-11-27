@@ -20,7 +20,6 @@ export default function CartPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     updateQuantity(itemId, newQuantity);
@@ -38,7 +37,6 @@ export default function CartPage() {
     }
 
     setIsSubmitting(true);
-    setCheckoutUrl(null);
 
     try {
         const { url, error } = await createCheckoutSession(cartItems, user.uid);
@@ -48,8 +46,8 @@ export default function CartPage() {
             throw new Error(error || 'Não foi possível criar a sessão de checkout.');
         }
         
-        // Em vez de redirecionar, armazenamos a URL para o usuário clicar
-        setCheckoutUrl(url);
+        // Redireciona o usuário para a URL de checkout da Stripe
+        window.location.href = url;
 
     } catch (error: any) {
         console.error("Error during checkout process: ", error);
@@ -58,8 +56,7 @@ export default function CartPage() {
             title: 'Erro ao iniciar a compra',
             description: error.message || 'Houve um problema ao conectar com o sistema de pagamento. Tente novamente.',
         });
-    } finally {
-        setIsSubmitting(false);
+        setIsSubmitting(false); // Reativa o botão em caso de erro
     }
   };
   
@@ -174,25 +171,16 @@ export default function CartPage() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                    {!checkoutUrl ? (
-                        <Button size="lg" className="w-full" onClick={handleCheckout} disabled={isSubmitting}>
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Processando...
-                                </>
-                            ) : (
-                                'Ir para Pagamento'
-                            )}
-                        </Button>
-                    ) : (
-                        <Button size="lg" className="w-full" asChild>
-                            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="mr-2" />
-                                Clique aqui para pagar
-                            </a>
-                        </Button>
-                    )}
+                    <Button size="lg" className="w-full" onClick={handleCheckout} disabled={isSubmitting}>
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Redirecionando...
+                            </>
+                        ) : (
+                            'Finalizar Compra'
+                        )}
+                    </Button>
                 </CardFooter>
             </Card>
         </div>
