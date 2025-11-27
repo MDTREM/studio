@@ -13,11 +13,6 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { createCheckoutSession } from '@/app/actions/stripe';
-import { loadStripe } from '@stripe/stripe-js';
-
-// Make sure to add your public key to the .env.local file
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
@@ -30,7 +25,7 @@ export default function CartPage() {
     updateQuantity(itemId, newQuantity);
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!user) {
         toast({
             variant: 'destructive',
@@ -43,42 +38,26 @@ export default function CartPage() {
 
     setIsSubmitting(true);
 
-    // This function will handle the async operations
-    const performCheckout = async () => {
-        try {
-            const { sessionId, error } = await createCheckoutSession(cartItems, user.uid);
+    try {
+        const { sessionId, error } = await createCheckoutSession(cartItems, user.uid);
 
-            if (error || !sessionId) {
-                console.error("Server-side error:", error);
-                throw new Error(error || 'Não foi possível criar a sessão de checkout.');
-            }
-
-            const stripe = await stripePromise;
-            if (!stripe) {
-                throw new Error('Stripe.js não carregou.');
-            }
-            
-            // Use the official redirectToCheckout method
-            const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
-
-            if (stripeError) {
-                console.error("Stripe redirection error: ", stripeError);
-                throw new Error(stripeError.message);
-            }
-
-        } catch (error: any) {
-            console.error("Error during checkout process: ", error);
-            toast({
-                variant: 'destructive',
-                title: 'Erro ao iniciar a compra',
-                description: error.message || 'Houve um problema ao conectar com o sistema de pagamento. Tente novamente.',
-            });
-            setIsSubmitting(false); // Only re-enable form on error
+        if (error || !sessionId) {
+            console.error("Server-side error:", error);
+            throw new Error(error || 'Não foi possível criar a sessão de checkout.');
         }
-    };
-    
-    // Call the async function
-    performCheckout();
+        
+        // Redireciona para a página intermediária que fará o checkout
+        router.push(`/checkout/redirect-to-stripe?sessionId=${sessionId}`);
+
+    } catch (error: any) {
+        console.error("Error during checkout process: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Erro ao iniciar a compra',
+            description: error.message || 'Houve um problema ao conectar com o sistema de pagamento. Tente novamente.',
+        });
+        setIsSubmitting(false);
+    }
   };
   
   if (cartCount === 0) {
