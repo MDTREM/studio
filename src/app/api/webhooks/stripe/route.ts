@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
                 status: 'Em análise',
                 productName: item.productName,
                 quantity: item.quantity,
-                totalAmount: item.totalPrice,
+                totalPrice: item.totalPrice,
                 variation: {
                     format: item.selectedFormat,
                     finishing: item.selectedFinishing,

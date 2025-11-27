@@ -13,20 +13,6 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { createCheckoutSession } from '@/app/actions/stripe';
-import { Product } from '@/lib/definitions';
-
-
-// A lógica de cálculo de preço para exibição foi movida para cá.
-const getClientSidePrice = (product: Product, quantity: number): number => {
-    if (!product?.basePrice || quantity <= 0) {
-        return 0;
-    }
-    const baseQuantity = product.variations.quantities?.[0] || 1;
-    if (baseQuantity <= 0) return 0;
-
-    const pricePerUnit = product.basePrice / baseQuantity;
-    return pricePerUnit * quantity;
-};
 
 
 export default function CartPage() {
@@ -41,7 +27,7 @@ export default function CartPage() {
   };
 
   const cartTotal = cartItems.reduce((total, item) => {
-      return total + getClientSidePrice(item.product, item.quantity);
+      return total + item.totalPrice;
   }, 0);
 
   const handleCheckout = async () => {
@@ -58,9 +44,7 @@ export default function CartPage() {
     setIsSubmitting(true);
 
     try {
-        // Remove a propriedade 'totalPrice' antes de enviar para a Server Action
-        const itemsForCheckout = cartItems.map(({ totalPrice, ...item }) => item);
-        const { url, error } = await createCheckoutSession(itemsForCheckout, user.uid);
+        const { url, error } = await createCheckoutSession(cartItems, user.uid);
 
         if (error || !url) {
             console.error("Server-side error:", error);
@@ -122,7 +106,6 @@ export default function CartPage() {
                         <TableBody>
                         {cartItems.map(item => {
                             const imageUrl = item.product.imageUrl && item.product.imageUrl.length > 0 ? item.product.imageUrl[0] : 'https://placehold.co/100x100/FF6B07/white?text=Sem+Imagem';
-                            const itemTotalPrice = getClientSidePrice(item.product, item.quantity);
                             return (
                             <TableRow key={item.id}>
                                 <TableCell className="hidden sm:table-cell">
@@ -152,7 +135,7 @@ export default function CartPage() {
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-right font-medium">
-                                    {itemTotalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    {item.totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </TableCell>
                                 <TableCell>
                                     <Button
