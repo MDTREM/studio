@@ -19,6 +19,17 @@ import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface ProductPageProps {
   product: Product;
@@ -33,10 +44,12 @@ export default function ProductPage({ product }: ProductPageProps) {
     const [selectedFormat, setSelectedFormat] = useState<string>('');
     const [selectedColor, setSelectedColor] = useState<string>('');
     const [selectedFinishing, setSelectedFinishing] = useState<string>('');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const { addToCart } = useCart();
     const { toast } = useToast();
     const firestore = useFirestore();
+    const router = useRouter();
 
     const ART_DESIGN_COST = 35.00;
 
@@ -121,6 +134,7 @@ export default function ProductPage({ product }: ProductPageProps) {
             title: "Produto adicionado!",
             description: `${product.name} foi adicionado ao seu carrinho.`,
         });
+        setIsDialogOpen(true);
     };
     
     // Helper to check if a variation array is valid and not empty
@@ -130,6 +144,7 @@ export default function ProductPage({ product }: ProductPageProps) {
 
     return (
         <TooltipProvider>
+        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <div className="bg-background">
             <div className="container max-w-7xl mx-auto px-4 py-8 sm:py-16">
                 <nav className="flex items-center text-sm text-muted-foreground mb-8">
@@ -425,6 +440,26 @@ export default function ProductPage({ product }: ProductPageProps) {
                     </div>
                 </div>
         </div>
+
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Produto adicionado ao carrinho!</AlertDialogTitle>
+                <AlertDialogDescription>
+                    O que você gostaria de fazer agora?
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="sm:justify-between">
+                <AlertDialogCancel asChild>
+                    <Button variant="outline">Continuar Comprando</Button>
+                </AlertDialogCancel>
+                <AlertDialogAction asChild>
+                    <Link href="/carrinho">
+                        <Button>Finalizar Compra</Button>
+                    </Link>
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
         </TooltipProvider>
       );
 }
