@@ -5,7 +5,7 @@ import { getStripe } from "@/lib/stripe";
 import { headers } from "next/headers";
 
 export async function createCheckoutSession(items: CartItem[], userId: string) {
-    const origin = headers().get('origin') || 'http://localhost:9003';
+    const origin = process.env.NEXT_PUBLIC_URL || headers().get('origin') || 'http://localhost:9003';
     const stripe = getStripe();
     
     try {
