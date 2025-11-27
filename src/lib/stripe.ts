@@ -1,3 +1,4 @@
+'use client';
 import Stripe from 'stripe';
 
 // Declara a variável stripe que pode ser nula inicialmente.
@@ -9,10 +10,8 @@ export const getStripe = (): Stripe => {
   if (!stripe) {
     // Se a chave secreta não estiver definida em produção, lance um erro.
     // Isso evita que a aplicação execute sem a configuração necessária.
-    if (!process.env.STRIPE_SECRET_KEY) {
-      if (process.env.NODE_ENV === 'production') {
-        throw new Error('STRIPE_SECRET_KEY is not set in production environment variables.');
-      }
+    if (!process.env.STRIPE_SECRET_KEY && process.env.NODE_ENV === 'production') {
+        throw new Error('STRIPE_SECRET_KEY is not set in production environment variables for runtime.');
     }
 
     // Cria a instância da Stripe. Em ambientes de não produção sem a chave,

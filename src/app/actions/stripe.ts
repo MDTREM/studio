@@ -6,12 +6,12 @@ import { headers } from "next/headers";
 
 // A lógica de cálculo de preço foi movida para o servidor para segurança.
 const calculatePrice = (product: CartItem['product'], quantity: number): number => {
-    if (!product?.basePrice || !product?.variations?.quantities?.length || quantity <= 0) {
-        throw new Error(`Produto inválido ou sem preço base: ${product.name}`);
-    }
-    const baseQuantity = product.variations.quantities[0];
-    if (!baseQuantity || baseQuantity <= 0) {
-        throw new Error(`Quantidade base inválida para o produto ${product.name}.`);
+    // Garante que o cálculo não falhe se as variações não existirem.
+    const baseQuantity = product?.variations?.quantities?.[0] || 1;
+    if (!product?.basePrice || baseQuantity <= 0 || quantity <= 0) {
+        // Retorna 0 ou lança um erro se o produto for inválido
+        // Lançar um erro pode ser mais seguro para evitar cobranças incorretas
+        throw new Error(`Produto inválido, sem preço base ou quantidade base inválida: ${product.name}`);
     }
     const pricePerUnit = product.basePrice / baseQuantity;
     return Math.round(pricePerUnit * quantity * 100); // Retorna em centavos
