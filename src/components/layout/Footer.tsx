@@ -38,7 +38,7 @@ export default function Footer() {
           {/* Segurança */}
           <div className="text-center md:text-left">
             <h3 className="font-bold mb-4">Segurança</h3>
-            <div className="flex flex-col gap-4 text-sm text-gray-400">
+            <div className="flex flex-col items-center md:items-start gap-4 text-sm text-gray-400">
               <Image src="https://i.imgur.com/eP7c5HZ.png" alt="Selo Site Blindado" width={120} height={32} />
             </div>
           </div>
