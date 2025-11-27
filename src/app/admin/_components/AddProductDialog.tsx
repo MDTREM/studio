@@ -34,7 +34,7 @@ const productFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   shortDescription: z.string().min(10, { message: 'A descrição curta deve ter pelo menos 10 caracteres.' }),
   description: z.string().optional(),
-  imageUrls: z.array(
+  imageUrl: z.array(
     z.object({ value: z.string().url({ message: 'Por favor, insira uma URL válida.' }) })
   ).min(1, 'Adicione pelo menos uma URL de imagem.'),
   imageHint: z.string().optional(),
@@ -88,7 +88,7 @@ export default function AddProductDialog() {
         name: '',
         shortDescription: '',
         description: '',
-        imageUrls: [{ value: '' }],
+        imageUrl: [{ value: '' }],
         imageHint: '',
         basePrice: 0,
         categoryId: '',
@@ -102,7 +102,7 @@ export default function AddProductDialog() {
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "imageUrls"
+    name: "imageUrl"
   });
 
   const onSubmit = (data: ProductFormValues) => {
@@ -112,7 +112,7 @@ export default function AddProductDialog() {
         ...data,
         createdAt: serverTimestamp(),
         keywords: generateKeywords(data.name),
-        imageUrls: data.imageUrls.map(url => url.value), // Extract string values
+        imageUrl: data.imageUrl.map(url => url.value), // Extract string values
         variations: {
             ...data.variations,
             // Convert comma-separated strings to arrays
@@ -234,7 +234,7 @@ export default function AddProductDialog() {
                 <FormField
                   key={field.id}
                   control={form.control}
-                  name={`imageUrls.${index}.value`}
+                  name={`imageUrl.${index}.value`}
                   render={({ field }) => (
                     <FormItem className='flex items-center gap-2 mt-2'>
                       <FormControl>
@@ -261,7 +261,7 @@ export default function AddProductDialog() {
                 Adicionar outra URL
               </Button>
                <FormMessage>
-                {form.formState.errors.imageUrls?.root?.message}
+                {form.formState.errors.imageUrl?.root?.message}
               </FormMessage>
             </div>
             

@@ -1,3 +1,4 @@
+'use client'
 // Onde você pode adicionar novos campos nos produtos.
 // Altere esta interface para adicionar ou remover propriedades dos seus produtos.
 // Lembre-se de atualizar também a estrutura no Firestore e os formulários no painel de admin.
@@ -6,7 +7,7 @@ export type Product = {
   name: string;
   shortDescription: string;
   description?: string;
-  imageUrls: string[]; // Alterado de imageUrl para imageUrls
+  imageUrl: string[]; // Padronizado para imageUrl
   imageHint: string;
   basePrice: number;
   categoryId: string;
@@ -89,5 +90,3 @@ export type Review = {
 //   "format": "date-time",
 //   "description": "Timestamp when the product was created."
 // }
-
-    

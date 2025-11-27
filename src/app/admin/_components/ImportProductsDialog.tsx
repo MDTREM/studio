@@ -92,7 +92,7 @@ export default function ImportProductsDialog() {
               name: productData.name,
               shortDescription: productData.shortDescription || '',
               description: productData.description || '',
-              imageUrls: (productData.imageUrls || '').split(',').map((s:string) => s.trim()),
+              imageUrl: (productData.imageUrl || '').split(',').map((s:string) => s.trim()),
               imageHint: productData.imageHint || '',
               basePrice: parseFloat(productData.basePrice),
               categoryId: productData.categoryId,
@@ -164,8 +164,8 @@ export default function ImportProductsDialog() {
             </div>
             <div className='text-xs text-muted-foreground space-y-2 p-4 bg-secondary/50 rounded-md'>
                 <p className='font-bold'>Instruções:</p>
-                <p>O arquivo deve ter as colunas: `id` (opcional), `name`, `shortDescription`, `description`, `imageUrls`, `imageHint`, `basePrice`, `categoryId`, `formats`, `finishings`, `quantities`, `materials`, `colors`.</p>
-                <p>Para campos com múltiplos valores (como `imageUrls` ou `formats`), separe os valores por vírgulas (ex: "url1,url2,url3").</p>
+                <p>O arquivo deve ter as colunas: `id` (opcional), `name`, `shortDescription`, `description`, `imageUrl`, `imageHint`, `basePrice`, `categoryId`, `formats`, `finishings`, `quantities`, `materials`, `colors`.</p>
+                <p>Para campos com múltiplos valores (como `imageUrl` ou `formats`), separe os valores por vírgulas (ex: "url1,url2,url3").</p>
                 <p>Se um `id` for fornecido e já existir, o produto será atualizado. Caso contrário, um novo produto será criado.</p>
             </div>
         </div>

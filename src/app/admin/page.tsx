@@ -106,7 +106,7 @@ export default function AdminProductsPage() {
                             alt={product.name}
                             className="aspect-square rounded-md object-cover"
                             height="64"
-                            src={product.imageUrls[0]}
+                            src={product.imageUrl[0]}
                             width="64"
                             data-ai-hint={product.imageHint}
                         />

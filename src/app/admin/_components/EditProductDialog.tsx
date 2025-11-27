@@ -35,7 +35,7 @@ const productFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   shortDescription: z.string().min(10, { message: 'A descrição curta deve ter pelo menos 10 caracteres.' }),
   description: z.string().optional(),
-  imageUrls: z.array(
+  imageUrl: z.array(
     z.object({ value: z.string().url({ message: 'Por favor, insira uma URL válida.' }) })
   ).min(1, 'Adicione pelo menos uma URL de imagem.'),
   imageHint: z.string().optional(),
@@ -94,7 +94,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
         name: product.name,
         shortDescription: product.shortDescription,
         description: product.description || '',
-        imageUrls: product.imageUrls.map(url => ({ value: url })),
+        imageUrl: product.imageUrl.map(url => ({ value: url })),
         imageHint: product.imageHint || '',
         basePrice: product.basePrice,
         categoryId: product.categoryId,
@@ -108,7 +108,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "imageUrls"
+    name: "imageUrl"
   });
 
   const onSubmit = (data: ProductFormValues) => {
@@ -119,7 +119,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
     const updatedProductData = {
         ...data,
         keywords: generateKeywords(data.name),
-        imageUrls: data.imageUrls.map(url => url.value),
+        imageUrl: data.imageUrl.map(url => url.value),
         variations: {
             ...data.variations,
             formats: data.variations.formats.split(',').map(s => s.trim()),
@@ -226,7 +226,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
                 <FormField
                   key={field.id}
                   control={form.control}
-                  name={`imageUrls.${index}.value`}
+                  name={`imageUrl.${index}.value`}
                   render={({ field }) => (
                     <FormItem className='flex items-center gap-2 mt-2'>
                       <FormControl>
@@ -253,7 +253,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
                 Adicionar outra URL
               </Button>
                <FormMessage>
-                {form.formState.errors.imageUrls?.root?.message}
+                {form.formState.errors.imageUrl?.root?.message}
               </FormMessage>
             </div>
             

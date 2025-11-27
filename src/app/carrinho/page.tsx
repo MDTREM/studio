@@ -125,7 +125,7 @@ export default function CartPage() {
                             <TableRow key={item.id}>
                                 <TableCell className="hidden sm:table-cell">
                                     <Image
-                                    src={item.product.imageUrls[0]}
+                                    src={item.product.imageUrl[0]}
                                     alt={item.product.name}
                                     width={100}
                                     height={100}

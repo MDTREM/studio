@@ -9,18 +9,14 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     
     try {
         const line_items = items.map(item => {
-            // A fonte da verdade para o preço agora é o CartContext, que foi corrigido.
-            // Esta ação agora simplesmente confia no totalPrice e na quantidade.
             const unitAmount = item.quantity > 0 ? item.totalPrice / item.quantity : 0;
             const unitAmountInCents = Math.round(unitAmount * 100);
 
-            // Verificação crucial: a Stripe exige um valor mínimo (geralmente 50 centavos para BRL).
-            // Se o valor unitário for menor que isso, a transação falhará.
             if (unitAmountInCents < 50) {
                  throw new Error(`O valor unitário para o produto ${item.product.name} (R$${unitAmount.toFixed(2)}) é menor que o mínimo de R$0,50 permitido para pagamento.`);
             }
 
-            const validImages = item.product.imageUrls.filter(url => url && url.startsWith('http'));
+            const validImages = item.product.imageUrl.filter(url => url && url.startsWith('http'));
 
             return {
                 price_data: {
@@ -57,9 +53,7 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
 
         return { sessionId: session.id };
     } catch (error: any) {
-        // Log do erro detalhado no servidor para diagnóstico
         console.error("Erro ao criar sessão de checkout da Stripe:", error.message);
-        // Retorna uma mensagem de erro clara para o cliente
         return { error: `Não foi possível criar a sessão de pagamento: ${error.message}` };
     }
 }

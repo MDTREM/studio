@@ -64,7 +64,7 @@ export default function ProductPage({ product }: ProductPageProps) {
     // Effect to safely initialize state when product data is available.
     useEffect(() => {
         if (product) {
-            setMainImage(product.imageUrls?.[0] || null);
+            setMainImage(product.imageUrl?.[0] || null);
             if (product.variations?.quantities?.[0]) {
               setQuantity(product.variations.quantities[0]);
             }
@@ -146,7 +146,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                 {/* Imagens do Produto */}
                 <div className="flex flex-col-reverse md:flex-row gap-4">
                     <div className="flex md:flex-col gap-2 w-full md:w-20">
-                        {product.imageUrls?.slice(0, 4).map((url, i) => (
+                        {product.imageUrl?.slice(0, 4).map((url, i) => (
                         <div 
                             key={i} 
                             className="aspect-square relative bg-secondary/50 rounded-md cursor-pointer hover:ring-2 hover:ring-primary"

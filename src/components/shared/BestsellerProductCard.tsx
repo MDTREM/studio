@@ -89,7 +89,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
       <div className="relative">
         <Link href={`/produto/${product.id}`}>
           <div className="relative aspect-square w-full overflow-hidden bg-primary flex items-center justify-center">
-            <Image src={product.imageUrls[0]} alt={product.name} fill className="object-cover" data-ai-hint={product.imageHint} />
+            <Image src={product.imageUrl[0]} alt={product.name} fill className="object-cover" data-ai-hint={product.imageHint} />
           </div>
         </Link>
         <Button
@@ -132,5 +132,3 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
     </Card>
   );
 }
-
-    
