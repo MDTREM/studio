@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { Product, Favorite, Review } from '@/lib/definitions';
+import { Product, Favorite } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Star } from 'lucide-react';
@@ -32,25 +32,6 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
 
   const { data: favorites } = useCollection<Favorite>(favoritesQuery);
   const isFavorited = favorites?.some(fav => fav.id === product.id);
-
-  const reviewsQuery = useMemoFirebase(() => {
-    if (!firestore || !product.id) return null;
-    return query(collection(firestore, 'products', product.id, 'reviews'));
-  }, [firestore, product.id]);
-
-  const { data: reviews } = useCollection<Review>(reviewsQuery);
-
-  const { averageRating, reviewCount } = useMemo(() => {
-    if (!reviews || reviews.length === 0) {
-        return { averageRating: 0, reviewCount: 0 };
-    }
-    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return {
-        averageRating: totalRating / reviews.length,
-        reviewCount: reviews.length,
-    };
-  }, [reviews]);
-
 
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigating when clicking the heart
@@ -109,20 +90,6 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
       <CardContent className="p-4 flex flex-col flex-grow">
         <p className="text-xs text-primary font-medium mb-1 uppercase">{product.categoryId}</p>
         <h3 className="font-bold text-base mb-1 truncate">{product.name}</h3>
-        <div className="flex items-center gap-1 mb-2">
-            {reviewCount > 0 ? (
-                <>
-                    <div className="flex items-center">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={i} className={`h-4 w-4 ${i < Math.floor(averageRating) ? 'text-primary fill-primary' : 'text-gray-300'}`} />
-                        ))}
-                    </div>
-                    <span className="text-xs text-muted-foreground">({reviewCount} avaliações)</span>
-                </>
-            ) : (
-                <span className="text-xs text-muted-foreground">Nenhuma avaliação.</span>
-            )}
-        </div>
         <p className="text-sm text-muted-foreground mb-4 h-10 overflow-hidden">{product.shortDescription}</p>
 
         <div className="mt-auto">

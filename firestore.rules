@@ -65,18 +65,6 @@ service cloud.firestore {
     match /products/{productId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
-
-      /**
-       * @description Reviews for a product. Publicly readable. Users can write/edit/delete their own reviews.
-       * @path /products/{productId}/reviews/{reviewId}
-       */
-      match /reviews/{reviewId} {
-        allow get, list: if true;
-        // User must be signed in and be the author of the review to create.
-        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-        // User can only update or delete their own review.
-        allow update, delete: if isSignedIn() && isOwner(resource.data.userId);
-      }
     }
 
     /**
@@ -141,4 +129,3 @@ service cloud.firestore {
     }
   }
 }
-    

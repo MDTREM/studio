@@ -72,16 +72,6 @@ export type Favorite = {
   createdAt: any;
 };
 
-export type Review = {
-  id: string;
-  productId: string;
-  userId: string;
-  userName: string;
-  rating: number;
-  comment?: string;
-  createdAt: any;
-};
-
 
 // Add the 'createdAt' field to the Product entity in backend.json
 // This is important for sorting new products.
