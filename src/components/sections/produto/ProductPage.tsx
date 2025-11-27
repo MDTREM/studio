@@ -6,7 +6,7 @@ import { Product } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Check, ChevronRight, Download, FileUp, Home, Info, Lightbulb, Link as LinkIcon, Minus, PackageSearch, Pencil, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
+import { Check, ChevronRight, Download, FileUp, Home, Info, Lightbulb, Link as LinkIcon, Loader2, Minus, PackageSearch, Pencil, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -45,10 +45,12 @@ export default function ProductPage({ product }: ProductPageProps) {
     const [selectedColor, setSelectedColor] = useState<string>('');
     const [selectedFinishing, setSelectedFinishing] = useState<string>('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [cep, setCep] = useState('');
+    const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
+    const [shippingOptions, setShippingOptions] = useState<{name: string, price: number, days: number}[] | null>(null);
 
     const { addToCart } = useCart();
     const { toast } = useToast();
-    const firestore = useFirestore();
     const router = useRouter();
 
     const ART_DESIGN_COST = 35.00;
@@ -113,6 +115,22 @@ export default function ProductPage({ product }: ProductPageProps) {
             description: `${product.name} foi adicionado ao seu carrinho.`,
         });
         setIsDialogOpen(true);
+    };
+
+    const handleCalculateShipping = () => {
+      if (!cep) return;
+      setIsCalculatingShipping(true);
+      setShippingOptions(null);
+
+      // Simula uma chamada de API de frete
+      setTimeout(() => {
+        setShippingOptions([
+          { name: 'SEDEX', price: 25.50, days: 3 },
+          { name: 'PAC', price: 15.80, days: 7 },
+          { name: 'Retirar na Loja', price: 0, days: 1 },
+        ]);
+        setIsCalculatingShipping(false);
+      }, 1000);
     };
     
     // Helper to check if a variation array is valid and not empty
@@ -343,12 +361,45 @@ export default function ProductPage({ product }: ProductPageProps) {
 
                 {/* Preço e Compra */}
                 <div className="space-y-4 pb-32">
-                    <div className='border rounded-lg p-3 flex items-center gap-3 bg-secondary/30'>
-                        <Truck className="h-6 w-6 text-primary" />
-                        <div>
-                            <p className='font-semibold'>Frete e prazo</p>
-                            <p className='text-sm text-muted-foreground'>Calcule o frete e o prazo de entrega estimados para sua região.</p>
+                    <div className='border rounded-lg p-4 bg-secondary/30'>
+                        <div className='flex items-start gap-3'>
+                            <Truck className="h-6 w-6 text-primary mt-1" />
+                            <div>
+                                <p className='font-semibold'>Calcular frete e prazo</p>
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 mt-2">
+                                    <Input 
+                                      placeholder="Digite seu CEP" 
+                                      className="w-full sm:w-48"
+                                      value={cep}
+                                      onChange={e => setCep(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                                    />
+                                    <Button onClick={handleCalculateShipping} disabled={!cep || isCalculatingShipping} className='mt-2 sm:mt-0'>
+                                        {isCalculatingShipping ? <Loader2 className="mr-2 animate-spin" /> : null}
+                                        Calcular
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
+                        {isCalculatingShipping && (
+                            <div className="mt-4 text-center text-muted-foreground">Calculando...</div>
+                        )}
+                        {shippingOptions && (
+                          <div className="mt-4 space-y-2">
+                            {shippingOptions.map(option => (
+                              <div key={option.name} className="flex justify-between items-center text-sm p-2 rounded-md hover:bg-background">
+                                <div>
+                                  <p className="font-medium">{option.name}</p>
+                                  <p className="text-muted-foreground">
+                                    {option.price > 0 ? `Até ${option.days} dias úteis` : 'Pronto em até 1 dia útil'}
+                                  </p>
+                                </div>
+                                <p className="font-semibold text-primary">
+                                  {option.price > 0 ? option.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'Grátis'}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                     </div>
                     <div className='space-y-4'>
                         <h3 className="text-lg font-semibold mt-6 mb-2">Especificações do Produto</h3>
@@ -440,5 +491,7 @@ export default function ProductPage({ product }: ProductPageProps) {
         </TooltipProvider>
       );
 }
+
+    
 
     
