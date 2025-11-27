@@ -10,13 +10,15 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const imageUrl = product.imageUrl && product.imageUrl.length > 0 ? product.imageUrl[0] : 'https://placehold.co/600x400/FF6B07/white?text=Sem+Imagem';
+  
   return (
     <Link href={`/produto/${product.id}`} className="group block">
         <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
         <CardHeader className="p-0">
             <div className="relative aspect-video">
             <Image
-                src={product.imageUrl[0]}
+                src={imageUrl}
                 alt={`Imagem do produto ${product.name}`}
                 fill
                 className="object-cover"

@@ -22,6 +22,9 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
   const { toast } = useToast();
   const router = useRouter();
 
+  // Safely get the image URL
+  const imageUrl = product.imageUrl && product.imageUrl.length > 0 ? product.imageUrl[0] : 'https://placehold.co/400x400/FF6B07/white?text=Sem+Imagem';
+
   const favoritesQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return query(collection(firestore, 'users', user.uid, 'favorites'));
@@ -82,14 +85,14 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
     }
   };
 
-  const minQuantity = product.variations.quantities[0] || 1;
+  const minQuantity = product.variations.quantities?.[0] || 1;
 
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group">
       <div className="relative">
         <Link href={`/produto/${product.id}`}>
           <div className="relative aspect-square w-full overflow-hidden bg-primary flex items-center justify-center">
-            <Image src={product.imageUrl[0]} alt={product.name} fill className="object-cover" data-ai-hint={product.imageHint} />
+            <Image src={imageUrl} alt={product.name} fill className="object-cover" data-ai-hint={product.imageHint} />
           </div>
         </Link>
         <Button
