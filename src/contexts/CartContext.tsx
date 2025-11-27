@@ -20,7 +20,9 @@ const getPriceForQuantity = (product: CartItem['product'], quantity: number): nu
         return 0;
     }
     const baseQuantity = product.variations?.quantities?.[0] || 1;
-    const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1));
+    // This calculation provides a slight discount for larger quantities.
+    const discountFactor = Math.log10(quantity / baseQuantity + 1) / 2; // Logarithmic discount
+    const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1)) * (1 - discountFactor);
     const totalPrice = pricePerUnit * quantity;
     return totalPrice;
 };
@@ -70,7 +72,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems([]);
   };
   
-  const cartCount = useMemo(() => cartItems.reduce((count, item) => count + item.quantity, 0), [cartItems]);
+  const cartCount = useMemo(() => cartItems.length, [cartItems]);
 
   const cartTotal = useMemo(() => {
     return cartItems.reduce((total, item) => total + item.totalPrice, 0);
