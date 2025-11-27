@@ -1,11 +1,12 @@
 'use server';
 
 import { CartItem } from "@/lib/definitions";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { headers } from "next/headers";
 
 export async function createCheckoutSession(items: CartItem[], userId: string) {
     const origin = headers().get('origin') || 'http://localhost:9003';
+    const stripe = getStripe();
     
     try {
         const line_items = items.map(item => {
