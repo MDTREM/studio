@@ -15,14 +15,13 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Preço linear simples para garantir precisão
 const getPriceForQuantity = (product: CartItem['product'], quantity: number): number => {
     if (!product?.basePrice || quantity <= 0) {
         return 0;
     }
     const baseQuantity = product.variations?.quantities?.[0] || 1;
-    // This calculation provides a slight discount for larger quantities.
-    const discountFactor = Math.log10(quantity / baseQuantity + 1) / 2; // Logarithmic discount
-    const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1)) * (1 - discountFactor);
+    const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1));
     const totalPrice = pricePerUnit * quantity;
     return totalPrice;
 };

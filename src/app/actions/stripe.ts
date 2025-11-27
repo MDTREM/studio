@@ -4,13 +4,13 @@ import { CartItem } from "@/lib/definitions";
 import { stripe } from "@/lib/stripe";
 import { headers } from "next/headers";
 
+// Preço linear simples para garantir precisão
 const getPriceForQuantity = (product: CartItem['product'], quantity: number): number => {
     if (!product?.basePrice || quantity <= 0) {
         return 0;
     }
     const baseQuantity = product.variations?.quantities?.[0] || 1;
-    const discountFactor = Math.log10(quantity / baseQuantity + 1) / 2; // Logarithmic discount
-    const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1)) * (1 - discountFactor);
+    const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1));
     return pricePerUnit * quantity;
 };
 
@@ -19,17 +19,16 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     
     try {
         const line_items = items.map(item => {
-            // Recalculate total price on the server to ensure accuracy and prevent manipulation.
+            // Recalcula o preço no servidor para segurança, usando a lógica linear.
             const preciseTotalPrice = getPriceForQuantity(item.product, item.quantity);
 
-            // Calculate total price in cents first to avoid floating point issues.
+            // Calcula o valor total em centavos.
             const totalAmountInCents = Math.round(preciseTotalPrice * 100);
             
-            // Calculate unit amount in cents by dividing the total cents by quantity.
-            // Use Math.floor to ensure we don't have fractional cents.
+            // Calcula o valor unitário em centavos a partir do total para evitar erros de arredondamento.
             const unitAmountInCents = Math.floor(totalAmountInCents / item.quantity);
 
-            // Stripe's minimum charge amount is 50 cents (for BRL).
+            // Validação de segurança final.
             if (unitAmountInCents < 50) {
                  throw new Error(`O valor unitário para o produto ${item.product.name} (R$${(unitAmountInCents/100).toFixed(2)}) é menor que o mínimo de R$0,50 permitido para pagamento.`);
             }
