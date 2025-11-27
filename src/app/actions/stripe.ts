@@ -4,37 +4,43 @@ import { CartItem } from "@/lib/definitions";
 import { stripe } from "@/lib/stripe";
 import { headers } from "next/headers";
 
+// Preço linear simples para garantir precisão e consistência.
+const getPriceForQuantity = (product: CartItem['product'], quantity: number): number => {
+    if (!product?.basePrice || quantity <= 0) {
+        return 0;
+    }
+    // Garante que a quantidade base seja pelo menos 1 para evitar divisão por zero.
+    const baseQuantity = product.variations?.quantities?.[0] || 1;
+    const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1));
+    const totalPrice = pricePerUnit * quantity;
+    return totalPrice;
+};
+
 export async function createCheckoutSession(items: CartItem[], userId: string) {
     const origin = headers().get('origin') || 'http://localhost:9003';
     
     try {
         const line_items = items.map(item => {
-            // --- Lógica de cálculo de preço segura e refeita ---
 
             if (!item.product?.basePrice || item.quantity <= 0) {
                 throw new Error(`Produto inválido ou quantidade zero para ${item.product.name}.`);
             }
 
-            // 1. Obter a quantidade base para o preço base (ex: 1000 unidades)
-            const baseQuantity = item.product.variations?.quantities?.[0] || 1;
-
-            // 2. Calcular o preço por unidade de forma linear e segura.
-            const pricePerUnit = item.product.basePrice / (baseQuantity > 0 ? baseQuantity : 1);
-
-            // 3. Calcular o preço total para a quantidade do item no carrinho.
-            const totalPriceForItem = pricePerUnit * item.quantity;
+            // 1. Recalcula o preço total de forma segura e consistente, usando a mesma lógica do carrinho.
+            const totalPriceForItem = getPriceForQuantity(item.product, item.quantity);
             
-            // 4. Converter o preço total para centavos PRIMEIRO, para evitar erros de ponto flutuante.
+            // 2. Converte o preço total para centavos, arredondando para evitar frações de centavos.
             const totalAmountInCents = Math.round(totalPriceForItem * 100);
 
-            // 5. Derivar o valor unitário em centavos a partir do total em centavos. Esta é a etapa crucial.
+            // 3. Deriva o valor unitário em centavos a partir do total em centavos, usando Math.floor para garantir um inteiro.
             const unitAmountInCents = Math.floor(totalAmountInCents / item.quantity);
 
-            // 6. Validação de segurança final.
-            if (unitAmountInCents < 50) { // R$ 0,50 em centavos
+            // 4. Validação de segurança final. Se o valor for menor que 50 centavos, lança um erro claro.
+            if (unitAmountInCents < 50) { 
                  throw new Error(`O valor unitário para o produto ${item.product.name} (R$${(unitAmountInCents/100).toFixed(2)}) é menor que o mínimo de R$0,50 permitido para pagamento.`);
             }
 
+            // Garante que a imagem é uma URL válida.
             const validImages = item.product.imageUrl.filter(url => url && url.startsWith('http'));
 
             return {
@@ -63,7 +69,7 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
                     productId: item.product.id,
                     productName: item.product.name,
                     quantity: item.quantity,
-                    totalPrice: item.totalPrice, // Mantido para referência no webhook
+                    totalPrice: getPriceForQuantity(item.product, item.quantity), // Usa a função segura
                     selectedFormat: item.selectedFormat,
                     selectedFinishing: item.selectedFinishing,
                 })))

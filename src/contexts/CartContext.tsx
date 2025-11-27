@@ -15,11 +15,12 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Preço linear simples para garantir precisão
+// Preço linear simples para garantir precisão e consistência.
 const getPriceForQuantity = (product: CartItem['product'], quantity: number): number => {
     if (!product?.basePrice || quantity <= 0) {
         return 0;
     }
+    // Garante que a quantidade base seja pelo menos 1 para evitar divisão por zero.
     const baseQuantity = product.variations?.quantities?.[0] || 1;
     const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1));
     const totalPrice = pricePerUnit * quantity;
@@ -46,7 +47,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             existingItem.totalPrice = getPriceForQuantity(existingItem.product, newQuantity);
             return updatedItems;
         } else {
-            return [...prevItems, item];
+            // Garante que o preço total do novo item esteja correto.
+            const newItem = {
+                ...item,
+                totalPrice: getPriceForQuantity(item.product, item.quantity),
+            };
+            return [...prevItems, newItem];
         }
     });
   };
@@ -59,11 +65,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId && newQuantity > 0) {
+            // Recalcula o preço total de forma segura ao atualizar a quantidade.
             const newTotalPrice = getPriceForQuantity(item.product, newQuantity);
             return { ...item, quantity: newQuantity, totalPrice: newTotalPrice };
         }
         return item;
-      }).filter(item => item.quantity > 0)
+      }).filter(item => item.quantity > 0) // Remove o item se a quantidade for 0 ou menos.
     );
   };
 
