@@ -94,7 +94,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
         name: product.name,
         shortDescription: product.shortDescription,
         description: product.description || '',
-        imageUrl: product.imageUrl.map(url => ({ value: url })),
+        imageUrl: product.imageUrl ? product.imageUrl.map(url => ({ value: url })) : [{ value: '' }],
         imageHint: product.imageHint || '',
         basePrice: product.basePrice,
         categoryId: product.categoryId,
