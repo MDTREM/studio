@@ -1,4 +1,3 @@
-'use client';
 import Stripe from 'stripe';
 
 // Variável para armazenar a instância da Stripe em cache após a primeira inicialização.
