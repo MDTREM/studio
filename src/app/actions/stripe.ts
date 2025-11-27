@@ -15,12 +15,8 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
                 throw new Error(`Produto inválido ou quantidade zero para ${product.name}.`);
             }
             
-            // LÓGICA FINAL, SIMPLES E SEGURA
-            // 1. O `basePrice` é o preço unitário. Sem divisões, sem complexidade.
-            // 2. Convertemos diretamente para centavos. É o método mais robusto.
             const unitAmountInCents = Math.round(product.basePrice * 100);
 
-            // Garante que a imagem é uma URL válida.
             const imageUrl = item.product.imageUrl && item.product.imageUrl.length > 0 ? item.product.imageUrl[0] : undefined;
 
             return {
@@ -46,7 +42,6 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
             client_reference_id: userId, 
             metadata: {
                 cartItems: JSON.stringify(items.map(item => {
-                    // O `totalPrice` do metadado deve corresponder ao que é enviado para a Stripe
                     const totalPrice = item.product.basePrice * item.quantity;
                     
                     return {
@@ -60,8 +55,10 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
                 }))
             }
         });
+        
+        // Retorna a URL completa em vez de apenas o ID
+        return { url: session.url };
 
-        return { sessionId: session.id };
     } catch (error: any) {
         console.error("Erro ao criar sessão de checkout da Stripe:", error.message);
         return { error: `Não foi possível criar a sessão de pagamento: ${error.message}` };

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Image from 'next/image';
-import { Trash2, ShoppingCart, ArrowLeft, Loader2 } from 'lucide-react';
+import { Trash2, ShoppingCart, ArrowLeft, Loader2, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -20,6 +20,7 @@ export default function CartPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     updateQuantity(itemId, newQuantity);
@@ -37,17 +38,18 @@ export default function CartPage() {
     }
 
     setIsSubmitting(true);
+    setCheckoutUrl(null);
 
     try {
-        const { sessionId, error } = await createCheckoutSession(cartItems, user.uid);
+        const { url, error } = await createCheckoutSession(cartItems, user.uid);
 
-        if (error || !sessionId) {
+        if (error || !url) {
             console.error("Server-side error:", error);
             throw new Error(error || 'Não foi possível criar a sessão de checkout.');
         }
         
-        // Redireciona para a página intermediária que fará o checkout
-        router.push(`/checkout/redirect-to-stripe?sessionId=${sessionId}`);
+        // Em vez de redirecionar, armazenamos a URL para o usuário clicar
+        setCheckoutUrl(url);
 
     } catch (error: any) {
         console.error("Error during checkout process: ", error);
@@ -56,6 +58,7 @@ export default function CartPage() {
             title: 'Erro ao iniciar a compra',
             description: error.message || 'Houve um problema ao conectar com o sistema de pagamento. Tente novamente.',
         });
+    } finally {
         setIsSubmitting(false);
     }
   };
@@ -171,12 +174,25 @@ export default function CartPage() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                <Button size="lg" className="w-full" onClick={handleCheckout} disabled={isSubmitting}>
-                    {isSubmitting ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    {isSubmitting ? 'Processando...' : 'Ir para Pagamento'}
-                </Button>
+                    {!checkoutUrl ? (
+                        <Button size="lg" className="w-full" onClick={handleCheckout} disabled={isSubmitting}>
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Processando...
+                                </>
+                            ) : (
+                                'Ir para Pagamento'
+                            )}
+                        </Button>
+                    ) : (
+                        <Button size="lg" className="w-full" asChild>
+                            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="mr-2" />
+                                Clique aqui para pagar
+                            </a>
+                        </Button>
+                    )}
                 </CardFooter>
             </Card>
         </div>
