@@ -33,7 +33,7 @@ export type Category = {
 export type OrderStatus = 'Em análise' | 'Em produção' | 'Pronto para retirada' | 'Entregue' | 'Cancelado';
 
 export type Order = {
-  id: string;
+  id?: string; // ID is now optional as it's set after creation
   customerId: string; // Adicionado para rastrear o dono do pedido
   customerName: string;
   customerEmail: string;

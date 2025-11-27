@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { getSdks } from '@/firebase/server';
-import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 // O segredo do webhook é obtido das variáveis de ambiente
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -69,8 +69,8 @@ export async function POST(req: NextRequest) {
             };
 
             const docRef = await addDoc(newOrderRef, orderData);
-            // Optionally, update the document with its own ID
-            // await updateDoc(docRef, { id: docRef.id });
+            // Salva o ID gerado pelo Firestore dentro do próprio documento
+            await updateDoc(docRef, { id: docRef.id });
         }
 
     } catch (error) {
