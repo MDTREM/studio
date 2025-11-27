@@ -46,7 +46,6 @@ export default function CartPage() {
             throw new Error(error || 'Não foi possível criar a sessão de checkout.');
         }
         
-        // Redireciona o usuário para a URL de checkout da Stripe
         window.location.href = url;
 
     } catch (error: any) {
@@ -56,7 +55,7 @@ export default function CartPage() {
             title: 'Erro ao iniciar a compra',
             description: error.message || 'Houve um problema ao conectar com o sistema de pagamento. Tente novamente.',
         });
-        setIsSubmitting(false); // Reativa o botão em caso de erro
+        setIsSubmitting(false);
     }
   };
   
@@ -175,7 +174,7 @@ export default function CartPage() {
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Redirecionando...
+                                Finalizando compra...
                             </>
                         ) : (
                             'Finalizar Compra'
