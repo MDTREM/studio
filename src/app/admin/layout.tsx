@@ -5,9 +5,23 @@ import { Package, ShoppingCart, Users, Tags, ShieldAlert, Loader2 } from "lucide
 import Logo from "@/components/shared/Logo";
 import UserNav from "@/components/shared/UserNav";
 import { FirebaseClientProvider, useUser } from "@/firebase";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getIdTokenResult } from "firebase/auth";
+
+// 1. Criar o Contexto
+interface AdminContextType {
+  isAdmin: boolean;
+  isCheckingAdmin: boolean;
+}
+
+export const AdminContext = createContext<AdminContextType>({
+  isAdmin: false,
+  isCheckingAdmin: true,
+});
+
+// Hook customizado para usar o contexto
+export const useAdmin = () => useContext(AdminContext);
 
 function AdminContent({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
@@ -25,49 +39,42 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         setIsCheckingAdmin(false);
       });
     } else {
-      // Se não houver usuário, ele não é admin e a verificação terminou.
       setIsAdmin(false);
       setIsCheckingAdmin(false);
     }
   }, [user, isUserLoading]);
 
-  // Passa os estados para os componentes filhos
-  const childrenWithProps = React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
-      // @ts-ignore
-      return React.cloneElement(child, { isCheckingAdmin, isAdmin });
-    }
-    return child;
-  });
-
   return (
-    <div className="flex flex-col">
-      <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-        <div className="w-full flex-1">
-          {/* Search can be added here */}
-        </div>
-        <UserNav />
-      </header>
-      <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
-        {isCheckingAdmin && (
+    // 2. Prover o contexto para os filhos
+    <AdminContext.Provider value={{ isAdmin, isCheckingAdmin }}>
+      <div className="flex flex-col">
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+          <div className="w-full flex-1">
+            {/* Search can be added here */}
+          </div>
+          <UserNav />
+        </header>
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
+          {isCheckingAdmin && (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold">Verificando permissões...</h2>
+                  <p className="text-muted-foreground">Aguarde um momento.</p>
+              </div>
+          )}
+          {!isCheckingAdmin && !isAdmin && (
             <div className="flex flex-col items-center justify-center h-full text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
-                <h2 className="text-xl font-semibold">Verificando permissões...</h2>
-                <p className="text-muted-foreground">Aguarde um momento.</p>
+                  <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
+                  <h2 className="text-2xl font-bold">Acesso Negado</h2>
+                  <p className="text-muted-foreground max-w-md">
+                      Você não tem as permissões necessárias para acessar o painel de administração. Por favor, contate o suporte se você acredita que isso é um erro.
+                  </p>
             </div>
-        )}
-        {!isCheckingAdmin && !isAdmin && (
-           <div className="flex flex-col items-center justify-center h-full text-center">
-                <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
-                <h2 className="text-2xl font-bold">Acesso Negado</h2>
-                <p className="text-muted-foreground max-w-md">
-                    Você não tem as permissões necessárias para acessar o painel de administração. Por favor, contate o suporte se você acredita que isso é um erro.
-                </p>
-           </div>
-        )}
-        {!isCheckingAdmin && isAdmin && childrenWithProps}
-      </main>
-    </div>
+          )}
+          {!isCheckingAdmin && isAdmin && children}
+        </main>
+      </div>
+    </AdminContext.Provider>
   );
 }
 

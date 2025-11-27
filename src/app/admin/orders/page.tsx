@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { Order, OrderStatus, User } from "@/lib/definitions";
+import { Order, OrderStatus } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { collection, query, doc, where, orderBy, getDocs, collectionGroup } from "firebase/firestore";
 import { ListFilter, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useAdmin } from "../layout";
 
 const statusColors: { [key in OrderStatus]: string } = {
     'Em análise': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
@@ -22,15 +23,11 @@ const statusColors: { [key in OrderStatus]: string } = {
 
 const availableStatuses: OrderStatus[] = ['Em análise', 'Em produção', 'Pronto para retirada', 'Entregue', 'Cancelado'];
 
-interface AdminOrdersPageProps {
-    isCheckingAdmin?: boolean;
-    isAdmin?: boolean;
-}
-
-export default function AdminOrdersPage({ isCheckingAdmin, isAdmin }: AdminOrdersPageProps) {
+export default function AdminOrdersPage() {
     const firestore = useFirestore();
     const { toast } = useToast();
     const [statusFilters, setStatusFilters] = useState<OrderStatus[]>([]);
+    const { isAdmin, isCheckingAdmin } = useAdmin(); // Consumir o contexto
 
     const allOrdersQuery = useMemoFirebase(() => {
         if (!firestore || isCheckingAdmin || !isAdmin) return null;
@@ -165,7 +162,7 @@ export default function AdminOrdersPage({ isCheckingAdmin, isAdmin }: AdminOrder
                                                 {availableStatuses.map(status => (
                                                     <DropdownMenuItem 
                                                         key={status} 
-                                                        onClick={() => handleStatusChange(order.id, order.customerId, status)}
+                                                        onClick={() => handleStatusChange(order.id!, order.customerId, status)}
                                                         disabled={order.status === status}
                                                     >
                                                         {status}
