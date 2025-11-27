@@ -15,7 +15,13 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
                 throw new Error(`Produto inválido ou quantidade zero para ${product.name}.`);
             }
             
-            const unitAmountInCents = Math.round(product.basePrice * 100);
+            // Lógica de cálculo do preço unitário
+            const baseQuantity = product.variations.quantities?.[0];
+            if (!baseQuantity || baseQuantity <= 0) {
+                throw new Error(`Quantidade base inválida para o produto ${product.name}.`);
+            }
+            const pricePerUnit = product.basePrice / baseQuantity;
+            const unitAmountInCents = Math.round(pricePerUnit * 100);
 
             const imageUrl = item.product.imageUrl && item.product.imageUrl.length > 0 ? item.product.imageUrl[0] : undefined;
 
@@ -42,7 +48,9 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
             client_reference_id: userId, 
             metadata: {
                 cartItems: JSON.stringify(items.map(item => {
-                    const totalPrice = item.product.basePrice * item.quantity;
+                    const baseQuantity = item.product.variations.quantities?.[0] || 1;
+                    const pricePerUnit = item.product.basePrice / baseQuantity;
+                    const totalPrice = pricePerUnit * item.quantity;
                     
                     return {
                         productId: item.product.id,

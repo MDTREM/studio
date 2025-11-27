@@ -1,6 +1,6 @@
 'use client';
 
-import { CartItem } from '@/lib/definitions';
+import { CartItem, Product } from '@/lib/definitions';
 import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
 interface CartContextType {
@@ -15,8 +15,8 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Lógica de preço linear e segura
-const getPriceForQuantity = (product: CartItem['product'], quantity: number): number => {
+// Lógica de preço correta, baseada em preço unitário
+const getPriceForQuantity = (product: Product, quantity: number): number => {
     if (!product?.basePrice || !product?.variations?.quantities?.length || quantity <= 0) {
         return 0;
     }
@@ -24,7 +24,7 @@ const getPriceForQuantity = (product: CartItem['product'], quantity: number): nu
     const baseQuantity = product.variations.quantities[0];
     if (baseQuantity <= 0) return 0; // Evita divisão por zero
 
-    // O preço por unidade é o preço base dividido pela quantidade base.
+    // Calcula o preço por unidade dividindo o preço base pela quantidade base.
     const pricePerUnit = product.basePrice / baseQuantity;
     
     // O preço total é o preço por unidade multiplicado pela quantidade desejada.
@@ -32,7 +32,6 @@ const getPriceForQuantity = (product: CartItem['product'], quantity: number): nu
     
     return totalPrice;
 };
-
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
