@@ -121,11 +121,13 @@ export default function CartPage() {
                         </TableRow>
                         </TableHeader>
                         <TableBody>
-                        {cartItems.map(item => (
+                        {cartItems.map(item => {
+                            const imageUrl = item.product.imageUrl && item.product.imageUrl.length > 0 ? item.product.imageUrl[0] : 'https://placehold.co/100x100/FF6B07/white?text=Sem+Imagem';
+                            return (
                             <TableRow key={item.id}>
                                 <TableCell className="hidden sm:table-cell">
                                     <Image
-                                    src={item.product.imageUrl[0]}
+                                    src={imageUrl}
                                     alt={item.product.name}
                                     width={100}
                                     height={100}
@@ -162,7 +164,7 @@ export default function CartPage() {
                                     </Button>
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        )})}
                         </TableBody>
                     </Table>
                 </CardContent>
