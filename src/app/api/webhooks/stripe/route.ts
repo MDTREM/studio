@@ -11,6 +11,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = headers().get('stripe-signature') as string;
+  // Obtém a instância da Stripe usando a função getStripe() em vez de importá-la diretamente.
   const stripe = getStripe();
 
   let event: Stripe.Event;

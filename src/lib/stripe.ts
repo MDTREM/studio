@@ -1,22 +1,21 @@
-'use client';
 import Stripe from 'stripe';
 
-// Declara a variável stripe que pode ser nula inicialmente.
+// Variável para armazenar a instância da Stripe em cache após a primeira inicialização.
 let stripe: Stripe | null = null;
 
-// A função getStripe agora serve para inicializar a instância se ela ainda não existir.
+// Função para obter a instância da Stripe.
+// Ela cria a instância na primeira vez que é chamada e a retorna nas chamadas subsequentes.
 export const getStripe = (): Stripe => {
-  // Se a instância já foi criada, retorne-a.
+  // Se a instância já foi criada, retorne-a do cache.
   if (!stripe) {
-    // Se a chave secreta não estiver definida em produção, lance um erro.
-    // Isso evita que a aplicação execute sem a configuração necessária.
-    if (!process.env.STRIPE_SECRET_KEY && process.env.NODE_ENV === 'production') {
-        throw new Error('STRIPE_SECRET_KEY is not set in production environment variables for runtime.');
+    // Se a chave secreta não estiver definida em produção, lance um erro claro.
+    // Isso só acontecerá em tempo de execução, não durante o build.
+    if (!process.env.STRIPE_SECRET_KEY) {
+        throw new Error('STRIPE_SECRET_KEY não está definida nas variáveis de ambiente.');
     }
 
-    // Cria a instância da Stripe. Em ambientes de não produção sem a chave,
-    // a string vazia permitirá que o build passe, mas as chamadas de API falharão em tempo de execução.
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? '', {
+    // Cria a nova instância da Stripe.
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: '2024-06-20',
       typescript: true,
     });

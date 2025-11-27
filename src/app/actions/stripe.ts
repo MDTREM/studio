@@ -20,6 +20,7 @@ const calculatePrice = (product: CartItem['product'], quantity: number): number 
 
 export async function createCheckoutSession(items: CartItem[], userId: string) {
     const origin = process.env.NEXT_PUBLIC_URL || headers().get('origin') || 'http://localhost:9003';
+    // Obtém a instância da Stripe usando a função getStripe() em vez de importá-la diretamente.
     const stripe = getStripe();
     
     try {
