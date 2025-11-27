@@ -6,7 +6,7 @@ import { Product } from '@/lib/definitions';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Check, ChevronRight, Download, FileUp, Home, Info, Lightbulb, Minus, PackageSearch, Pencil, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
+import { Check, ChevronRight, Download, FileUp, Home, Info, Lightbulb, Link as LinkIcon, Minus, PackageSearch, Pencil, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -39,6 +39,7 @@ export default function ProductPage({ product }: ProductPageProps) {
     const [mainImage, setMainImage] = useState<string | null>(null);
     const [artworkOption, setArtworkOption] = useState('i-have-design');
     const [artworkFile, setArtworkFile] = useState<File | null>(null);
+    const [artworkLink, setArtworkLink] = useState('');
     const [selectedMaterial, setSelectedMaterial] = useState<string>('');
     const [selectedFormat, setSelectedFormat] = useState<string>('');
     const [selectedColor, setSelectedColor] = useState<string>('');
@@ -279,10 +280,24 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </Label>
                     </RadioGroup>
                     {artworkOption === 'i-have-design' && (
-                        <div className="grid w-full max-w-sm items-center gap-1.5 mt-4">
-                            <Label htmlFor="artwork-file">Anexar arte</Label>
-                            <Input id="artwork-file" type="file" onChange={(e) => setArtworkFile(e.target.files ? e.target.files[0] : null)} />
-                            <p className="text-xs text-muted-foreground">Formatos aceitos: PDF, AI, CDR, JPG, PNG.</p>
+                        <div className="space-y-4 mt-4 p-4 border rounded-lg bg-secondary/30">
+                            <div className="grid w-full max-w-sm items-center gap-1.5">
+                                <Label htmlFor="artwork-link">Link da Arte (Google Drive, etc.)</Label>
+                                <div className="flex items-center gap-2">
+                                    <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                                    <Input id="artwork-link" type="url" placeholder="https://..." value={artworkLink} onChange={(e) => setArtworkLink(e.target.value)} />
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="flex-1 border-t"></div>
+                                <span className="text-xs text-muted-foreground">OU</span>
+                                <div className="flex-1 border-t"></div>
+                            </div>
+                            <div className="grid w-full max-w-sm items-center gap-1.5">
+                                <Label htmlFor="artwork-file">Anexar arte</Label>
+                                <Input id="artwork-file" type="file" onChange={(e) => setArtworkFile(e.target.files ? e.target.files[0] : null)} />
+                                <p className="text-xs text-muted-foreground">Formatos aceitos: PDF, AI, CDR, JPG, PNG.</p>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -425,3 +440,5 @@ export default function ProductPage({ product }: ProductPageProps) {
         </TooltipProvider>
       );
 }
+
+    
