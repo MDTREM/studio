@@ -99,14 +99,16 @@ export default function AdminProductsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product: Product) => (
+              {products.map((product: Product) => {
+                const imageUrl = product.imageUrl && product.imageUrl.length > 0 ? product.imageUrl[0] : 'https://placehold.co/64x64/FF6B07/white?text=Sem+Img';
+                return (
                 <TableRow key={product.id}>
                     <TableCell className="hidden sm:table-cell">
                         <Image
                             alt={product.name}
                             className="aspect-square rounded-md object-cover"
                             height="64"
-                            src={product.imageUrl[0]}
+                            src={imageUrl}
                             width="64"
                             data-ai-hint={product.imageHint}
                         />
@@ -153,7 +155,7 @@ export default function AdminProductsPage() {
                         </AlertDialog>
                     </TableCell>
                 </TableRow>
-              ))}
+              )})}
             </TableBody>
           </Table>
         </CardContent>
