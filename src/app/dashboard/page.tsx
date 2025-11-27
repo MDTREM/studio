@@ -7,7 +7,7 @@ import { Order } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { collection, query, where, orderBy } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 const statusColors = {
@@ -79,7 +79,7 @@ export default function DashboardPage() {
             <TableBody>
               {userOrders && userOrders.length > 0 ? userOrders.map((order: Order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id.substring(0, 7)}...</TableCell>
+                  <TableCell className="font-medium">{order.id?.substring(0, 7)}...</TableCell>
                   <TableCell>{order.productName}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className={cn("border", statusColors[order.status])}>
