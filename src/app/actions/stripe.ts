@@ -41,7 +41,8 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
             }
 
             // Garante que a imagem é uma URL válida.
-            const validImages = item.product.imageUrl.filter(url => url && url.startsWith('http'));
+            const imageUrl = item.product.imageUrl && item.product.imageUrl.length > 0 ? item.product.imageUrl[0] : undefined;
+
 
             return {
                 price_data: {
@@ -49,7 +50,7 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
                     product_data: {
                         name: item.product.name,
                         description: `${item.selectedFormat} / ${item.selectedFinishing}`,
-                        ...(validImages.length > 0 && { images: [validImages[0]] })
+                        ...(imageUrl && { images: [imageUrl] })
                     },
                     unit_amount: unitAmountInCents,
                 },
