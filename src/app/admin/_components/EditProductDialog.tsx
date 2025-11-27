@@ -269,20 +269,22 @@ export default function EditProductDialog({ product, children }: EditProductDial
                     control={form.control}
                     name={`imageUrl.${index}.value`}
                     render={({ field }) => (
-                        <FormItem className='flex items-center gap-2'>
-                        <FormControl>
-                            <Input placeholder="URL da imagem ou faça upload" {...field} />
-                        </FormControl>
-                        <Input id={`edit-upload-${index}`} type="file" className="hidden" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0], index)} />
-                        <Button type="button" variant="outline" size="icon" asChild>
-                            <Label htmlFor={`edit-upload-${index}`} className="cursor-pointer"><Upload className="h-4 w-4" /></Label>
-                        </Button>
-                        {fields.length > 1 && (
-                            <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
-                            <Trash2 className="h-4 w-4" />
-                            </Button>
-                        )}
-                        <FormMessage />
+                        <FormItem>
+                            <div className="flex items-center gap-2">
+                                <FormControl>
+                                    <Input placeholder="URL da imagem ou faça upload" {...field} />
+                                </FormControl>
+                                <Input id={`edit-upload-${index}`} type="file" className="hidden" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0], index)} />
+                                <Button type="button" variant="outline" size="icon" asChild>
+                                    <Label htmlFor={`edit-upload-${index}`} className="cursor-pointer"><Upload className="h-4 w-4" /></Label>
+                                </Button>
+                                {fields.length > 1 && (
+                                    <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                                    <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                )}
+                            </div>
+                            <FormMessage />
                         </FormItem>
                     )}
                     />
