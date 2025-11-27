@@ -7,7 +7,7 @@ import { Order } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { collection, query, where, orderBy } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 
 const statusColors = {
