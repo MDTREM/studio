@@ -20,10 +20,6 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**', // Permite qualquer hostname
       },
-      {
-        protocol: 'http',
-        hostname: '**', // Permite qualquer hostname
-      }
     ],
   },
 };

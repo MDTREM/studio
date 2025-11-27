@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2, Trash2, Upload } from 'lucide-react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -27,9 +27,11 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { updateDocumentNonBlocking, useFirestore } from '@/firebase';
+import { updateDocumentNonBlocking, useFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Product } from '@/lib/definitions';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { Progress } from '@/components/ui/progress';
 
 const productFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
@@ -61,17 +63,14 @@ const generateKeywords = (name: string): string[] => {
     const words = nameLower.split(' ');
     const keywords = new Set<string>();
 
-    // Add full name
     keywords.add(nameLower);
 
-    // Add individual words
     words.forEach(word => {
-        if (word.length > 2) { // Avoid very short words
+        if (word.length > 2) {
             keywords.add(word);
         }
     });
 
-    // Add partial strings
     for (const word of words) {
         if (word.length > 3) {
             for (let i = 3; i < word.length; i++) {
@@ -86,7 +85,8 @@ const generateKeywords = (name: string): string[] => {
 export default function EditProductDialog({ product, children }: EditProductDialogProps) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
-  const firestore = useFirestore();
+  const { firestore, storage } = useFirebase();
+  const [uploadProgress, setUploadProgress] = useState<number[]>([]);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -110,6 +110,47 @@ export default function EditProductDialog({ product, children }: EditProductDial
     control: form.control,
     name: "imageUrl"
   });
+
+  const handleFileUpload = (file: File, index: number) => {
+    if (!storage) return;
+    if (!file.type.startsWith('image/')) {
+        toast({ title: "Formato inválido", description: "Por favor, selecione um arquivo de imagem.", variant: "destructive" });
+        return;
+    }
+
+    const storageRef = ref(storage, `products/${Date.now()}-${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on('state_changed',
+        (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(prev => {
+                const newProgress = [...prev];
+                newProgress[index] = progress;
+                return newProgress;
+            });
+        },
+        (error) => {
+            console.error("Upload error:", error);
+            toast({ title: "Erro no Upload", description: "Não foi possível enviar a imagem.", variant: "destructive" });
+            setUploadProgress(prev => {
+                const newProgress = [...prev];
+                newProgress[index] = 0;
+                return newProgress;
+            });
+        },
+        () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                form.setValue(`imageUrl.${index}.value`, downloadURL, { shouldValidate: true });
+                 setUploadProgress(prev => {
+                    const newProgress = [...prev];
+                    newProgress[index] = 0; // Reset progress
+                    return newProgress;
+                });
+            });
+        }
+    );
+  };
 
   const onSubmit = (data: ProductFormValues) => {
     if (!firestore) return;
@@ -221,26 +262,32 @@ export default function EditProductDialog({ product, children }: EditProductDial
                 />
 
             <div>
-              <Label>URLs das Imagens</Label>
-              {fields.map((field, index) => (
-                <FormField
-                  key={field.id}
-                  control={form.control}
-                  name={`imageUrl.${index}.value`}
-                  render={({ field }) => (
-                    <FormItem className='flex items-center gap-2 mt-2'>
-                      <FormControl>
-                        <Input placeholder="https://..." {...field} />
-                      </FormControl>
-                      {fields.length > 1 && (
-                        <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
-                          <Trash2 className="h-4 w-4" />
+              <Label>Imagens do Produto</Label>
+               {fields.map((field, index) => (
+                <div key={field.id} className="mt-2 space-y-2">
+                    <FormField
+                    control={form.control}
+                    name={`imageUrl.${index}.value`}
+                    render={({ field }) => (
+                        <FormItem className='flex items-center gap-2'>
+                        <FormControl>
+                            <Input placeholder="URL da imagem ou faça upload" {...field} />
+                        </FormControl>
+                        <Input id={`edit-upload-${index}`} type="file" className="hidden" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0], index)} />
+                        <Button type="button" variant="outline" size="icon" asChild>
+                            <Label htmlFor={`edit-upload-${index}`} className="cursor-pointer"><Upload className="h-4 w-4" /></Label>
                         </Button>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        {fields.length > 1 && (
+                            <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                            <Trash2 className="h-4 w-4" />
+                            </Button>
+                        )}
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    {uploadProgress[index] > 0 && <Progress value={uploadProgress[index]} className="h-2" />}
+                </div>
               ))}
               <Button
                 type="button"
@@ -250,7 +297,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
                 onClick={() => append({ value: '' })}
                 disabled={fields.length >= 10}
               >
-                Adicionar outra URL
+                Adicionar outra Imagem
               </Button>
                <FormMessage>
                 {form.formState.errors.imageUrl?.root?.message}

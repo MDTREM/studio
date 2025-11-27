@@ -4,19 +4,22 @@ import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'
+import { getStorage } from 'firebase/storage';
 import { getSdks as getClientSdks } from './server';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
-  if (!getApps().length) {
-    // For environments like Vercel, we must always provide the config.
-    // The previous logic attempted auto-initialization which only works on Firebase Hosting.
-    const firebaseApp = initializeApp(firebaseConfig);
-    return getClientSdks(firebaseApp);
-  }
-
-  // If already initialized, return the SDKs with the already initialized App
-  return getClientSdks(getApp());
+  const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  const auth = getAuth(app);
+  const firestore = getFirestore(app);
+  const storage = getStorage(app);
+  
+  return {
+      firebaseApp: app,
+      auth,
+      firestore,
+      storage
+  };
 }
 
 export * from './provider';
