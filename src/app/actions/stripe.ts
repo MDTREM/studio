@@ -9,11 +9,16 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     
     try {
         const line_items = items.map(item => {
-            const unitAmount = item.quantity > 0 ? item.totalPrice / item.quantity : 0;
-            const unitAmountInCents = Math.round(unitAmount * 100);
+            // Calculate total price in cents first to avoid floating point issues
+            const totalAmountInCents = Math.round(item.totalPrice * 100);
+            
+            // Calculate unit amount in cents by dividing the total cents by quantity
+            // Use Math.floor to ensure we don't have fractional cents
+            const unitAmountInCents = Math.floor(totalAmountInCents / item.quantity);
 
+            // Stripe's minimum charge amount is 50 cents (for BRL)
             if (unitAmountInCents < 50) {
-                 throw new Error(`O valor unitário para o produto ${item.product.name} (R$${unitAmount.toFixed(2)}) é menor que o mínimo de R$0,50 permitido para pagamento.`);
+                 throw new Error(`O valor unitário para o produto ${item.product.name} (R$${(unitAmountInCents/100).toFixed(2)}) é menor que o mínimo de R$0,50 permitido para pagamento.`);
             }
 
             const validImages = item.product.imageUrl.filter(url => url && url.startsWith('http'));
