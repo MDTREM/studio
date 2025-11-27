@@ -49,21 +49,25 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId && newQuantity > 0) {
-            // Reimplementa a mesma lógica de precificação da página do produto para consistência.
+            // Lógica de precificação robusta, espelhando a da página do produto.
             const { basePrice, variations } = item.product;
-            if (!basePrice || !variations || !variations.quantities || variations.quantities.length === 0) {
-              // Se não houver dados de preço, não é possível calcular. Mantenha o item como está.
-              return { ...item, quantity: newQuantity };
+            
+            // Se não houver dados de preço, retorna o item com a nova quantidade (caso de fallback).
+            if (!basePrice || !variations?.quantities?.length) {
+                return { ...item, quantity: newQuantity };
             }
             
             const baseQuantity = variations.quantities[0] || 1;
             const safeBaseQuantity = baseQuantity > 0 ? baseQuantity : 1;
+            const basePricePerUnit = basePrice / safeBaseQuantity;
             
-            // Fator de desconto que aumenta com a quantidade
+            // Aplica um fator de desconto que aumenta com a quantidade
             const discountFactor = Math.log10(newQuantity / safeBaseQuantity + 1) / 2;
             
-            // Preço por unidade com desconto, com um teto para o desconto
-            const pricePerUnit = (basePrice / safeBaseQuantity) * (1 - Math.min(discountFactor, 0.75));
+            // Limita o desconto para evitar preços negativos ou muito baixos.
+            const finalDiscount = Math.min(discountFactor, 0.75); // Limite de 75% de desconto
+            
+            const pricePerUnit = basePricePerUnit * (1 - finalDiscount);
 
             const newTotalPrice = pricePerUnit * newQuantity;
 
@@ -78,7 +82,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems([]);
   };
   
-  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+  const cartCount = useMemo(() => cartItems.reduce((count, item) => count + item.quantity, 0), [cartItems]);
 
   const cartTotal = useMemo(() => {
     return cartItems.reduce((total, item) => total + item.totalPrice, 0);
