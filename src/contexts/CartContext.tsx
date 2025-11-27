@@ -15,15 +15,21 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Preço linear simples para garantir precisão e consistência.
+// Lógica de preço linear e segura
 const getPriceForQuantity = (product: CartItem['product'], quantity: number): number => {
-    if (!product?.basePrice || quantity <= 0) {
+    if (!product?.basePrice || !product?.variations?.quantities?.length || quantity <= 0) {
         return 0;
     }
-    // Garante que a quantidade base seja pelo menos 1 para evitar divisão por zero.
-    const baseQuantity = product.variations?.quantities?.[0] || 1;
-    const pricePerUnit = (product.basePrice / (baseQuantity > 0 ? baseQuantity : 1));
+
+    const baseQuantity = product.variations.quantities[0];
+    if (baseQuantity <= 0) return 0; // Evita divisão por zero
+
+    // O preço por unidade é o preço base dividido pela quantidade base.
+    const pricePerUnit = product.basePrice / baseQuantity;
+    
+    // O preço total é o preço por unidade multiplicado pela quantidade desejada.
     const totalPrice = pricePerUnit * quantity;
+    
     return totalPrice;
 };
 
