@@ -4,12 +4,12 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { Product } from '@/lib/definitions';
 import { collection, query, where } from 'firebase/firestore';
 import { Filter, Search } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
-// A página agora recebe `searchParams` como props.
-export default function CatalogoPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
-  // O hook `useSearchParams` foi removido.
-  const currentCategory = searchParams?.categoria as string | undefined;
-  const searchQuery = searchParams?.q as string | undefined;
+export default function CatalogoPage() {
+  const searchParams = useSearchParams();
+  const currentCategory = searchParams.get('categoria');
+  const searchQuery = searchParams.get('q');
   const firestore = useFirestore();
 
   const productsQuery = useMemoFirebase(() => {
