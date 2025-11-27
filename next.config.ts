@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   // The value is the domain of the Cloud Workstation.
   allowedDevOrigins: [
     '6000-firebase-studio-1764070301810.cluster-lr6dwlc2lzbcctqhqorax5zmro.cloudworkstations.dev',
+    '*.stripe.com'
   ],
   images: {
     remotePatterns: [
