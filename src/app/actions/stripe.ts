@@ -4,6 +4,20 @@ import { CartItem } from "@/lib/definitions";
 import { getStripe } from "@/lib/stripe";
 import { headers } from "next/headers";
 
+// A lógica de cálculo de preço foi movida para o servidor para segurança.
+const calculatePrice = (product: CartItem['product'], quantity: number): number => {
+    if (!product?.basePrice || !product?.variations?.quantities?.length || quantity <= 0) {
+        throw new Error(`Produto inválido ou sem preço base: ${product.name}`);
+    }
+    const baseQuantity = product.variations.quantities[0];
+    if (!baseQuantity || baseQuantity <= 0) {
+        throw new Error(`Quantidade base inválida para o produto ${product.name}.`);
+    }
+    const pricePerUnit = product.basePrice / baseQuantity;
+    return Math.round(pricePerUnit * quantity * 100); // Retorna em centavos
+};
+
+
 export async function createCheckoutSession(items: CartItem[], userId: string) {
     const origin = process.env.NEXT_PUBLIC_URL || headers().get('origin') || 'http://localhost:9003';
     const stripe = getStripe();
@@ -12,17 +26,8 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
         const line_items = items.map(item => {
             const product = item.product;
 
-            if (!product?.basePrice || item.quantity <= 0) {
-                throw new Error(`Produto inválido ou quantidade zero para ${product.name}.`);
-            }
-            
-            // Lógica de cálculo do preço unitário
-            const baseQuantity = product.variations.quantities?.[0];
-            if (!baseQuantity || baseQuantity <= 0) {
-                throw new Error(`Quantidade base inválida para o produto ${product.name}.`);
-            }
-            const pricePerUnit = product.basePrice / baseQuantity;
-            const unitAmountInCents = Math.round(pricePerUnit * 100);
+            // O preço total em centavos agora é calculado de forma segura no servidor.
+            const totalAmountInCents = calculatePrice(product, item.quantity);
 
             const imageUrl = item.product.imageUrl && item.product.imageUrl.length > 0 ? item.product.imageUrl[0] : undefined;
 
@@ -34,7 +39,8 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
                         description: `${item.selectedFormat} / ${item.selectedFinishing}`,
                         ...(imageUrl && { images: [imageUrl] })
                     },
-                    unit_amount: unitAmountInCents,
+                    // Stripe espera o valor por unidade, então dividimos o total pela quantidade.
+                    unit_amount: Math.round(totalAmountInCents / item.quantity),
                 },
                 quantity: item.quantity,
             };
@@ -48,24 +54,20 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
             cancel_url: `${origin}/checkout/cancel`,
             client_reference_id: userId, 
             metadata: {
-                cartItems: JSON.stringify(items.map(item => {
-                    const baseQuantity = item.product.variations.quantities?.[0] || 1;
-                    const pricePerUnit = item.product.basePrice / baseQuantity;
-                    const totalPrice = pricePerUnit * item.quantity;
-                    
-                    return {
-                        productId: item.product.id,
-                        productName: item.product.name,
-                        quantity: item.quantity,
-                        totalPrice: totalPrice,
-                        selectedFormat: item.selectedFormat,
-                        selectedFinishing: item.selectedFinishing,
-                    }
-                }))
+                // Serializa os itens do carrinho para usar no webhook.
+                // O preço aqui é apenas para referência, o cálculo real do pedido é feito no webhook.
+                cartItems: JSON.stringify(items.map(item => ({
+                    productId: item.product.id,
+                    productName: item.product.name,
+                    quantity: item.quantity,
+                    // Recalcula o preço total em BRL para o metadata
+                    totalPrice: calculatePrice(item.product, item.quantity) / 100, 
+                    selectedFormat: item.selectedFormat,
+                    selectedFinishing: item.selectedFinishing,
+                })))
             }
         });
         
-        // Retorna a URL completa em vez de apenas o ID
         return { url: session.url };
 
     } catch (error: any) {

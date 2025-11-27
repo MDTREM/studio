@@ -127,7 +127,6 @@ export default function ProductPage({ product }: ProductPageProps) {
             quantity,
             selectedFormat,
             selectedFinishing,
-            totalPrice: selectedPrice,
         };
         addToCart(cartItem);
         toast({

@@ -63,7 +63,7 @@ export type CartItem = {
   quantity: number;
   selectedFormat: string;
   selectedFinishing: string;
-  totalPrice: number;
+  totalPrice: number; // Agora é usado apenas para exibição no cliente
 };
 
 export type Favorite = {
