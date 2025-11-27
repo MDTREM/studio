@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Logo from "@/components/shared/Logo";
 import { Facebook, Instagram } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -37,9 +38,9 @@ export default function Footer() {
           {/* Segurança */}
           <div className="text-center md:text-left">
             <h3 className="font-bold mb-4">Segurança</h3>
-            <div className="flex flex-col gap-2 text-sm text-gray-400">
-              <span>Site Seguro</span>
-              <span>Site Blindado</span>
+            <div className="flex flex-col gap-4 text-sm text-gray-400">
+              <Image src="https://i.imgur.com/Jno45zK.png" alt="Selo Site Seguro" width={120} height={32} />
+              <Image src="https://i.imgur.com/eP7c5HZ.png" alt="Selo Site Blindado" width={120} height={32} />
             </div>
           </div>
           
