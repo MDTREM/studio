@@ -34,7 +34,7 @@ export default function UserNav() {
     } else {
       setIsAdmin(false);
     }
-  }, [user]);
+  }, [user?.uid]); // Changed dependency from `user` object to `user.uid` string
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
