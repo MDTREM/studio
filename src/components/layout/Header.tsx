@@ -76,11 +76,10 @@ export default function Header() {
     });
 
     // Second pass: build the tree
-    menuCategories.forEach(category => {
-        const categoryNode = categoryMap.get(category.id)!;
-        if (category.parentId && categoryMap.has(category.parentId)) {
+    categoryMap.forEach(categoryNode => {
+        if (categoryNode.parentId && categoryMap.has(categoryNode.parentId)) {
             // It's a child, add it to its parent
-            const parentNode = categoryMap.get(category.parentId)!;
+            const parentNode = categoryMap.get(categoryNode.parentId)!;
             parentNode.children.push(categoryNode);
         } else {
             // It's a root category
@@ -217,7 +216,7 @@ export default function Header() {
                                 Todos os produtos
                             </NavigationMenuTrigger>
                             <NavigationMenuContent>
-                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-popover text-popover-foreground">
                                     {areMenuCategoriesLoading ? (
                                         Array.from({length: 6}).map((_, i) => <Skeleton key={i} className='h-10 w-full bg-gray-200' />)
                                     ) : (
@@ -292,13 +291,13 @@ const ListItem = forwardRef<React.ElementRef<"a">, React.ComponentPropsWithoutRe
         <a
           ref={ref}
           className={cn(
-            'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+            'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white/10 hover:text-primary focus:bg-white/10 focus:text-primary',
             className
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <div className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+          <div className="text-sm font-medium leading-none text-white">{title}</div>
+          <div className="line-clamp-2 text-sm leading-snug text-gray-400">
             {children}
           </div>
         </a>
