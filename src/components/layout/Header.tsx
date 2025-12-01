@@ -70,21 +70,22 @@ export default function Header() {
     const categoryMap = new Map<string, CategoryWithChildren>();
     const rootCategories: CategoryWithChildren[] = [];
 
+    // First pass: create a map of all categories as CategoryWithChildren
     menuCategories.forEach(category => {
       categoryMap.set(category.id, { ...category, children: [] });
     });
 
+    // Second pass: build the tree
     menuCategories.forEach(category => {
-      if (category.parentId && categoryMap.has(category.parentId)) {
-        const parent = categoryMap.get(category.parentId)!;
-        parent.children.push(categoryMap.get(category.id)!);
-      }
-    });
-
-    menuCategories.forEach(category => {
-      if (!category.parentId || !categoryMap.has(category.parentId)) {
-        rootCategories.push(categoryMap.get(category.id)!);
-      }
+        const categoryNode = categoryMap.get(category.id)!;
+        if (category.parentId && categoryMap.has(category.parentId)) {
+            // It's a child, add it to its parent
+            const parentNode = categoryMap.get(category.parentId)!;
+            parentNode.children.push(categoryNode);
+        } else {
+            // It's a root category
+            rootCategories.push(categoryNode);
+        }
     });
 
     return rootCategories;
