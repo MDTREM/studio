@@ -70,21 +70,18 @@ export default function Header() {
     const categoryMap = new Map<string, CategoryWithChildren>();
     const rootCategories: CategoryWithChildren[] = [];
 
-    // First pass: create a map of all categories as CategoryWithChildren
     menuCategories.forEach(category => {
       categoryMap.set(category.id, { ...category, children: [] });
     });
 
-    // Second pass: build the tree
-    categoryMap.forEach(categoryNode => {
-        if (categoryNode.parentId && categoryMap.has(categoryNode.parentId)) {
-            // It's a child, add it to its parent
-            const parentNode = categoryMap.get(categoryNode.parentId)!;
-            parentNode.children.push(categoryNode);
-        } else {
-            // It's a root category
-            rootCategories.push(categoryNode);
-        }
+    menuCategories.forEach(category => {
+      const categoryNode = categoryMap.get(category.id)!;
+      if (category.parentId && categoryMap.has(category.parentId)) {
+        const parentNode = categoryMap.get(category.parentId)!;
+        parentNode.children.push(categoryNode);
+      } else {
+        rootCategories.push(categoryNode);
+      }
     });
 
     return rootCategories;
@@ -268,7 +265,7 @@ export default function Header() {
                                         <>
                                             <NavigationMenuTrigger>{category.name}</NavigationMenuTrigger>
                                             <NavigationMenuContent>
-                                                <ul className="grid w-[200px] gap-3 p-4 md:w-[250px]">
+                                                <ul className="grid w-[200px] gap-1 p-2 md:w-[250px]">
                                                     {category.children.map((subCategory) => (
                                                         <ListItem
                                                             key={subCategory.id}
@@ -310,10 +307,12 @@ const ListItem = forwardRef<React.ElementRef<"a">, React.ComponentPropsWithoutRe
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <div className="line-clamp-2 text-sm leading-snug text-gray-400">
-            {children}
-          </div>
+          <div className="text-sm font-medium leading-none text-white">{title}</div>
+          {children && (
+              <div className="line-clamp-2 text-sm leading-snug text-gray-400">
+                {children}
+              </div>
+          )}
         </a>
       </NavigationMenuLink>
     </li>
