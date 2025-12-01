@@ -28,6 +28,7 @@ export type Category = {
   name: string;
   imageUrl: string;
   imageHint: string;
+  parentId?: string; // ID da categoria pai
 };
 
 export type OrderStatus = 'Em análise' | 'Em produção' | 'Pronto para retirada' | 'Entregue' | 'Cancelado';

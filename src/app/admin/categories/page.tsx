@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast";
+import { useMemo } from "react";
 
 export default function AdminCategoriesPage() {
   const firestore = useFirestore();
@@ -39,6 +40,11 @@ export default function AdminCategoriesPage() {
   }, [firestore]);
 
   const { data: categories, isLoading } = useCollection<Category>(categoriesQuery);
+
+  const categoryMap = useMemo(() => {
+    if (!categories) return new Map();
+    return new Map(categories.map(c => [c.id, c.name]));
+  }, [categories]);
 
   const handleDelete = (categoryId: string, categoryName: string) => {
     if (!firestore) return;
@@ -77,7 +83,8 @@ export default function AdminCategoriesPage() {
                   <span className="sr-only">Imagem</span>
                 </TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead>ID</TableHead>
+                <TableHead className="hidden md:table-cell">ID</TableHead>
+                <TableHead>Categoria Pai</TableHead>
                 <TableHead>
                   <span className="sr-only">Ações</span>
                 </TableHead>
@@ -91,12 +98,15 @@ export default function AdminCategoriesPage() {
                       alt={category.name}
                       className="aspect-square rounded-md object-cover"
                       height="64"
-                      src={category.imageUrl}
+                      src={category.imageUrl || 'https://placehold.co/64x64/FF6B07/white?text=Sem+Img'}
                       width="64"
                     />
                   </TableCell>
                   <TableCell className="font-medium">{category.name}</TableCell>
-                  <TableCell>{category.id}</TableCell>
+                  <TableCell className="hidden md:table-cell">{category.id}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {category.parentId ? categoryMap.get(category.parentId) : 'Nenhuma'}
+                  </TableCell>
                   <TableCell>
                     <AlertDialog>
                       <DropdownMenu>
@@ -125,7 +135,7 @@ export default function AdminCategoriesPage() {
                           <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
                           <AlertDialogDescription>
                             Essa ação não pode ser desfeita. Isso excluirá permanentemente a categoria
-                            "{category.name}".
+                            "{category.name}". Se esta categoria for pai de outras, elas ficarão órfãs.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

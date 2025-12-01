@@ -57,7 +57,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Category",
       "type": "object",
-      "description": "Represents a category of products.",
+      "description": "Represents a category of products, which can be nested.",
       "properties": {
         "id": {
           "type": "string",
@@ -70,6 +70,10 @@
         "description": {
           "type": "string",
           "description": "Description of the category."
+        },
+        "parentId": {
+          "type": "string",
+          "description": "The ID of the parent category. If null, it's a top-level category."
         }
       },
       "required": [

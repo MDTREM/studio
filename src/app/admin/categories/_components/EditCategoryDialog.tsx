@@ -25,16 +25,18 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { updateDocumentNonBlocking, useFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { updateDocumentNonBlocking, useCollection, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection, doc, query } from 'firebase/firestore';
 import type { Category } from '@/lib/definitions';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const categoryFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida ou faça upload de uma imagem.' }),
+  parentId: z.string().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -50,11 +52,18 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
   const { firestore, storage } = useFirebase();
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "categories"));
+  }, [firestore]);
+  const { data: categories } = useCollection<Category>(categoriesQuery);
+
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       name: category.name,
       imageUrl: category.imageUrl,
+      parentId: category.parentId || '',
     },
   });
 
@@ -92,7 +101,13 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
 
     const categoryRef = doc(firestore, 'categories', category.id);
     
-    updateDocumentNonBlocking(categoryRef, data);
+    const updatedData = {
+        name: data.name,
+        imageUrl: data.imageUrl,
+        parentId: data.parentId || null,
+    }
+
+    updateDocumentNonBlocking(categoryRef, updatedData);
     
     toast({
         title: 'Categoria Atualizada!',
@@ -130,6 +145,30 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
                   <FormControl>
                     <Input placeholder="Ex: Cartões de Visita" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="parentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subcategoria de (Opcional)</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Nenhuma (categoria principal)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Nenhuma (categoria principal)</SelectItem>
+                      {/* Remove the current category from the list of possible parents */}
+                      {categories?.filter(c => c.id !== category.id).map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

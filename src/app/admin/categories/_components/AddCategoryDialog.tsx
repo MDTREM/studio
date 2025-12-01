@@ -24,16 +24,19 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { setDocumentNonBlocking, useFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { setDocumentNonBlocking, useCollection, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection, doc, query } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Category } from '@/lib/definitions';
 
 const categoryFormSchema = z.object({
   id: z.string().min(2, { message: 'O ID deve ter pelo menos 2 caracteres.' }).regex(/^[a-z0-9-]+$/, 'Use apenas letras minúsculas, números e hífens.'),
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida ou faça upload de uma imagem.' }),
+  parentId: z.string().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -44,12 +47,19 @@ export default function AddCategoryDialog() {
   const { firestore, storage } = useFirebase();
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "categories"));
+  }, [firestore]);
+  const { data: categories } = useCollection<Category>(categoriesQuery);
+
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       id: '',
       name: '',
       imageUrl: '',
+      parentId: '',
     },
   });
 
@@ -88,11 +98,11 @@ export default function AddCategoryDialog() {
 
     const categoryRef = doc(firestore, 'categories', data.id);
     
-    // The imageHint is no longer part of the form, so we don't include it.
     const categoryData = {
       id: data.id,
       name: data.name,
       imageUrl: data.imageUrl,
+      parentId: data.parentId || null,
     }
 
     setDocumentNonBlocking(categoryRef, categoryData, { merge: false });
@@ -146,6 +156,29 @@ export default function AddCategoryDialog() {
                   <FormControl>
                     <Input placeholder="Ex: Cartões de Visita" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="parentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subcategoria de (Opcional)</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Nenhuma (categoria principal)" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">Nenhuma (categoria principal)</SelectItem>
+                      {categories?.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
