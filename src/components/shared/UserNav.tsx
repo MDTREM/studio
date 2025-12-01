@@ -72,21 +72,25 @@ export default function UserNav() {
       </Link>
     );
   }
+  
+  const displayName = appUser?.name || user.displayName || user.email?.split('@')[0] || 'Usuário';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-9 w-9">
-            <AvatarImage src={user.photoURL || "https://picsum.photos/seed/user/100/100"} alt={user.displayName || user.email || 'User'} data-ai-hint="person face" />
-            <AvatarFallback>{user.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
-          </Avatar>
+        <Button variant="ghost" className="flex items-center gap-2 text-sm font-medium hover:text-primary text-white p-2">
+            <User className="h-6 w-6" />
+            <div>
+                <span className="text-gray-300 text-xs">Bem-vindo(a)</span>
+                <br/>
+                <strong className="truncate max-w-[150px]">{displayName}</strong>
+            </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{appUser?.name || user.displayName || 'Usuário'}</p>
+            <p className="text-sm font-medium leading-none">{displayName}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
