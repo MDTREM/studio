@@ -8,8 +8,7 @@ export default function Logo() {
         alt="Ouro Gráfica Logo"
         width={180}
         height={40}
-        className="w-auto"
-        style={{ height: '2.5rem' }} // 40px
+        className="w-auto h-10" // Controla a altura e deixa a largura automática
         priority
       />
     </div>
