@@ -37,7 +37,7 @@ import { FormDescription } from '@/components/ui/form';
 const categoryFormSchema = z.object({
   id: z.string().min(2, { message: 'O ID deve ter pelo menos 2 caracteres.' }).regex(/^[a-z0-9-]+$/, 'Use apenas letras minúsculas, números e hífens.'),
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
-  imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida ou faça upload de uma imagem.' }),
+  imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida.' }).optional().or(z.literal('')),
   parentId: z.string().optional(),
   showOnHome: z.boolean().default(true),
   showInMenu: z.boolean().default(true),
@@ -195,7 +195,7 @@ export default function AddCategoryDialog() {
               name="imageUrl"
               render={({ field }) => (
                 <FormItem>
-                    <FormLabel>URL da Imagem</FormLabel>
+                    <FormLabel>URL da Imagem (Opcional)</FormLabel>
                     <div className="flex items-center gap-2">
                         <FormControl>
                             <Input placeholder="https://... ou faça upload" {...field} />

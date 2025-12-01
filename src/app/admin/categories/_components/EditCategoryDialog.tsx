@@ -36,7 +36,7 @@ import { Switch } from '@/components/ui/switch';
 
 const categoryFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
-  imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida ou faça upload de uma imagem.' }),
+  imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida.' }).optional().or(z.literal('')),
   parentId: z.string().optional(),
   showOnHome: z.boolean().default(true),
   showInMenu: z.boolean().default(true),
@@ -65,7 +65,7 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       name: category.name,
-      imageUrl: category.imageUrl,
+      imageUrl: category.imageUrl || '',
       parentId: category.parentId || '',
       showOnHome: category.showOnHome ?? true,
       showInMenu: category.showInMenu ?? true,
@@ -184,7 +184,7 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
               name="imageUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL da Imagem</FormLabel>
+                  <FormLabel>URL da Imagem (Opcional)</FormLabel>
                    <div className="flex items-center gap-2">
                         <FormControl>
                             <Input placeholder="URL da imagem ou faça upload" {...field} />

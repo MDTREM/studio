@@ -8,7 +8,7 @@ export type Product = {
   shortDescription: string;
   description?: string;
   imageUrl: string[]; // Padronizado para imageUrl
-  imageHint: string;
+  imageHint?: string;
   basePrice: number;
   categoryId: string;
   variations: {
@@ -26,8 +26,8 @@ export type Product = {
 export type Category = {
   id: string;
   name: string;
-  imageUrl: string;
-  imageHint: string;
+  imageUrl?: string;
+  imageHint?: string;
   parentId?: string; // ID da categoria pai
   showOnHome?: boolean;
   showInMenu?: boolean;
