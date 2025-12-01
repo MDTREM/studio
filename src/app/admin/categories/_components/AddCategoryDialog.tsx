@@ -38,8 +38,8 @@ const categoryFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida ou faça upload de uma imagem.' }),
   parentId: z.string().optional(),
-  showOnHome: z.boolean().optional(),
-  showInMenu: z.boolean().optional(),
+  showOnHome: z.boolean().default(true),
+  showInMenu: z.boolean().default(true),
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
