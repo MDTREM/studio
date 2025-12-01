@@ -89,12 +89,6 @@ export default function Header() {
 
     return rootCategories;
   }, [menuCategories]);
-
-
-  const categoryLinks = menuCategories ? [
-    { href: '/catalogo', label: 'Todos os produtos' },
-    ...menuCategories.map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
-  ] : [{ href: '/catalogo', label: 'Todos os produtos' }];
   
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -144,13 +138,33 @@ export default function Header() {
                             <AccordionItem value="categories" className="border-b border-white/20">
                                 <AccordionTrigger className="p-6 hover:no-underline text-base">Categorias</AccordionTrigger>
                                 <AccordionContent className="bg-white/10">
-                                    <div className="flex flex-col gap-4 p-6">
-                                        {areMenuCategoriesLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className='h-6 w-3/4 bg-gray-700' />) 
-                                        : categoryLinks.map((link) => (
-                                            <Link key={link.href} href={link.href} className="transition-colors hover:text-primary">
-                                                {link.label}
-                                            </Link>
-                                        ))}
+                                    <div className="flex flex-col p-6">
+                                        <Link href="/catalogo" className="transition-colors hover:text-primary mb-4">Todos os Produtos</Link>
+                                        <Accordion type="multiple" className="w-full">
+                                            {areMenuCategoriesLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className='h-8 w-full bg-gray-700 mb-2' />) 
+                                            : categoryTree.map((category) => (
+                                                category.children && category.children.length > 0 ? (
+                                                    <AccordionItem key={category.id} value={category.id} className="border-b border-white/20">
+                                                        <AccordionTrigger className='py-3 hover:no-underline'>
+                                                            <Link href={`/catalogo?categoria=${category.id}`} className='hover:text-primary'>{category.name}</Link>
+                                                        </AccordionTrigger>
+                                                        <AccordionContent className='pt-2 pl-4'>
+                                                            <div className="flex flex-col gap-3">
+                                                                {category.children.map(child => (
+                                                                    <Link key={child.id} href={`/catalogo?categoria=${child.id}`} className="transition-colors hover:text-primary text-sm">
+                                                                        {child.name}
+                                                                    </Link>
+                                                                ))}
+                                                            </div>
+                                                        </AccordionContent>
+                                                    </AccordionItem>
+                                                ) : (
+                                                    <Link key={category.id} href={`/catalogo?categoria=${category.id}`} className="transition-colors hover:text-primary py-3 block border-b border-white/20">
+                                                        {category.name}
+                                                    </Link>
+                                                )
+                                            ))}
+                                        </Accordion>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -216,9 +230,9 @@ export default function Header() {
                                 Todos os produtos
                             </NavigationMenuTrigger>
                             <NavigationMenuContent>
-                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-popover text-popover-foreground">
+                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                                     {areMenuCategoriesLoading ? (
-                                        Array.from({length: 6}).map((_, i) => <Skeleton key={i} className='h-10 w-full bg-gray-200' />)
+                                        Array.from({length: 6}).map((_, i) => <Skeleton key={i} className='h-10 w-full bg-gray-700' />)
                                     ) : (
                                         categoryTree.map((category) => (
                                             <ListItem
@@ -291,12 +305,12 @@ const ListItem = forwardRef<React.ElementRef<"a">, React.ComponentPropsWithoutRe
         <a
           ref={ref}
           className={cn(
-            'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white/10 hover:text-primary focus:bg-white/10 focus:text-primary',
+            'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-white/10 focus:bg-white/10',
             className
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none text-white">{title}</div>
+          <div className="text-sm font-medium leading-none">{title}</div>
           <div className="line-clamp-2 text-sm leading-snug text-gray-400">
             {children}
           </div>
