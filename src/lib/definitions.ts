@@ -66,7 +66,8 @@ export type CartItem = {
   quantity: number;
   selectedFormat: string;
   selectedFinishing: string;
-  totalPrice: number; // Agora é usado apenas para exibição no cliente
+  totalPrice: number; 
+  artworkFee?: number; // Custo opcional da arte
 };
 
 export type Favorite = {

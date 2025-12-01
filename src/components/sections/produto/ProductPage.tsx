@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -34,6 +33,7 @@ import {
 interface ProductPageProps {
   product: Product;
 }
+const ART_DESIGN_COST = 35.00;
 
 export default function ProductPage({ product }: ProductPageProps) {
     const [quantity, setQuantity] = useState<number>(1);
@@ -53,8 +53,6 @@ export default function ProductPage({ product }: ProductPageProps) {
     const { addToCart } = useCart();
     const { toast } = useToast();
     const router = useRouter();
-
-    const ART_DESIGN_COST = 35.00;
 
     // Effect to safely initialize state when product data is available.
     useEffect(() => {
@@ -103,12 +101,17 @@ export default function ProductPage({ product }: ProductPageProps) {
     }, [quantity, product, artworkOption]);
 
     const handleAddToCart = () => {
+        const artworkFee = artworkOption === 'professional-design' ? ART_DESIGN_COST : 0;
+        const finalPrice = selectedPrice;
+
         const cartItem = {
-            id: `${product.id}-${selectedFormat}-${selectedFinishing}`,
+            id: `${product.id}-${selectedFormat}-${selectedFinishing}-${artworkFee > 0 ? 'with-design' : 'no-design'}`,
             product,
             quantity,
             selectedFormat,
             selectedFinishing,
+            artworkFee: artworkFee,
+            totalPrice: finalPrice, // Envia o preço final calculado
         };
         addToCart(cartItem);
         toast({
@@ -158,7 +161,7 @@ export default function ProductPage({ product }: ProductPageProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
                 {/* Imagens do Produto */}
                 <div className="flex flex-col-reverse md:flex-row gap-4">
-                    <div className="flex md:flex-col gap-2 h-20 md:h-auto md:w-20">
+                    <div className="flex flex-row md:flex-col gap-2 h-20 md:h-auto md:w-20">
                         {product.imageUrl?.slice(0, 4).map((url, i) => (
                         <button
                             key={i} 
@@ -496,8 +499,3 @@ export default function ProductPage({ product }: ProductPageProps) {
         </TooltipProvider>
       );
 }
-
-    
-
-    
-

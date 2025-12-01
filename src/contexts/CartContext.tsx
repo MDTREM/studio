@@ -29,27 +29,30 @@ const getClientSidePrice = (product: Product, quantity: number): number => {
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const addToCart = (item: Omit<CartItem, 'totalPrice'>) => {
+  const addToCart = (item: CartItem) => {
     setCartItems(prevItems => {
         const existingItemIndex = prevItems.findIndex(
             i => i.product.id === item.product.id && 
                  i.selectedFormat === item.selectedFormat && 
-                 i.selectedFinishing === item.selectedFinishing
+                 i.selectedFinishing === item.selectedFinishing &&
+                 // Considera a taxa de design na unicidade do item
+                 i.artworkFee === item.artworkFee 
         );
-        
-        const price = getClientSidePrice(item.product, item.quantity);
 
         if (existingItemIndex > -1) {
+            // Se o item já existe (com a mesma opção de arte), apenas atualiza a quantidade
             const updatedItems = [...prevItems];
             const existingItem = updatedItems[existingItemIndex];
             const newQuantity = existingItem.quantity + item.quantity;
             
             existingItem.quantity = newQuantity;
-            existingItem.totalPrice = getClientSidePrice(existingItem.product, newQuantity);
+            // O preço total é a soma dos preços, já que o preço unitário pode variar com a taxa
+            existingItem.totalPrice += item.totalPrice; 
             
             return updatedItems;
         } else {
-            return [...prevItems, { ...item, totalPrice: price }];
+            // Adiciona como um novo item
+            return [...prevItems, item];
         }
     });
   };
@@ -62,8 +65,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === itemId && newQuantity > 0) {
-            const updatedPrice = getClientSidePrice(item.product, newQuantity);
-            return { ...item, quantity: newQuantity, totalPrice: updatedPrice };
+            // Recalcula o preço base e adiciona a taxa de arte se existir
+            const basePrice = getClientSidePrice(item.product, newQuantity);
+            const finalPrice = basePrice + (item.artworkFee || 0);
+            return { ...item, quantity: newQuantity, totalPrice: finalPrice };
         }
         return item;
       }).filter(item => item.quantity > 0)
