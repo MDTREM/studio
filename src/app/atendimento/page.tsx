@@ -31,7 +31,7 @@ export default function AtendimentoPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">Envie sua dúvida</p>
-            <p className="text-lg font-semibold">contato@ourografica.com</p>
+            <p className="text-lg font-semibold">gráficaouro01@gmail.com</p>
           </CardContent>
         </Card>
         <Card className="text-center">
