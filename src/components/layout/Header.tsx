@@ -15,12 +15,21 @@ import {
 import { Input } from '../ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { useCart } from '@/contexts/CartContext';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { Category } from '@/lib/definitions';
 import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '../ui/skeleton';
+import {
+    NavigationMenu,
+    NavigationMenuContent,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+    NavigationMenuTrigger,
+    navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu"
 
 
 const mobileUserLinks = [
@@ -36,6 +45,11 @@ const mobileServiceLinks = [
     { href: '/servicos', label: 'Conserto de Impressoras', icon: <Wrench className="h-5 w-5" /> },
 ]
 
+interface CategoryWithChildren extends Category {
+  children: CategoryWithChildren[];
+}
+
+
 export default function Header() {
   const { cartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,28 +58,46 @@ export default function Header() {
 
   const allCategoriesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'categories'));
-  }, [firestore]);
-
-  const menuCategoriesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
     return query(collection(firestore, 'categories'), where("showInMenu", "==", true));
   }, [firestore]);
 
-  const { data: allCategories, isLoading: areAllCategoriesLoading } = useCollection<Category>(allCategoriesQuery);
-  const { data: menuCategories, isLoading: areMenuCategoriesLoading } = useCollection<Category>(menuCategoriesQuery);
+  const { data: menuCategories, isLoading: areMenuCategoriesLoading } = useCollection<Category>(allCategoriesQuery);
 
-  const categoryLinks = allCategories ? [
+  const categoryTree = useMemo(() => {
+    if (!menuCategories) return [];
+    
+    const categoryMap = new Map<string, CategoryWithChildren>();
+    const rootCategories: CategoryWithChildren[] = [];
+
+    // Initialize map with all categories and an empty children array
+    menuCategories.forEach(category => {
+      categoryMap.set(category.id, { ...category, children: [] });
+    });
+
+    // Populate the children array for each parent
+    menuCategories.forEach(category => {
+      if (category.parentId && categoryMap.has(category.parentId)) {
+        const parent = categoryMap.get(category.parentId)!;
+        parent.children.push(categoryMap.get(category.id)!);
+      }
+    });
+
+    // Find root categories (those without a parentId or with a non-existent parent)
+    menuCategories.forEach(category => {
+      if (!category.parentId || !categoryMap.has(category.parentId)) {
+        rootCategories.push(categoryMap.get(category.id)!);
+      }
+    });
+
+    return rootCategories;
+  }, [menuCategories]);
+
+
+  const categoryLinks = menuCategories ? [
     { href: '/catalogo', label: 'Todos os produtos' },
-    ...allCategories.map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
+    ...menuCategories.map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
   ] : [{ href: '/catalogo', label: 'Todos os produtos' }];
   
-  const secondaryNavLinks = menuCategories ? [
-      { href: '/catalogo', label: 'Todos os produtos', icon: <Menu className="h-5 w-5" />, dropdown: true },
-      ...menuCategories.slice(0, 5).map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
-  ] : [];
-
-
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -77,10 +109,10 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
-        <div className="container flex h-20 max-w-7xl items-center justify-between">
+        <div className="container flex h-20 max-w-7xl items-center">
           
           {/* Mobile Menu (Left) */}
-          <div className="flex-1 md:hidden">
+          <div className="flex-1 flex justify-start md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/10 hover:text-white">
@@ -116,7 +148,7 @@ export default function Header() {
                                 <AccordionTrigger className="p-6 hover:no-underline text-base">Categorias</AccordionTrigger>
                                 <AccordionContent className="bg-white/10">
                                     <div className="flex flex-col gap-4 p-6">
-                                        {areAllCategoriesLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className='h-6 w-3/4 bg-gray-700' />) 
+                                        {areMenuCategoriesLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className='h-6 w-3/4 bg-gray-700' />) 
                                         : categoryLinks.map((link) => (
                                             <Link key={link.href} href={link.href} className="transition-colors hover:text-primary">
                                                 {link.label}
@@ -146,9 +178,9 @@ export default function Header() {
             </Sheet>
           </div>
           
-          {/* Logo (Centered on mobile, left on desktop) */}
-          <div className="flex-shrink-0 md:flex-initial">
-            <Link href="/">
+          {/* Logo */}
+          <div className="flex-shrink-0 md:flex-1 md:flex md:justify-start">
+             <Link href="/">
                 <Logo />
             </Link>
           </div>
@@ -182,26 +214,77 @@ export default function Header() {
 
         <div className="hidden md:block border-t border-white/20">
             <div className="container max-w-7xl">
-                <nav className="flex items-center justify-center gap-6 text-sm font-medium h-12">
-                {areMenuCategoriesLoading ? (
-                  Array.from({length: 6}).map((_, i) => <Skeleton key={i} className='h-5 w-24 bg-gray-700' />)
-                ) : (
-                  secondaryNavLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="flex items-center gap-1 transition-colors text-gray-300 hover:text-primary"
-                    >
-                      {link.icon}
-                      {link.label}
-                      {link.dropdown && <ChevronDown className="h-4 w-4" />}
-                    </Link>
-                  ))
-                )}
-                </nav>
+                <NavigationMenu>
+                    <NavigationMenuList>
+                         <NavigationMenuItem>
+                            <Link href="/catalogo" legacyBehavior passHref>
+                                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                    Todos os produtos
+                                </NavigationMenuLink>
+                            </Link>
+                        </NavigationMenuItem>
+                        {areMenuCategoriesLoading ? (
+                             Array.from({length: 5}).map((_, i) => (
+                                <NavigationMenuItem key={i}>
+                                    <Skeleton className='h-5 w-24 bg-gray-700' />
+                                </NavigationMenuItem>
+                             ))
+                        ) : (
+                            categoryTree.map((category) => (
+                                <NavigationMenuItem key={category.id}>
+                                    {category.children && category.children.length > 0 ? (
+                                        <>
+                                            <NavigationMenuTrigger>{category.name}</NavigationMenuTrigger>
+                                            <NavigationMenuContent>
+                                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                                                    {category.children.map((subCategory) => (
+                                                        <ListItem
+                                                            key={subCategory.id}
+                                                            title={subCategory.name}
+                                                            href={`/catalogo?categoria=${subCategory.id}`}
+                                                        >
+                                                            {/* You can add a description for subcategories in the future */}
+                                                        </ListItem>
+                                                    ))}
+                                                </ul>
+                                            </NavigationMenuContent>
+                                        </>
+                                    ) : (
+                                        <Link href={`/catalogo?categoria=${category.id}`} legacyBehavior passHref>
+                                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                                {category.name}
+                                            </NavigationMenuLink>
+                                        </Link>
+                                    )}
+                                </NavigationMenuItem>
+                            ))
+                        )}
+                    </NavigationMenuList>
+                </NavigationMenu>
             </div>
         </div>
       </header>
     </>
   );
 }
+
+const ListItem = (({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  )
+})
+ListItem.displayName = "ListItem"
+
