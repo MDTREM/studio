@@ -254,14 +254,13 @@ export default function Header() {
                                         <>
                                             <NavigationMenuTrigger>{category.name}</NavigationMenuTrigger>
                                             <NavigationMenuContent>
-                                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                                                <ul className="grid w-[200px] gap-3 p-4 md:w-[250px]">
                                                     {category.children.map((subCategory) => (
                                                         <ListItem
                                                             key={subCategory.id}
                                                             title={subCategory.name}
                                                             href={`/catalogo?categoria=${subCategory.id}`}
-                                                        >
-                                                        </ListItem>
+                                                        />
                                                     ))}
                                                 </ul>
                                             </NavigationMenuContent>
