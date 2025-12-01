@@ -18,6 +18,7 @@ import * as z from 'zod';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -46,11 +47,16 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
   const { toast } = useToast();
   const firestore = useFirestore();
 
+  // Use the correct direct URL for "cartoes-de-visita"
+  const initialImageUrl = category.id === 'cartoes-de-visita'
+    ? 'https://i.imgur.com/7OHUG77.png'
+    : category.imageUrl;
+
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       name: category.name,
-      imageUrl: category.imageUrl,
+      imageUrl: initialImageUrl,
       imageHint: category.imageHint,
     },
   });
@@ -111,6 +117,9 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
                   <FormControl>
                     <Input placeholder="https://..." {...field} />
                   </FormControl>
+                  <FormDescription>
+                    Use o link direto da imagem (geralmente terminando em .png ou .jpg).
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
