@@ -32,11 +32,14 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 const categoryFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida ou faça upload de uma imagem.' }),
   parentId: z.string().optional(),
+  showOnHome: z.boolean().optional(),
+  showInMenu: z.boolean().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -64,6 +67,8 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
       name: category.name,
       imageUrl: category.imageUrl,
       parentId: category.parentId || '',
+      showOnHome: category.showOnHome ?? true,
+      showInMenu: category.showInMenu ?? true,
     },
   });
 
@@ -105,6 +110,8 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
         name: data.name,
         imageUrl: data.imageUrl,
         parentId: data.parentId || null,
+        showOnHome: data.showOnHome,
+        showInMenu: data.showInMenu,
     }
 
     updateDocumentNonBlocking(categoryRef, updatedData);
@@ -129,7 +136,7 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto px-1">
             <FormItem>
                 <FormLabel>ID da Categoria</FormLabel>
                 <FormControl>
@@ -190,9 +197,44 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
                     </div>
                     {uploadProgress > 0 && <Progress value={uploadProgress} className="h-2 mt-2" />}
                   <FormDescription>
-                    Use o link direto da imagem ou faça o upload.
+                    Use o link direto da imagem (final .png, .jpg) ou faça o upload.
                   </FormDescription>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="showOnHome"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Mostrar na Página Inicial</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="showInMenu"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Mostrar no Menu Principal</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />

@@ -29,6 +29,8 @@ export type Category = {
   imageUrl: string;
   imageHint: string;
   parentId?: string; // ID da categoria pai
+  showOnHome?: boolean;
+  showInMenu?: boolean;
 };
 
 export type OrderStatus = 'Em análise' | 'Em produção' | 'Pronto para retirada' | 'Entregue' | 'Cancelado';

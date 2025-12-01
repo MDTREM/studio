@@ -9,7 +9,7 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { Category } from '@/lib/definitions';
 import Image from 'next/image';
 
@@ -17,7 +17,8 @@ export default function CategoriesSection() {
   const firestore = useFirestore();
   const categoriesQuery = useMemoFirebase(() => {
       if (!firestore) return null;
-      return query(collection(firestore, "categories"));
+      // Filtra apenas as categorias que devem ser mostradas na home
+      return query(collection(firestore, "categories"), where("showOnHome", "==", true));
   }, [firestore]);
   const { data: categories, isLoading } = useCollection<Category>(categoriesQuery);
 
@@ -25,7 +26,8 @@ export default function CategoriesSection() {
       return <div className="container max-w-7xl mx-auto px-4 text-center py-12">Carregando categorias...</div>;
   }
 
-  if (!categories) {
+  // Se não houver categorias para mostrar, não renderiza a seção
+  if (!categories || categories.length === 0) {
     return null;
   }
 
@@ -38,13 +40,13 @@ export default function CategoriesSection() {
         <Carousel
             opts={{
                 align: "start",
-                loop: true,
+                loop: categories.length > 6, // Ativa o loop se houver mais categorias do que o visível
             }}
             className="w-full"
         >
             <CarouselContent>
                 {categories.map((category) => {
-                    const imageUrl = category.imageUrl;
+                    const imageUrl = category.imageUrl || 'https://placehold.co/400x400';
                     
                     return (
                       <CarouselItem key={category.id} className="basis-1/2 md:basis-1/4 lg:basis-1/6">

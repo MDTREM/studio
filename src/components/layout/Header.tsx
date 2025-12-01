@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { Category } from '@/lib/definitions';
-import { collection, query } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '../ui/skeleton';
 
 
@@ -42,21 +42,27 @@ export default function Header() {
   const router = useRouter();
   const firestore = useFirestore();
 
-  const categoriesQuery = useMemoFirebase(() => {
+  const allCategoriesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'categories'));
   }, [firestore]);
 
-  const { data: categories, isLoading: areCategoriesLoading } = useCollection<Category>(categoriesQuery);
+  const menuCategoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'categories'), where("showInMenu", "==", true));
+  }, [firestore]);
 
-  const categoryLinks = categories ? [
+  const { data: allCategories, isLoading: areAllCategoriesLoading } = useCollection<Category>(allCategoriesQuery);
+  const { data: menuCategories, isLoading: areMenuCategoriesLoading } = useCollection<Category>(menuCategoriesQuery);
+
+  const categoryLinks = allCategories ? [
     { href: '/catalogo', label: 'Todos os produtos' },
-    ...categories.map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
+    ...allCategories.map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
   ] : [{ href: '/catalogo', label: 'Todos os produtos' }];
   
-  const secondaryNavLinks = categories ? [
+  const secondaryNavLinks = menuCategories ? [
       { href: '/catalogo', label: 'Todos os produtos', icon: <Menu className="h-5 w-5" />, dropdown: true },
-      ...categories.slice(0, 5).map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
+      ...menuCategories.slice(0, 5).map(c => ({ href: `/catalogo?categoria=${c.id}`, label: c.name }))
   ] : [];
 
 
@@ -71,10 +77,10 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
-        <div className="container flex h-20 max-w-7xl items-center justify-between md:justify-start">
+        <div className="container flex h-20 max-w-7xl items-center justify-between">
           
           {/* Mobile Menu (Left) */}
-          <div className="md:hidden">
+          <div className="flex-1 md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/10 hover:text-white">
@@ -110,7 +116,7 @@ export default function Header() {
                                 <AccordionTrigger className="p-6 hover:no-underline text-base">Categorias</AccordionTrigger>
                                 <AccordionContent className="bg-white/10">
                                     <div className="flex flex-col gap-4 p-6">
-                                        {areCategoriesLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className='h-6 w-3/4 bg-gray-700' />) 
+                                        {areAllCategoriesLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className='h-6 w-3/4 bg-gray-700' />) 
                                         : categoryLinks.map((link) => (
                                             <Link key={link.href} href={link.href} className="transition-colors hover:text-primary">
                                                 {link.label}
@@ -141,7 +147,7 @@ export default function Header() {
           </div>
           
           {/* Logo (Centered on mobile, left on desktop) */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 md:flex-initial">
             <Link href="/">
                 <Logo />
             </Link>
@@ -160,7 +166,7 @@ export default function Header() {
           </div>
 
           {/* User Nav and Cart (Right) */}
-          <div className="flex justify-end items-center gap-4">
+          <div className="flex flex-1 justify-end items-center gap-4">
             <div className="hidden md:flex">
                 <UserNav />
             </div>
@@ -177,7 +183,7 @@ export default function Header() {
         <div className="hidden md:block border-t border-white/20">
             <div className="container max-w-7xl">
                 <nav className="flex items-center justify-center gap-6 text-sm font-medium h-12">
-                {areCategoriesLoading ? (
+                {areMenuCategoriesLoading ? (
                   Array.from({length: 6}).map((_, i) => <Skeleton key={i} className='h-5 w-24 bg-gray-700' />)
                 ) : (
                   secondaryNavLinks.map((link) => (

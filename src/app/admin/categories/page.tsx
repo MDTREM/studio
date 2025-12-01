@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Category } from "@/lib/definitions";
-import { MoreHorizontal } from "lucide-react";
+import { CheckCircle2, MoreHorizontal, XCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast";
 import { useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export default function AdminCategoriesPage() {
   const firestore = useFirestore();
@@ -83,6 +85,7 @@ export default function AdminCategoriesPage() {
                   <span className="sr-only">Imagem</span>
                 </TableHead>
                 <TableHead>Nome</TableHead>
+                <TableHead>Visibilidade</TableHead>
                 <TableHead className="hidden md:table-cell">ID</TableHead>
                 <TableHead>Categoria Pai</TableHead>
                 <TableHead>
@@ -103,6 +106,18 @@ export default function AdminCategoriesPage() {
                     />
                   </TableCell>
                   <TableCell className="font-medium">{category.name}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1.5">
+                      <Badge variant={category.showOnHome ? "default" : "secondary"} className="w-fit">
+                        {category.showOnHome ? <CheckCircle2 className="mr-1 h-3 w-3" /> : <XCircle className="mr-1 h-3 w-3" />}
+                        Início
+                      </Badge>
+                      <Badge variant={category.showInMenu ? "default" : "secondary"} className="w-fit">
+                        {category.showInMenu ? <CheckCircle2 className="mr-1 h-3 w-3" /> : <XCircle className="mr-1 h-3 w-3" />}
+                        Menu
+                      </Badge>
+                    </div>
+                  </TableCell>
                   <TableCell className="hidden md:table-cell">{category.id}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {category.parentId ? categoryMap.get(category.parentId) : 'Nenhuma'}

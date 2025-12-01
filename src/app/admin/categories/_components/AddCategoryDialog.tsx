@@ -31,12 +31,15 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Category } from '@/lib/definitions';
+import { Switch } from '@/components/ui/switch';
 
 const categoryFormSchema = z.object({
   id: z.string().min(2, { message: 'O ID deve ter pelo menos 2 caracteres.' }).regex(/^[a-z0-9-]+$/, 'Use apenas letras minúsculas, números e hífens.'),
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida ou faça upload de uma imagem.' }),
   parentId: z.string().optional(),
+  showOnHome: z.boolean().optional(),
+  showInMenu: z.boolean().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -60,6 +63,8 @@ export default function AddCategoryDialog() {
       name: '',
       imageUrl: '',
       parentId: '',
+      showOnHome: true,
+      showInMenu: true,
     },
   });
 
@@ -103,6 +108,8 @@ export default function AddCategoryDialog() {
       name: data.name,
       imageUrl: data.imageUrl,
       parentId: data.parentId || null,
+      showOnHome: data.showOnHome,
+      showInMenu: data.showInMenu,
     }
 
     setDocumentNonBlocking(categoryRef, categoryData, { merge: false });
@@ -133,7 +140,7 @@ export default function AddCategoryDialog() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto px-1">
             <FormField
               control={form.control}
               name="id"
@@ -191,7 +198,7 @@ export default function AddCategoryDialog() {
                     <FormLabel>URL da Imagem</FormLabel>
                     <div className="flex items-center gap-2">
                         <FormControl>
-                            <Input placeholder="URL da imagem ou faça upload" {...field} />
+                            <Input placeholder="https://... ou faça upload" {...field} />
                         </FormControl>
                         <Input id={`upload-category-new`} type="file" className="hidden" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])} />
                         <Button type="button" variant="outline" size="icon" asChild>
@@ -203,6 +210,42 @@ export default function AddCategoryDialog() {
                 </FormItem>
               )}
             />
+            
+            <FormField
+              control={form.control}
+              name="showOnHome"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Mostrar na Página Inicial</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="showInMenu"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Mostrar no Menu Principal</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
             <DialogFooter>
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                     {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
