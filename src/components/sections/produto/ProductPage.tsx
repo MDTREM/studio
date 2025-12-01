@@ -53,8 +53,6 @@ export default function ProductPage({ product }: ProductPageProps) {
     const { toast } = useToast();
     const router = useRouter();
 
-    const ART_DESIGN_COST = 35.00;
-
     // Effect to safely initialize state when product data is available.
     useEffect(() => {
         if (product) {
@@ -138,6 +136,8 @@ export default function ProductPage({ product }: ProductPageProps) {
         return product?.variations?.[key] && Array.isArray(product.variations[key]) && (product.variations[key] as any[]).length > 0 && (product.variations[key] as any[])[0] !== '';
     }
 
+    const ART_DESIGN_COST = 35.00;
+
     return (
         <TooltipProvider>
         <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -158,9 +158,12 @@ export default function ProductPage({ product }: ProductPageProps) {
                 <div className="flex flex-col-reverse md:flex-row gap-4">
                     <div className="flex md:flex-col gap-2 w-full md:w-20">
                         {product.imageUrl?.slice(0, 4).map((url, i) => (
-                        <div 
+                        <button
                             key={i} 
-                            className="aspect-square relative bg-secondary/50 rounded-md cursor-pointer hover:ring-2 hover:ring-primary"
+                            className={cn(
+                                "aspect-square relative bg-secondary/50 rounded-md cursor-pointer ring-2 ring-transparent hover:ring-primary transition-all",
+                                mainImage === url && "ring-primary"
+                            )}
                             onClick={() => setMainImage(url)}
                         >
                             <Image
@@ -170,7 +173,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                                 className="object-cover rounded-md"
                                 data-ai-hint={product.imageHint}
                             />
-                        </div>
+                        </button>
                         ))}
                     </div>
                     <div className="aspect-square w-full relative bg-secondary rounded-lg">
