@@ -71,10 +71,17 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
-        <div className="container flex h-20 max-w-7xl items-center justify-between gap-4">
+        <div className="container flex h-20 max-w-7xl items-center">
           
-          {/* Mobile Header */}
-          <div className="md:hidden flex items-center gap-2">
+          {/* Logo */}
+          <div className="md:w-1/5">
+            <Link href="/">
+                <Logo />
+            </Link>
+          </div>
+          
+          {/* Mobile Header - Trigger */}
+          <div className="md:hidden flex-1 flex justify-start">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/10 hover:text-white">
@@ -138,19 +145,26 @@ export default function Header() {
                 </div>
               </SheetContent>
             </Sheet>
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white">
-                <Search className="h-6 w-6" />
-            </Button>
           </div>
 
-          <div className="flex justify-center flex-1 md:flex-none">
-            <Link href="/">
-                <Logo />
-            </Link>
+          {/* Desktop Search */}
+          <div className="hidden md:flex flex-1 justify-center px-8">
+            <form className="w-full max-w-xl" onSubmit={handleSearch}>
+              <div className="relative w-full">
+                  <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-white/20 text-white border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-gray-300" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                  <Button type="submit" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full text-white hover:bg-white/10 hover:text-white">
+                      <Search className="h-5 w-5" />
+                  </Button>
+              </div>
+            </form>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 md:hidden text-white hover:bg-white/10 hover:text-white">
+
+          {/* User Nav and Cart */}
+          <div className="flex justify-end items-center gap-4 md:w-1/5">
+            <div className="hidden md:flex">
+                <UserNav />
+            </div>
+             <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
                 <Link href="/carrinho">
                     <ShoppingCart className="h-6 w-6" />
                     {cartCount > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
@@ -158,35 +172,8 @@ export default function Header() {
                 </Link>
             </Button>
           </div>
-
-
-          {/* Desktop Header */}
-          <form className="hidden md:flex flex-1 max-w-xl" onSubmit={handleSearch}>
-            <div className="relative w-full">
-                <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-white/20 text-white border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-gray-300" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                <Button type="submit" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full text-white hover:bg-white/10 hover:text-white">
-                    <Search className="h-5 w-5" />
-                </Button>
-            </div>
-          </form>
-
-          <div className="hidden md:flex items-center gap-4">
-                <Link href="/atendimento" className="flex items-center gap-2 text-sm font-medium hover:text-primary">
-                    <MessageSquare className="h-6 w-6" />
-                    <div>
-                        <span className="text-gray-300 text-xs">Central de</span> <br/> <strong>Atendimento</strong>
-                    </div>
-                </Link>
-                <UserNav />
-                 <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
-                    <Link href="/carrinho">
-                        <ShoppingCart className="h-6 w-6" />
-                        {cartCount > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
-                        <span className="sr-only">Carrinho</span>
-                    </Link>
-                </Button>
-          </div>
         </div>
+
         <div className="hidden md:block border-t border-white/20">
             <div className="container max-w-7xl">
                 <nav className="flex items-center justify-center gap-6 text-sm font-medium h-12">
