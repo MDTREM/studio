@@ -54,6 +54,8 @@ export default function ProductPage({ product }: ProductPageProps) {
     const { toast } = useToast();
     const router = useRouter();
 
+    const ART_DESIGN_COST = 35.00;
+
     // Effect to safely initialize state when product data is available.
     useEffect(() => {
         if (product) {
@@ -137,7 +139,6 @@ export default function ProductPage({ product }: ProductPageProps) {
         return product?.variations?.[key] && Array.isArray(product.variations[key]) && (product.variations[key] as any[]).length > 0 && (product.variations[key] as any[])[0] !== '';
     }
 
-    const ART_DESIGN_COST = 35.00;
 
     return (
         <TooltipProvider>
@@ -499,3 +500,4 @@ export default function ProductPage({ product }: ProductPageProps) {
     
 
     
+
