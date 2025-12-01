@@ -44,9 +44,7 @@ export default function CategoriesSection() {
         >
             <CarouselContent>
                 {categories.map((category) => {
-                    const imageUrl = category.id === 'cartoes-de-visita' 
-                      ? 'https://i.imgur.com/7OHUG77.png' 
-                      : category.imageUrl;
+                    const imageUrl = category.imageUrl;
                     
                     return (
                       <CarouselItem key={category.id} className="basis-1/2 md:basis-1/4 lg:basis-1/6">
@@ -59,7 +57,6 @@ export default function CategoriesSection() {
                                         alt={category.name} 
                                         fill 
                                         className="object-cover" 
-                                        data-ai-hint={category.imageHint}
                                         sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
                                       />
                                   </div>

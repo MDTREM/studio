@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -25,14 +25,16 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { updateDocumentNonBlocking, useFirestore } from '@/firebase';
+import { updateDocumentNonBlocking, useFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Category } from '@/lib/definitions';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 
 const categoryFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
-  imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida.' }),
-  imageHint: z.string().min(2, { message: 'A dica de imagem deve ter pelo menos 2 caracteres.' }),
+  imageUrl: z.string().url({ message: 'Por favor, insira uma URL válida ou faça upload de uma imagem.' }),
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
@@ -45,21 +47,45 @@ interface EditCategoryDialogProps {
 export default function EditCategoryDialog({ category, children }: EditCategoryDialogProps) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
-  const firestore = useFirestore();
-
-  // Use the correct direct URL for "cartoes-de-visita"
-  const initialImageUrl = category.id === 'cartoes-de-visita'
-    ? 'https://i.imgur.com/7OHUG77.png'
-    : category.imageUrl;
+  const { firestore, storage } = useFirebase();
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
       name: category.name,
-      imageUrl: initialImageUrl,
-      imageHint: category.imageHint,
+      imageUrl: category.imageUrl,
     },
   });
+
+  const handleFileUpload = (file: File) => {
+    if (!storage) return;
+    if (!file.type.startsWith('image/')) {
+        toast({ title: "Formato inválido", description: "Por favor, selecione um arquivo de imagem.", variant: "destructive" });
+        return;
+    }
+
+    const storageRef = ref(storage, `categories/${Date.now()}-${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on('state_changed',
+        (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(progress);
+        },
+        (error) => {
+            console.error("Upload error:", error);
+            toast({ title: "Erro no Upload", description: "Não foi possível enviar a imagem.", variant: "destructive" });
+            setUploadProgress(0);
+        },
+        () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                form.setValue(`imageUrl`, downloadURL, { shouldValidate: true });
+                setUploadProgress(0); // Reset progress
+            });
+        }
+    );
+  };
 
   const onSubmit = (data: CategoryFormValues) => {
     if (!firestore) return;
@@ -114,25 +140,19 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>URL da Imagem</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://..." {...field} />
-                  </FormControl>
+                   <div className="flex items-center gap-2">
+                        <FormControl>
+                            <Input placeholder="URL da imagem ou faça upload" {...field} />
+                        </FormControl>
+                        <Input id={`upload-category-edit-${category.id}`} type="file" className="hidden" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])} />
+                        <Button type="button" variant="outline" size="icon" asChild>
+                            <Label htmlFor={`upload-category-edit-${category.id}`} className="cursor-pointer"><Upload className="h-4 w-4" /></Label>
+                        </Button>
+                    </div>
+                    {uploadProgress > 0 && <Progress value={uploadProgress} className="h-2 mt-2" />}
                   <FormDescription>
-                    Use o link direto da imagem (geralmente terminando em .png ou .jpg).
+                    Use o link direto da imagem ou faça o upload.
                   </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="imageHint"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Dica de Imagem (para IA)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="ex: business cards" {...field} />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

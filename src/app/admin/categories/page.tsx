@@ -93,7 +93,6 @@ export default function AdminCategoriesPage() {
                       height="64"
                       src={category.imageUrl}
                       width="64"
-                      data-ai-hint={category.imageHint}
                     />
                   </TableCell>
                   <TableCell className="font-medium">{category.name}</TableCell>
