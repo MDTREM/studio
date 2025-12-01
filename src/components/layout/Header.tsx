@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/shared/Logo';
 import UserNav from '@/components/shared/UserNav';
-import { Menu, Search, ShoppingCart, MessageSquare, ChevronDown, Truck, User, Phone, Heart, Package, Wrench } from 'lucide-react';
+import { Menu, Search, ShoppingCart, MessageSquare, ChevronDown, Truck, User, Phone, Heart, Package, Wrench, Brush } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -277,11 +277,11 @@ export default function Header() {
                                             </NavigationMenuContent>
                                         </>
                                     ) : (
-                                        <Link href={`/catalogo?categoria=${category.id}`} legacyBehavior passHref>
-                                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                                            <Link href={`/catalogo?categoria=${category.id}`}>
                                                 {category.name}
-                                            </NavigationMenuLink>
-                                        </Link>
+                                            </Link>
+                                        </NavigationMenuLink>
                                     )}
                                 </NavigationMenuItem>
                             ))
@@ -319,3 +319,5 @@ const ListItem = forwardRef<React.ElementRef<"a">, React.ComponentPropsWithoutRe
   )
 })
 ListItem.displayName = "ListItem"
+
+    
