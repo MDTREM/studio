@@ -162,14 +162,13 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Subcategoria de (Opcional)</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                   <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Nenhuma (categoria principal)" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Nenhuma (categoria principal)</SelectItem>
                       {/* Remove the current category from the list of possible parents */}
                       {categories?.filter(c => c.id !== category.id).map(cat => (
                         <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>

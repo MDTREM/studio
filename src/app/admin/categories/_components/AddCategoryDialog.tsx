@@ -32,6 +32,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Category } from '@/lib/definitions';
 import { Switch } from '@/components/ui/switch';
+import { FormDescription } from '@/components/ui/form';
 
 const categoryFormSchema = z.object({
   id: z.string().min(2, { message: 'O ID deve ter pelo menos 2 caracteres.' }).regex(/^[a-z0-9-]+$/, 'Use apenas letras minúsculas, números e hífens.'),
@@ -180,7 +181,6 @@ export default function AddCategoryDialog() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Nenhuma (categoria principal)</SelectItem>
                       {categories?.map(cat => (
                         <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                       ))}
@@ -206,6 +206,9 @@ export default function AddCategoryDialog() {
                         </Button>
                     </div>
                     {uploadProgress > 0 && <Progress value={uploadProgress} className="h-2 mt-2" />}
+                    <FormDescription>
+                        Use o link direto da imagem (final .png, .jpg) ou faça o upload.
+                    </FormDescription>
                     <FormMessage />
                 </FormItem>
               )}
