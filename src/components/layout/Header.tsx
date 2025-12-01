@@ -15,7 +15,7 @@ import {
 import { Input } from '../ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { useCart } from '@/contexts/CartContext';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, forwardRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { Category } from '@/lib/definitions';
@@ -30,6 +30,7 @@ import {
     NavigationMenuTrigger,
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
+import { cn } from '@/lib/utils';
 
 
 const mobileUserLinks = [
@@ -69,12 +70,10 @@ export default function Header() {
     const categoryMap = new Map<string, CategoryWithChildren>();
     const rootCategories: CategoryWithChildren[] = [];
 
-    // Initialize map with all categories and an empty children array
     menuCategories.forEach(category => {
       categoryMap.set(category.id, { ...category, children: [] });
     });
 
-    // Populate the children array for each parent
     menuCategories.forEach(category => {
       if (category.parentId && categoryMap.has(category.parentId)) {
         const parent = categoryMap.get(category.parentId)!;
@@ -82,7 +81,6 @@ export default function Header() {
       }
     });
 
-    // Find root categories (those without a parentId or with a non-existent parent)
     menuCategories.forEach(category => {
       if (!category.parentId || !categoryMap.has(category.parentId)) {
         rootCategories.push(categoryMap.get(category.id)!);
@@ -111,7 +109,6 @@ export default function Header() {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
         <div className="container flex h-20 max-w-7xl items-center">
           
-          {/* Mobile Menu (Left) */}
           <div className="flex-1 flex justify-start md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -178,14 +175,12 @@ export default function Header() {
             </Sheet>
           </div>
           
-          {/* Logo */}
-          <div className="flex-shrink-0 md:flex-1 md:flex md:justify-start">
+          <div className="flex-1 flex justify-center md:justify-start">
              <Link href="/">
                 <Logo />
             </Link>
           </div>
           
-          {/* Desktop Search */}
           <div className="hidden md:flex flex-1 justify-center px-8">
             <form className="w-full max-w-xl" onSubmit={handleSearch}>
               <div className="relative w-full">
@@ -197,8 +192,7 @@ export default function Header() {
             </form>
           </div>
 
-          {/* User Nav and Cart (Right) */}
-          <div className="flex flex-1 justify-end items-center gap-4">
+          <div className="flex-1 flex justify-end items-center gap-4">
             <div className="hidden md:flex">
                 <UserNav />
             </div>
@@ -212,16 +206,40 @@ export default function Header() {
           </div>
         </div>
 
-        <div className="hidden md:block border-t border-white/20">
-            <div className="container max-w-7xl">
+        <div className="hidden md:flex justify-center border-t border-white/20">
+            <div className="container max-w-7xl flex justify-center">
                 <NavigationMenu>
                     <NavigationMenuList>
-                         <NavigationMenuItem>
-                            <Link href="/catalogo" legacyBehavior passHref>
-                                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                    Todos os produtos
-                                </NavigationMenuLink>
-                            </Link>
+                        <NavigationMenuItem>
+                            <NavigationMenuTrigger className='flex gap-2'>
+                                <Menu className="h-4 w-4" />
+                                Todos os produtos
+                            </NavigationMenuTrigger>
+                            <NavigationMenuContent>
+                                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                                    {areMenuCategoriesLoading ? (
+                                        Array.from({length: 6}).map((_, i) => <Skeleton key={i} className='h-10 w-full bg-gray-200' />)
+                                    ) : (
+                                        categoryTree.map((category) => (
+                                            <ListItem
+                                                key={category.id}
+                                                title={category.name}
+                                                href={`/catalogo?categoria=${category.id}`}
+                                            >
+                                                <ul className='mt-2 space-y-1'>
+                                                {category.children.map(child => (
+                                                    <li key={child.id}>
+                                                        <Link href={`/catalogo?categoria=${child.id}`} className='text-sm text-muted-foreground hover:text-primary'>
+                                                            {child.name}
+                                                        </Link>
+                                                    </li>
+                                                ))}
+                                                </ul>
+                                            </ListItem>
+                                        ))
+                                    )}
+                                </ul>
+                            </NavigationMenuContent>
                         </NavigationMenuItem>
                         {areMenuCategoriesLoading ? (
                              Array.from({length: 5}).map((_, i) => (
@@ -243,7 +261,6 @@ export default function Header() {
                                                             title={subCategory.name}
                                                             href={`/catalogo?categoria=${subCategory.id}`}
                                                         >
-                                                            {/* You can add a description for subcategories in the future */}
                                                         </ListItem>
                                                     ))}
                                                 </ul>
@@ -268,23 +285,25 @@ export default function Header() {
   );
 }
 
-const ListItem = (({ className, title, children, ...props }, ref) => {
+const ListItem = forwardRef<React.ElementRef<"a">, React.ComponentPropsWithoutRef<"a">>(({ className, title, children, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
         <a
           ref={ref}
-          className={'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'}
+          className={cn(
+            'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+            className
+          )}
           {...props}
         >
           <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+          <div className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
-          </p>
+          </div>
         </a>
       </NavigationMenuLink>
     </li>
   )
 })
 ListItem.displayName = "ListItem"
-
