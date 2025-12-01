@@ -71,12 +71,7 @@ export default function Header() {
 
   return (
     <>
-      <TopBanner>
-        <div className="flex items-center justify-center gap-2">
-            <Truck className="h-5 w-5" />
-            <span>Primeira compra? Use o cupom OURO5</span>
-        </div>
-      </TopBanner>
+      <TopBanner />
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
         <div className="container flex h-20 max-w-7xl items-center justify-between gap-4">
           
