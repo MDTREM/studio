@@ -368,7 +368,7 @@ export default function ProductPage({ product }: ProductPageProps) {
 
 
                 {/* Preço e Compra */}
-                <div className="space-y-4 pb-32">
+                <div className="space-y-4">
                     <div className='border rounded-lg p-4 bg-secondary/30'>
                         <div className='flex items-start gap-3'>
                             <Truck className="h-6 w-6 text-primary mt-1" />
