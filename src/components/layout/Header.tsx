@@ -71,10 +71,10 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
-        <div className="container flex h-20 max-w-7xl items-center">
+        <div className="container flex h-20 max-w-7xl items-center justify-between md:justify-start">
           
           {/* Mobile Menu (Left) */}
-          <div className="flex-1 md:hidden">
+          <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/10 hover:text-white">
@@ -141,7 +141,7 @@ export default function Header() {
           </div>
           
           {/* Logo (Centered on mobile, left on desktop) */}
-          <div className="flex-1 flex justify-center md:justify-start">
+          <div className="flex-shrink-0">
             <Link href="/">
                 <Logo />
             </Link>
@@ -160,7 +160,7 @@ export default function Header() {
           </div>
 
           {/* User Nav and Cart (Right) */}
-          <div className="flex-1 flex justify-end items-center gap-4">
+          <div className="flex justify-end items-center gap-4">
             <div className="hidden md:flex">
                 <UserNav />
             </div>
