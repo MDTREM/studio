@@ -73,15 +73,8 @@ export default function Header() {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
         <div className="container flex h-20 max-w-7xl items-center">
           
-          {/* Logo */}
-          <div className="md:w-1/5">
-            <Link href="/">
-                <Logo />
-            </Link>
-          </div>
-          
-          {/* Mobile Header - Trigger */}
-          <div className="md:hidden flex-1 flex justify-start">
+          {/* Mobile Menu (Left) */}
+          <div className="flex-1 md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/10 hover:text-white">
@@ -146,7 +139,14 @@ export default function Header() {
               </SheetContent>
             </Sheet>
           </div>
-
+          
+          {/* Logo (Centered on mobile, left on desktop) */}
+          <div className="flex-1 flex justify-center md:justify-start">
+            <Link href="/">
+                <Logo />
+            </Link>
+          </div>
+          
           {/* Desktop Search */}
           <div className="hidden md:flex flex-1 justify-center px-8">
             <form className="w-full max-w-xl" onSubmit={handleSearch}>
@@ -159,8 +159,8 @@ export default function Header() {
             </form>
           </div>
 
-          {/* User Nav and Cart */}
-          <div className="flex justify-end items-center gap-4 md:w-1/5">
+          {/* User Nav and Cart (Right) */}
+          <div className="flex-1 flex justify-end items-center gap-4">
             <div className="hidden md:flex">
                 <UserNav />
             </div>
