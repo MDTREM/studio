@@ -12,7 +12,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import TopBanner from './TopBanner';
 import { Input } from '../ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { useCart } from '@/contexts/CartContext';
@@ -71,7 +70,6 @@ export default function Header() {
 
   return (
     <>
-      <TopBanner />
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
         <div className="container flex h-20 max-w-7xl items-center justify-between gap-4">
           
