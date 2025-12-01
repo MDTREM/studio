@@ -50,30 +50,37 @@ export async function POST(req: NextRequest) {
         // O carrinho está armazenado como uma string JSON nos metadados
         const cartItems = JSON.parse(session.metadata.cartItems);
 
-        // Cria um pedido para cada item no carrinho
-        for (const item of cartItems) {
-            const newOrderRef = collection(firestore, 'users', userId, 'orders');
-            const orderData = {
-                customerId: userId,
-                customerName: userData.name, // Obtido do documento do usuário
-                customerEmail: userData.email, // Obtido do documento do usuário
-                orderDate: new Date().toISOString(),
-                status: 'Em análise',
+        // O valor total da sessão Stripe é autoritativo (em centavos)
+        const stripeTotalAmount = session.amount_total;
+
+        // Cria um pedido único com o valor total da sessão Stripe e os itens detalhados
+        const newOrderRef = collection(firestore, 'users', userId, 'orders');
+        const orderData = {
+            customerId: userId,
+            customerName: userData.name,
+            customerEmail: userData.email,
+            orderDate: new Date().toISOString(),
+            status: 'Em análise',
+            // O valor total vem diretamente da sessão Stripe para garantir consistência
+            totalAmount: stripeTotalAmount ? stripeTotalAmount / 100 : 0, 
+            items: cartItems.map((item: any) => ({
                 productName: item.productName,
                 quantity: item.quantity,
-                totalPrice: item.totalPrice,
+                totalPrice: item.totalPrice, // Armazena o preço do item individual
                 variation: {
                     format: item.selectedFormat,
                     finishing: item.selectedFinishing,
                 },
-                artworkUrl: '', // O cliente enviará a arte separadamente
-                createdAt: serverTimestamp(),
-            };
+                artworkFee: item.artworkFee || 0,
+            })),
+            artworkUrl: '', // O cliente enviará a arte separadamente
+            createdAt: serverTimestamp(),
+        };
 
-            const docRef = await addDoc(newOrderRef, orderData);
-            // Salva o ID gerado pelo Firestore dentro do próprio documento
-            await updateDoc(docRef, { id: docRef.id });
-        }
+        const docRef = await addDoc(newOrderRef, orderData);
+        // Salva o ID gerado pelo Firestore dentro do próprio documento
+        await updateDoc(docRef, { id: docRef.id });
+
 
     } catch (error) {
         console.error('❌ Erro ao salvar o pedido no Firestore:', error);

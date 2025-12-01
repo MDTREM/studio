@@ -35,15 +35,29 @@ export type Category = {
 
 export type OrderStatus = 'Em análise' | 'Em produção' | 'Pronto para retirada' | 'Entregue' | 'Cancelado';
 
+// Representa um único item dentro de um pedido
+export type OrderItem = {
+    productName: string;
+    quantity: number;
+    totalPrice: number;
+    variation: {
+        format: string;
+        finishing: string;
+    };
+    artworkFee: number;
+};
+
 export type Order = {
   id?: string; // ID is now optional as it's set after creation
-  customerId: string; // Adicionado para rastrear o dono do pedido
+  customerId: string;
   customerName: string;
   customerEmail: string;
   orderDate: string;
   totalAmount: number;
   status: OrderStatus;
-  productName: string;
+  items: OrderItem[]; // Pedido agora contém uma lista de itens
+  artworkUrl?: string;
+  createdAt?: any;
 };
 
 export type User = {

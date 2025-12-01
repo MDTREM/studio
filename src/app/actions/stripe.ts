@@ -19,9 +19,11 @@ const createLineItemFromCartItem = (item: CartItem) => {
                 ...(imageUrl && { images: [imageUrl] })
             },
             // Stripe espera o valor em centavos.
-            unit_amount: Math.round((item.totalPrice / item.quantity) * 100),
+            // Em vez de recalcular o preço unitário, usamos o preço total do item, que já está correto.
+            unit_amount: Math.round(item.totalPrice * 100),
         },
-        quantity: item.quantity,
+        // A quantidade é sempre 1 porque o preço total já está calculado para o conjunto de itens.
+        quantity: 1,
     };
 };
 
@@ -30,6 +32,7 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
     const stripe = getStripe();
     
     try {
+        // Cada item no carrinho se torna uma linha separada na Stripe com seu preço total.
         const line_items = items.map(createLineItemFromCartItem);
 
         const session = await stripe.checkout.sessions.create({
@@ -40,7 +43,7 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
             cancel_url: `${origin}/checkout/cancel`,
             client_reference_id: userId, 
             metadata: {
-                // Simplificado: A lógica principal agora está no webhook usando o valor total do Stripe.
+                // Simplificado: Armazenamos os detalhes para criação do pedido no webhook.
                 cartItems: JSON.stringify(items.map(item => ({
                     productId: item.product.id,
                     productName: item.product.name,
@@ -48,6 +51,7 @@ export async function createCheckoutSession(items: CartItem[], userId: string) {
                     selectedFormat: item.selectedFormat,
                     selectedFinishing: item.selectedFinishing,
                     artworkFee: item.artworkFee || 0,
+                    totalPrice: item.totalPrice, // Incluindo o preço total para o webhook
                 })))
             }
         });

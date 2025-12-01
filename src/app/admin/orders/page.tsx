@@ -8,10 +8,11 @@ import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking
 import { Order, OrderStatus } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { collection, query, doc, where, orderBy, getDocs, collectionGroup } from "firebase/firestore";
-import { ListFilter, MoreHorizontal } from "lucide-react";
+import { ListFilter, MoreHorizontal, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useAdmin } from "../layout";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const statusColors: { [key in OrderStatus]: string } = {
     'Em análise': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
@@ -33,7 +34,7 @@ export default function AdminOrdersPage() {
         if (!firestore || isCheckingAdmin || !isAdmin) return null;
         
         const baseQuery = collectionGroup(firestore, 'orders');
-        const queryConstraints: any[] = [orderBy("orderDate", "desc")];
+        const queryConstraints: any[] = [orderBy("createdAt", "desc")];
         
         if (statusFilters.length > 0) {
             queryConstraints.push(where("status", "in", statusFilters));
@@ -109,16 +110,11 @@ export default function AdminOrdersPage() {
                         <Table>
                             <TableHeader>
                             <TableRow>
+                                <TableHead className="w-20"><span className="sr-only">Expandir</span></TableHead>
                                 <TableHead>Cliente</TableHead>
-                                <TableHead className="hidden sm:table-cell">
-                                Produto
-                                </TableHead>
-                                <TableHead className="hidden sm:table-cell">
-                                Status
-                                </TableHead>
-                                <TableHead className="hidden md:table-cell">
-                                Data
-                                </TableHead>
+                                <TableHead className="hidden sm:table-cell">Itens</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="hidden md:table-cell">Data</TableHead>
                                 <TableHead className="text-right">Valor</TableHead>
                                 <TableHead>
                                     <span className="sr-only">Ações</span>
@@ -127,51 +123,80 @@ export default function AdminOrdersPage() {
                             </TableHeader>
                             <TableBody>
                             {allOrders.map((order: Order) => (
-                                <TableRow key={order.id}>
-                                    <TableCell>
-                                        <div className="font-medium">{order.customerName}</div>
-                                        <div className="hidden text-sm text-muted-foreground md:inline">
-                                        {order.customerEmail}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="hidden sm:table-cell">
-                                        {order.productName}
-                                    </TableCell>
-                                    <TableCell className="hidden sm:table-cell">
-                                        <Badge variant="outline" className={cn("border", statusColors[order.status])}>
-                                            {order.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="hidden md:table-cell">
-                                        {new Date(order.orderDate).toLocaleDateString('pt-BR')}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {order.totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                                    </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                    <span className="sr-only">Toggle menu</span>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Mudar Status</DropdownMenuLabel>
-                                                <DropdownMenuSeparator />
-                                                {availableStatuses.map(status => (
-                                                    <DropdownMenuItem 
-                                                        key={status} 
-                                                        onClick={() => handleStatusChange(order.id!, order.customerId, status)}
-                                                        disabled={order.status === status}
-                                                    >
-                                                        {status}
-                                                    </DropdownMenuItem>
-                                                ))}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
+                                <Accordion type="single" collapsible asChild key={order.id}>
+                                <AccordionItem value={order.id!} asChild>
+                                    <>
+                                    <TableRow>
+                                        <TableCell>
+                                            <AccordionTrigger className="p-0 [&[data-state=open]>svg]:rotate-90">
+                                                <Package className="h-4 w-4" />
+                                            </AccordionTrigger>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="font-medium">{order.customerName}</div>
+                                            <div className="hidden text-sm text-muted-foreground md:inline">
+                                            {order.customerEmail}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell">{order.items?.length || 0}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className={cn("border", statusColors[order.status])}>
+                                                {order.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="hidden md:table-cell">
+                                            {new Date(order.orderDate).toLocaleDateString('pt-BR')}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {order.totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        </TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">Toggle menu</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Mudar Status</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator />
+                                                    {availableStatuses.map(status => (
+                                                        <DropdownMenuItem 
+                                                            key={status} 
+                                                            onClick={() => handleStatusChange(order.id!, order.customerId, status)}
+                                                            disabled={order.status === status}
+                                                        >
+                                                            {status}
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell colSpan={7} className="p-0">
+                                        <AccordionContent>
+                                            <div className="p-6 bg-muted/50">
+                                                <h4 className="font-semibold mb-2">Detalhes do Pedido #{order.id?.substring(0, 7)}</h4>
+                                                <div className="space-y-2">
+                                                    {order.items?.map((item, index) => (
+                                                        <div key={index} className="flex justify-between items-center text-sm p-2 rounded bg-background">
+                                                            <div>
+                                                                <p><span className="font-medium">{item.quantity}x</span> {item.productName}</p>
+                                                                <p className="text-xs text-muted-foreground">{item.variation.format} / {item.variation.finishing} {item.artworkFee > 0 && "/ Com Design"}</p>
+                                                            </div>
+                                                            <p className="font-medium">{item.totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </AccordionContent>
+                                      </TableCell>
+                                    </TableRow>
+                                    </>
+                                </AccordionItem>
+                                </Accordion>
                             ))}
                             </TableBody>
                         </Table>
