@@ -6,7 +6,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { CreditCard, ShieldCheck, Tag, Truck } from "lucide-react";
+import { CreditCard, ShieldCheck, Brush, Truck } from "lucide-react";
 
 const infoItems = [
     {
@@ -25,9 +25,9 @@ const infoItems = [
         description: "loja 100% segura"
     },
     {
-        icon: <Tag className="h-8 w-8 text-primary" />,
-        title: "Desconto de 5%",
-        description: "cupom OURO5"
+        icon: <Brush className="h-8 w-8 text-primary" />,
+        title: "Design Profissional",
+        description: "Fazemos a sua arte"
     }
 ]
 
