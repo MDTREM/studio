@@ -26,9 +26,9 @@
     },
     {
       "id": "category-banners",
-      "description": "Banners",
-      "imageUrl": "https://images.unsplash.com/photo-1713937187977-740e826d6c1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y29uZmVyZW5jZSUyMGJhbm5lcnxlbnwwfHx8fDE3NjQwNzQ2MTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "conference banner"
+      "description": "Aluguel de Impressoras",
+      "imageUrl": "https://i.imgur.com/3NgKXUQ.png",
+      "imageHint": "printer rent"
     },
     {
       "id": "category-flyers",
