@@ -55,6 +55,30 @@
       "imageHint": "corporate gifts"
     },
     {
+      "id": "printer-banner-1",
+      "description": "Aluguel de Impressoras",
+      "imageUrl": "https://i.imgur.com/Ita0fuf.png",
+      "imageHint": "printer rent"
+    },
+    {
+      "id": "printer-banner-2",
+      "description": "Conserto de Impressoras",
+      "imageUrl": "https://i.imgur.com/khSPM8T.png",
+      "imageHint": "printer repair"
+    },
+    {
+      "id": "printer-banner-3",
+      "description": "Outsourcing de Impressão",
+      "imageUrl": "https://i.imgur.com/pm8WOLJ.png",
+      "imageHint": "printing outsourcing"
+    },
+    {
+      "id": "promo-banner-1",
+      "description": "Promo Banner 1",
+      "imageUrl": "https://via.placeholder.com/800x800/FF6B07/FFFFFF?text=Banner",
+      "imageHint": "promo banner"
+    },
+    {
       "id": "product-business-card",
       "description": "Cartão de Visita",
       "imageUrl": "https://images.unsplash.com/photo-1718670013921-2f144aba173a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YnVzaW5lc3MlMjBjYXJkfGVufDB8fHx8MTc2NDA3NDYxOXww&ixlib=rb-4.1.0&q=80&w=1080",
