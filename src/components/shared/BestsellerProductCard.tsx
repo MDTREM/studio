@@ -78,8 +78,8 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
 
   return (
     <Link href={`/produto/${product.id}`} className="group block h-full">
-      <Card className="h-full overflow-hidden transition-all duration-300 group-hover:shadow-lg flex flex-col">
-        <div className="relative">
+      <Card className="h-full overflow-hidden transition-all duration-300 group-hover:shadow-lg flex flex-col sm:flex-row md:flex-col">
+        <div className="relative w-full sm:w-2/5 md:w-full">
           <div className="relative aspect-square w-full overflow-hidden bg-primary flex items-center justify-center">
             <Image src={imageUrl} alt={product.name} fill className="object-cover" data-ai-hint={product.imageHint} />
           </div>
@@ -94,7 +94,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
           </Button>
         </div>
         
-        <CardContent className="p-4 flex flex-col flex-grow">
+        <CardContent className="p-4 flex flex-col flex-grow w-full sm:w-3/5 md:w-full">
           <p className="text-xs text-primary font-medium mb-1 uppercase">{product.categoryId}</p>
           <h3 className="font-bold text-base mb-1 truncate">{product.name}</h3>
           <p className="text-sm text-muted-foreground mb-4 h-10 overflow-hidden">{product.shortDescription}</p>
@@ -103,7 +103,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
               <p className="text-2xl font-bold text-primary">
                   {product.basePrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </p>
-              <p className="text-sm font-normal text-muted-foreground -mt-1">
+              <p className="text-sm font-normal text-muted-foreground">
                   / {minQuantity} unidade
               </p>
           </div>
