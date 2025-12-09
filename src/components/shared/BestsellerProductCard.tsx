@@ -102,9 +102,9 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
           <div className="mt-auto">
               <p className="text-2xl font-bold text-primary">
                   {product.basePrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </p>
-              <p className="text-sm font-normal text-muted-foreground">
-                  / {minQuantity} unidade
+                  <span className="text-sm font-normal text-muted-foreground ml-1">
+                    / {minQuantity} unidade
+                  </span>
               </p>
           </div>
         </CardContent>
