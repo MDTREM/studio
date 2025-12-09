@@ -1,7 +1,7 @@
 'use client';
 import Link from "next/link";
 import * as React from "react";
-import { Package, ShoppingCart, Users, Tags, ShieldAlert, Loader2 } from "lucide-react";
+import { Package, ShoppingCart, Users, Tags, ShieldAlert, Loader2, Home } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import UserNav from "@/components/shared/UserNav";
 import { FirebaseClientProvider, useUser } from "@/firebase";
@@ -108,6 +108,13 @@ function AdminNavLinks() {
         >
           <Users className="h-4 w-4" />
           Clientes
+        </Link>
+        <Link
+          href="/admin/home"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+        >
+          <Home className="h-4 w-4" />
+          Gerenciar Home
         </Link>
       </nav>
     );

@@ -6,6 +6,7 @@ import InfoCarousel from "@/components/sections/home/InfoCarousel";
 import NewReleasesSection from "@/components/sections/home/NewReleasesSection";
 import PrinterBanners from "@/components/sections/home/PrinterBanners";
 import PromoBanners from "@/components/sections/home/PromoBanners";
+import HomepageSections from "@/components/sections/home/HomepageSections";
 
 export default function Home() {
   return (
@@ -13,10 +14,8 @@ export default function Home() {
       <Hero />
       <InfoCarousel />
       <PromoBanners />
-      <BestsellersSection />
+      <HomepageSections />
       <CategoriesSection />
-      <AgendasSection />
-      <NewReleasesSection />
       <PrinterBanners />
     </>
   );

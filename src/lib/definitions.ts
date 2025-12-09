@@ -90,6 +90,14 @@ export type Favorite = {
   createdAt: any;
 };
 
+export type HomepageSection = {
+  id: string;
+  title: string;
+  order: number;
+  productIds: string[];
+  active: boolean;
+};
+
 
 // Add the 'createdAt' field to the Product entity in backend.json
 // This is important for sorting new products.
