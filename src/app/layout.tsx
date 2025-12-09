@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import WhatsappButton from "@/components/shared/WhatsappButton";
 import { FirebaseClientProvider } from "@/firebase";
 import { CartProvider } from "@/contexts/CartContext";
+import BottomNav from "@/components/layout/BottomNav";
 
 const ptSans = PT_Sans({
   subsets: ["latin"],
@@ -64,11 +65,12 @@ export default function RootLayout({
       >
         <FirebaseClientProvider>
           <CartProvider>
-            <div className="relative flex min-h-screen flex-col">
+            <div className="relative flex min-h-screen flex-col pb-16 md:pb-0">
               <Header />
               <main className="flex-1 bg-white">{children}</main>
               <Footer />
             </div>
+            <BottomNav />
             <WhatsappButton />
             <Toaster />
           </CartProvider>
