@@ -15,7 +15,7 @@ const initializeFirebaseApp = (): FirebaseApp => {
   return getApp();
 };
 
-export function getSdks(): { firebaseApp: FirebaseApp; auth: Auth; firestore: Firestore; } {
+export function getClientSdks(): { firebaseApp: FirebaseApp; auth: Auth; firestore: Firestore; } {
   const firebaseApp = initializeFirebaseApp();
   const auth = getAuth(firebaseApp);
   auth.languageCode = 'pt';
