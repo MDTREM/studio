@@ -55,7 +55,8 @@ export default function AddSectionDialog() {
     const sectionRef = doc(firestore, 'homepage_sections', data.id);
 
     const sectionData = {
-      ...data,
+      id: data.id,
+      title: data.title,
       active: true,
       order: 99, // Será reordenado, colocado no final inicialmente.
       productIds: [],
@@ -63,6 +64,8 @@ export default function AddSectionDialog() {
     };
     
     // Use setDocumentNonBlocking para criar o documento com o ID especificado
+    // A opção { merge: false } garante que estamos criando um novo documento
+    // e não mesclando com um existente que possa ter o mesmo ID.
     setDocumentNonBlocking(sectionRef, sectionData, { merge: false });
     
     toast({

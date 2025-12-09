@@ -249,6 +249,11 @@
         "active": {
             "type": "boolean",
             "description": "Whether the section is currently active and should be displayed."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the section was created.",
+          "format": "date-time"
         }
       },
       "required": [
@@ -256,7 +261,8 @@
         "title",
         "order",
         "productIds",
-        "active"
+        "active",
+        "createdAt"
       ]
     }
   },
