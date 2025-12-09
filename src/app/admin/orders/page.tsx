@@ -47,7 +47,7 @@ export default function AdminOrdersPage() {
 
                 const ordersPromises = allUsers.map(user => {
                     const ordersRef = collection(firestore, 'users', user.id, 'orders');
-                    return getDocs(ordersRef);
+                    return getDocs(query(ordersRef, orderBy("createdAt", "desc")));
                 });
 
                 const ordersSnapshots = await Promise.all(ordersPromises);
@@ -105,6 +105,13 @@ export default function AdminOrdersPage() {
         }
     }
 
+    if (isCheckingAdmin) {
+        return <div>Verificando permissões...</div>;
+    }
+    
+    if (!isAdmin) {
+        return null;
+    }
 
     return (
         <>
@@ -122,8 +129,8 @@ export default function AdminOrdersPage() {
                 </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {(isLoading || isCheckingAdmin) && <div>Carregando pedidos...</div>}
-                    {!isLoading && !isCheckingAdmin && !allOrders?.length && <div className="py-8 text-center text-muted-foreground">Nenhum pedido encontrado.</div>}
+                    {(isLoading) && <div>Carregando pedidos...</div>}
+                    {!isLoading && !allOrders?.length && <div className="py-8 text-center text-muted-foreground">Nenhum pedido encontrado.</div>}
                     {allOrders && allOrders.length > 0 && (
                         <Table>
                             <TableHeader>

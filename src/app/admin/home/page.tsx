@@ -15,7 +15,9 @@ export default function AdminHomePage() {
   }
 
   if (!isAdmin) {
-    return <div>Acesso negado.</div>;
+    // A tela de "Acesso Negado" já é mostrada pelo AdminLayout.
+    // Retornar null aqui evita renderização duplicada.
+    return null;
   }
 
   return (
