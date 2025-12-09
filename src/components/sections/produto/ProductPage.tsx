@@ -499,5 +499,3 @@ export default function ProductPage({ product }: ProductPageProps) {
         </TooltipProvider>
       );
 }
-
-    
