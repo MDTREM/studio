@@ -160,8 +160,8 @@ export default function ProductPage({ product }: ProductPageProps) {
                 </nav>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
                 {/* Imagens do Produto */}
-                <div className="flex flex-col-reverse md:flex-row gap-4">
-                    <div className="flex flex-row md:flex-col gap-2 h-20 md:h-auto md:w-20">
+                <div className="flex flex-col-reverse md:flex-row gap-4 sticky top-24 self-start">
+                    <div className="flex flex-row md:flex-col gap-2 shrink-0 h-20 md:h-auto md:w-20">
                         {product.imageUrl?.slice(0, 4).map((url, i) => (
                         <button
                             key={i} 
