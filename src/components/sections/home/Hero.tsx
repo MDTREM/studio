@@ -23,7 +23,7 @@ const banners = [
 
 export default function Hero() {
   return (
-    <section className="relative w-full md:h-[60vh] bg-black">
+    <section className="relative w-full h-[60vh] bg-black">
          <Carousel
             opts={{
                 align: "start",
@@ -66,5 +66,3 @@ export default function Hero() {
     </section>
   );
 }
-
-    
