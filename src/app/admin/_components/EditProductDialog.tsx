@@ -51,6 +51,7 @@ const productFormSchema = z.object({
     quantities: z.string().min(1, { message: 'Pelo menos uma quantidade é obrigatória.'}),
   }),
   showOnHome: z.boolean().default(false),
+  isBestseller: z.boolean().default(false),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -113,6 +114,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
             quantities: product.variations.quantities.join(', '),
         },
         showOnHome: product.showOnHome || false,
+        isBestseller: product.isBestseller || false,
     },
   });
 
@@ -384,6 +386,26 @@ export default function EditProductDialog({ product, children }: EditProductDial
                     <FormLabel>Mostrar na Página Inicial</FormLabel>
                     <FormDescription>
                       Marque para destacar este produto na home.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isBestseller"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Marcar como Mais Vendido</FormLabel>
+                    <FormDescription>
+                      Este produto aparecerá na seção "Mais Vendidos".
                     </FormDescription>
                   </div>
                   <FormControl>

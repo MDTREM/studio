@@ -22,6 +22,7 @@ export type Product = {
   keywords?: string[];
   createdAt?: any; // Can be a server timestamp
   showOnHome?: boolean;
+  isBestseller?: boolean;
 };
 
 export type Category = {

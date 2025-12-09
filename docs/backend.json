@@ -45,6 +45,10 @@
         "showOnHome": {
           "type": "boolean",
           "description": "Determines if the product is featured on the homepage."
+        },
+        "isBestseller": {
+          "type": "boolean",
+          "description": "Marks the product as a bestseller."
         }
       },
       "required": [

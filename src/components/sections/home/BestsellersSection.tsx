@@ -12,22 +12,22 @@ import { collection, query, where, limit } from "firebase/firestore";
 import { Product } from "@/lib/definitions";
 import { Loader2 } from "lucide-react";
 
-export default function FeaturedProducts() {
+export default function BestsellersSection() {
     const firestore = useFirestore();
-    const featuredProductsQuery = useMemoFirebase(() => {
+    const bestsellersQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         return query(
             collection(firestore, "products"),
-            where("showOnHome", "==", true),
+            where("isBestseller", "==", true),
             limit(12)
         );
     }, [firestore]);
 
-    const { data: products, isLoading } = useCollection<Product>(featuredProductsQuery);
+    const { data: products, isLoading } = useCollection<Product>(bestsellersQuery);
     
     if (isLoading) {
         return (
-            <section className="py-16 sm:py-24 bg-secondary/30">
+            <section className="py-16 sm:py-24 bg-background">
                 <div className="container max-w-7xl mx-auto px-4 text-center">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto" />
                 </div>
@@ -36,14 +36,14 @@ export default function FeaturedProducts() {
     }
     
     if (!products || products.length === 0) {
-        return null; // Don't render the section if there are no featured products
+        return null; // Don't render the section if there are no bestseller products
     }
 
     return (
-        <section className="py-16 sm:py-24 bg-secondary/30">
+        <section className="py-16 sm:py-24 bg-background">
             <div className="container max-w-7xl mx-auto px-4">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Produtos em Destaque</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Mais Vendidos</h2>
                 </div>
                 <Carousel
                     opts={{
