@@ -1,13 +1,14 @@
 'use client';
 import Link from "next/link";
 import * as React from "react";
-import { Package, ShoppingCart, Users, Tags, ShieldAlert, Loader2, Home } from "lucide-react";
+import { Package, ShoppingCart, Users, Tags, ShieldAlert, Loader2, Home, FileText } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import UserNav from "@/components/shared/UserNav";
 import { FirebaseClientProvider, useUser } from "@/firebase";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getIdTokenResult } from "firebase/auth";
+import { Button } from "@/components/ui/button";
 
 // 1. Criar o Contexto
 interface AdminContextType {
@@ -33,12 +34,15 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       return;
     }
     if (user) {
+      // O `true` força a atualização do token para buscar as custom claims mais recentes.
+      // Isso resolve o problema de claims desatualizadas após o login.
       getIdTokenResult(user, true).then((idTokenResult) => {
         const claims = idTokenResult.claims;
         setIsAdmin(!!claims.isAdmin);
         setIsCheckingAdmin(false);
       });
     } else {
+      // Se não há usuário, ele definitivamente não é admin.
       setIsAdmin(false);
       setIsCheckingAdmin(false);
     }
@@ -63,12 +67,23 @@ function AdminContent({ children }: { children: React.ReactNode }) {
               </div>
           )}
           {!isCheckingAdmin && !isAdmin && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
+            <div className="flex flex-col items-center justify-center h-full text-center p-4">
                   <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
                   <h2 className="text-2xl font-bold">Acesso Negado</h2>
-                  <p className="text-muted-foreground max-w-md">
-                      Você não tem as permissões necessárias para acessar o painel de administração. Por favor, contate o suporte se você acredita que isso é um erro.
+                  <p className="text-muted-foreground max-w-md mt-2 mb-6">
+                      Você não tem as permissões necessárias para acessar o painel de administração.
+                      Siga as instruções para se tornar um administrador e tente novamente.
                   </p>
+                  <div className="bg-secondary/50 p-4 rounded-lg text-left max-w-lg w-full">
+                    <h3 className="font-semibold mb-2">Como se tornar Administrador:</h3>
+                    <ol className="list-decimal list-inside text-sm space-y-2">
+                        <li>Gere uma chave de serviço no seu <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline text-primary">console do Firebase</a>.</li>
+                        <li>Renomeie a chave para `firebase-admin-sdk.json` e coloque na pasta `scripts/`.</li>
+                        <li>Execute o comando no terminal: <code className="bg-muted px-1.5 py-0.5 rounded-md text-xs">npm run set-admin -- seu-email@exemplo.com</code></li>
+                        <li>Após a confirmação, atualize esta página.</li>
+                    </ol>
+                    <p className="text-xs text-muted-foreground mt-3">Para o guia detalhado, veja o arquivo `INSTRUCOES-ADMIN.md`.</p>
+                  </div>
             </div>
           )}
           {!isCheckingAdmin && isAdmin && children}
@@ -167,3 +182,5 @@ export default function AdminLayout({
     </FirebaseClientProvider>
   );
 }
+
+    
