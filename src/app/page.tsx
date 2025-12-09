@@ -12,9 +12,9 @@ export default function Home() {
       <Hero />
       <InfoCarousel />
       <PromoBanners />
-      <FeaturedProducts />
       <BestsellersSection />
       <CategoriesSection />
+      <FeaturedProducts />
       <PrinterBanners />
     </>
   );
