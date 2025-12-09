@@ -27,10 +27,12 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { addDocumentNonBlocking, useFirebase } from '@/firebase';
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { addDocumentNonBlocking, useCollection, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection, query, serverTimestamp } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Category } from '@/lib/definitions';
 
 const productFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
@@ -84,6 +86,12 @@ export default function AddProductDialog() {
   const { toast } = useToast();
   const { firestore, storage } = useFirebase();
   const [uploadProgress, setUploadProgress] = useState<number[]>([]);
+
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "categories"));
+  }, [firestore]);
+  const { data: categories } = useCollection<Category>(categoriesQuery);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -243,21 +251,29 @@ export default function AddProductDialog() {
               )}
             />
              <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ID da Categoria</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: cartoes-visita" {...field} />
-                  </FormControl>
-                   <FormDescription>
-                    Este deve ser o mesmo ID usado na URL (ex: /catalogo?categoria=adesivos)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Categoria</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma categoria" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {categories?.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
             <FormField
                 control={form.control}
                 name="basePrice"
