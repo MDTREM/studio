@@ -24,8 +24,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { setDocumentNonBlocking, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, doc, serverTimestamp, query } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, doc, serverTimestamp, query, setDoc } from 'firebase/firestore';
 import { HomepageSection } from '@/lib/definitions';
 
 const sectionFormSchema = z.object({
@@ -40,7 +40,6 @@ export default function AddSectionDialog() {
   const { toast } = useToast();
   const firestore = useFirestore();
 
-  // Busca as seções existentes para verificar IDs duplicados
   const sectionsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'homepage_sections'));
@@ -55,10 +54,10 @@ export default function AddSectionDialog() {
     },
   });
 
-  const onSubmit = (data: SectionFormValues) => {
+  const onSubmit = async (data: SectionFormValues) => {
     if (!firestore) return;
 
-    // Verifica se o ID já existe
+    // Check for duplicate ID before submitting
     const isIdTaken = existingSections?.some(section => section.id === data.id);
     if (isIdTaken) {
       form.setError('id', {
@@ -74,19 +73,31 @@ export default function AddSectionDialog() {
       id: data.id,
       title: data.title,
       active: true,
-      order: 99,
+      order: existingSections?.length ?? 0, // Place new section at the end
       productIds: [],
       createdAt: serverTimestamp(),
     };
-    
-    setDocumentNonBlocking(sectionRef, sectionData, { merge: false });
-    
-    toast({
-      title: 'Seção Adicionada!',
-      description: `A seção "${data.title}" foi criada com sucesso.`,
-    });
-    setOpen(false);
-    form.reset();
+
+    try {
+      // Use await to ensure the operation completes before proceeding
+      await setDoc(sectionRef, sectionData, { merge: false });
+      
+      toast({
+        title: 'Seção Adicionada!',
+        description: `A seção "${data.title}" foi criada com sucesso.`,
+      });
+      
+      setOpen(false);
+      form.reset();
+
+    } catch (error: any) {
+      console.error("Error creating section:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao criar seção',
+        description: error.message || 'Não foi possível salvar a seção no banco de dados.',
+      });
+    }
   };
 
   return (
@@ -107,6 +118,7 @@ export default function AddSectionDialog() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
+          {/* We use a native form element to leverage isSubmitting state */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
             <FormField
               control={form.control}
@@ -115,7 +127,7 @@ export default function AddSectionDialog() {
                 <FormItem>
                   <FormLabel>ID da Seção</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: mais_vendidos" {...field} />
+                    <Input placeholder="Ex: mais_vendidos" {...field} disabled={form.formState.isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,7 +140,7 @@ export default function AddSectionDialog() {
                 <FormItem>
                   <FormLabel>Título da Seção</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Mais Vendidos" {...field} />
+                    <Input placeholder="Ex: Mais Vendidos" {...field} disabled={form.formState.isSubmitting} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
