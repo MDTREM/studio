@@ -25,8 +25,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { updateDocumentNonBlocking, useCollection, useFirebase, useMemoFirebase } from '@/firebase';
-import { collection, doc, query } from 'firebase/firestore';
+import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection, doc, query, updateDoc } from 'firebase/firestore';
 import type { Category } from '@/lib/definitions';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -101,7 +101,7 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
     );
   };
 
-  const onSubmit = (data: CategoryFormValues) => {
+  const onSubmit = async (data: CategoryFormValues) => {
     if (!firestore) return;
 
     const categoryRef = doc(firestore, 'categories', category.id);
@@ -114,13 +114,21 @@ export default function EditCategoryDialog({ category, children }: EditCategoryD
         showInMenu: data.showInMenu,
     }
 
-    updateDocumentNonBlocking(categoryRef, updatedData);
-    
-    toast({
-        title: 'Categoria Atualizada!',
-        description: `A categoria "${data.name}" foi atualizada com sucesso.`,
-    });
-    setOpen(false);
+    try {
+        await updateDoc(categoryRef, updatedData);
+        toast({
+            title: 'Categoria Atualizada!',
+            description: `A categoria "${data.name}" foi atualizada com sucesso.`,
+        });
+        setOpen(false);
+    } catch (error: any) {
+        console.error("Error updating category: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Erro ao atualizar categoria',
+            description: error.message,
+        });
+    }
   };
 
   return (

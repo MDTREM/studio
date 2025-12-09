@@ -3,8 +3,11 @@ import QuoteForm from "@/components/sections/orcamento/QuoteForm";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { Product } from "@/lib/definitions";
 import { collection, query } from "firebase/firestore";
+import { useSearchParams } from "next/navigation";
 
-export default function OrcamentoPage({ searchParams }: { searchParams: { produto?: string } }) {
+function OrcamentoPageContent() {
+    const searchParams = useSearchParams();
+    const productId = searchParams.get('produto');
     const firestore = useFirestore();
     const productsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
@@ -28,7 +31,18 @@ export default function OrcamentoPage({ searchParams }: { searchParams: { produt
           Personalize seu produto e receba uma estimativa de preço instantaneamente.
         </p>
       </div>
-      <QuoteForm products={products} selectedProductId={searchParams.produto} />
+      <QuoteForm products={products} selectedProductId={productId || undefined} />
     </div>
   );
+}
+
+
+import { Suspense } from 'react';
+
+export default function OrcamentoPage() {
+    return (
+        <Suspense fallback={<div>Carregando...</div>}>
+            <OrcamentoPageContent />
+        </Suspense>
+    )
 }

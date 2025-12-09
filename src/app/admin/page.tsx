@@ -12,8 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image";
-import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from "@/firebase";
-import { collection, query, doc } from "firebase/firestore";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query, doc, deleteDoc } from "firebase/firestore";
 import AddProductDialog from "./_components/AddProductDialog";
 import EditProductDialog from "./_components/EditProductDialog";
 import {
@@ -42,14 +42,22 @@ export default function AdminProductsPage() {
 
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
-  const handleDelete = (productId: string, productName: string) => {
+  const handleDelete = async (productId: string, productName: string) => {
     if (!firestore) return;
     const productRef = doc(firestore, 'products', productId);
-    deleteDocumentNonBlocking(productRef);
-    toast({
-      title: "Produto Excluído!",
-      description: `O produto "${productName}" foi removido.`,
-    });
+    try {
+        await deleteDoc(productRef);
+        toast({
+          title: "Produto Excluído!",
+          description: `O produto "${productName}" foi removido.`,
+        });
+    } catch (error: any) {
+        toast({
+            title: "Erro ao excluir",
+            description: error.message,
+            variant: "destructive"
+        });
+    }
   };
 
   if (isLoading) {

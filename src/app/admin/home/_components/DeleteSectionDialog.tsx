@@ -12,10 +12,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
-import { deleteDocumentNonBlocking, useFirestore } from "@/firebase";
+import { useFirestore } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { HomepageSection } from "@/lib/definitions";
-import { doc } from "firebase/firestore";
+import { doc, deleteDoc } from "firebase/firestore";
 import { Trash2 } from "lucide-react";
 
 interface DeleteSectionDialogProps {
@@ -26,14 +26,22 @@ export default function DeleteSectionDialog({ section }: DeleteSectionDialogProp
     const firestore = useFirestore();
     const { toast } = useToast();
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (!firestore) return;
         const sectionRef = doc(firestore, 'homepage_sections', section.id);
-        deleteDocumentNonBlocking(sectionRef);
-        toast({
-          title: "Seção Excluída!",
-          description: `A seção "${section.title}" foi removida permanentemente.`,
-        });
+        try {
+            await deleteDoc(sectionRef);
+            toast({
+              title: "Seção Excluída!",
+              description: `A seção "${section.title}" foi removida permanentemente.`,
+            });
+        } catch (error: any) {
+            toast({
+                title: "Erro ao excluir",
+                description: error.message,
+                variant: 'destructive'
+            });
+        }
     };
 
     return (

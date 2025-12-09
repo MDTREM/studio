@@ -27,8 +27,8 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { addDocumentNonBlocking, useCollection, useFirebase, useMemoFirebase } from '@/firebase';
-import { collection, query, serverTimestamp } from 'firebase/firestore';
+import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection, query, serverTimestamp, addDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -157,7 +157,7 @@ export default function AddProductDialog() {
     );
   };
 
-  const onSubmit = (data: ProductFormValues) => {
+  const onSubmit = async (data: ProductFormValues) => {
     if (!firestore) return;
 
     const productData = {
@@ -173,22 +173,22 @@ export default function AddProductDialog() {
         }
     };
     
-    addDocumentNonBlocking(collection(firestore, 'products'), productData)
-      .then(() => {
+    try {
+        await addDoc(collection(firestore, 'products'), productData);
         toast({
           title: 'Produto Adicionado!',
           description: `O produto "${data.name}" foi criado com sucesso.`,
         });
         setOpen(false);
         form.reset();
-      })
-      .catch((error) => {
+      } catch (error: any) {
+        console.error("Error adding document: ", error);
         toast({
           variant: 'destructive',
           title: 'Erro ao adicionar produto',
           description: error.message,
         });
-      });
+      }
   };
 
   return (

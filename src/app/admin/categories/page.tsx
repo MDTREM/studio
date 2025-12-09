@@ -12,8 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image";
-import { useCollection, useFirestore, useMemoFirebase, deleteDocumentNonBlocking } from "@/firebase";
-import { collection, query, doc } from "firebase/firestore";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query, doc, deleteDoc } from "firebase/firestore";
 import AddCategoryDialog from "./_components/AddCategoryDialog";
 import EditCategoryDialog from "./_components/EditCategoryDialog";
 import {
@@ -48,14 +48,22 @@ export default function AdminCategoriesPage() {
     return new Map(categories.map(c => [c.id, c.name]));
   }, [categories]);
 
-  const handleDelete = (categoryId: string, categoryName: string) => {
+  const handleDelete = async (categoryId: string, categoryName: string) => {
     if (!firestore) return;
     const categoryRef = doc(firestore, 'categories', categoryId);
-    deleteDocumentNonBlocking(categoryRef);
-    toast({
-      title: "Categoria Excluída!",
-      description: `A categoria "${categoryName}" foi removida.`,
-    });
+    try {
+        await deleteDoc(categoryRef);
+        toast({
+          title: "Categoria Excluída!",
+          description: `A categoria "${categoryName}" foi removida.`,
+        });
+    } catch (error: any) {
+        toast({
+          title: "Erro ao excluir",
+          description: error.message,
+          variant: 'destructive'
+        });
+    }
   };
 
   if (isLoading) {

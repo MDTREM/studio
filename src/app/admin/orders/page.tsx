@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { Order, OrderStatus, User } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
-import { collection, query, doc, where, orderBy, getDocs, collectionGroup } from "firebase/firestore";
+import { collection, query, doc, where, orderBy, getDocs, collectionGroup, updateDoc } from "firebase/firestore";
 import { ListFilter, MoreHorizontal, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -79,22 +79,30 @@ export default function AdminOrdersPage() {
         }
     }, [firestore, isAdmin, isCheckingAdmin, toast]);
     
-    const handleStatusChange = (orderId: string, customerId: string, newStatus: OrderStatus) => {
+    const handleStatusChange = async (orderId: string, customerId: string, newStatus: OrderStatus) => {
         if (!firestore) return;
         const orderDocRef = doc(firestore, 'users', customerId, 'orders', orderId);
-        updateDocumentNonBlocking(orderDocRef, { status: newStatus });
+        
+        try {
+            await updateDoc(orderDocRef, { status: newStatus });
+            // Update local state to reflect change immediately
+            setAllOrders(prevOrders => 
+                prevOrders.map(order => 
+                    order.id === orderId ? { ...order, status: newStatus } : order
+                )
+            );
 
-        // Update local state to reflect change immediately
-        setAllOrders(prevOrders => 
-            prevOrders.map(order => 
-                order.id === orderId ? { ...order, status: newStatus } : order
-            )
-        );
-
-        toast({
-            title: "Status Atualizado!",
-            description: `O pedido foi atualizado para "${newStatus}".`,
-        });
+            toast({
+                title: "Status Atualizado!",
+                description: `O pedido foi atualizado para "${newStatus}".`,
+            });
+        } catch (error: any) {
+            toast({
+                title: "Erro ao atualizar",
+                description: error.message,
+                variant: "destructive",
+            });
+        }
     }
 
 

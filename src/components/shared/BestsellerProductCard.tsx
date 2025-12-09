@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Star } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth, useCollection, useFirestore, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking, useUser } from '@/firebase';
-import { collection, doc, serverTimestamp, query } from 'firebase/firestore';
+import { useAuth, useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection, doc, serverTimestamp, query, deleteDoc, setDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -33,7 +33,7 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
   const { data: favorites } = useCollection<Favorite>(favoritesQuery);
   const isFavorited = favorites?.some(fav => fav.id === product.id);
 
-  const toggleFavorite = (e: React.MouseEvent) => {
+  const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigating when clicking the heart
     if (!user) {
       toast({
@@ -48,21 +48,29 @@ export default function BestsellerProductCard({ product }: BestsellerProductCard
 
     const favoriteRef = doc(firestore, 'users', user.uid, 'favorites', product.id);
 
-    if (isFavorited) {
-      deleteDocumentNonBlocking(favoriteRef);
-      toast({
-        title: "Removido dos favoritos!",
-        description: `"${product.name}" foi removido da sua lista de desejos.`,
-      });
-    } else {
-      setDocumentNonBlocking(favoriteRef, {
-        productId: product.id,
-        createdAt: serverTimestamp(),
-      }, { merge: false });
-      toast({
-        title: "Adicionado aos favoritos!",
-        description: `"${product.name}" foi adicionado à sua lista de desejos.`,
-      });
+    try {
+        if (isFavorited) {
+          await deleteDoc(favoriteRef);
+          toast({
+            title: "Removido dos favoritos!",
+            description: `"${product.name}" foi removido da sua lista de desejos.`,
+          });
+        } else {
+          await setDoc(favoriteRef, {
+            productId: product.id,
+            createdAt: serverTimestamp(),
+          }, { merge: false });
+          toast({
+            title: "Adicionado aos favoritos!",
+            description: `"${product.name}" foi adicionado à sua lista de desejos.`,
+          });
+        }
+    } catch (error: any) {
+        toast({
+            title: "Erro ao favoritar",
+            description: error.message,
+            variant: "destructive"
+        });
     }
   };
 

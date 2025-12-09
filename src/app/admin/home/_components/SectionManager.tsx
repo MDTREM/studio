@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { HomepageSection, Product } from '@/lib/definitions';
-import { collection, doc, query, orderBy, writeBatch, documentId, where, getDocs } from 'firebase/firestore';
+import { collection, doc, query, orderBy, writeBatch, documentId, where, getDocs, updateDoc } from 'firebase/firestore';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -28,11 +28,15 @@ function SortableSection({ section, products }: { section: HomepageSection; prod
   const firestore = useFirestore();
   const { toast } = useToast();
 
-  const handleStatusChange = (active: boolean) => {
+  const handleStatusChange = async (active: boolean) => {
     if (!firestore) return;
     const sectionRef = doc(firestore, 'homepage_sections', section.id);
-    updateDocumentNonBlocking(sectionRef, { active });
-    toast({ title: `Seção "${section.title}" ${active ? 'ativada' : 'desativada'}.` });
+    try {
+        await updateDoc(sectionRef, { active });
+        toast({ title: `Seção "${section.title}" ${active ? 'ativada' : 'desativada'}.` });
+    } catch (error: any) {
+        toast({ title: "Erro ao mudar status", description: error.message, variant: 'destructive' });
+    }
   };
   
   const sectionProducts = products.filter(p => section.productIds.includes(p.id));

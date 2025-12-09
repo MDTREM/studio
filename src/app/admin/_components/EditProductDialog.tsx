@@ -27,8 +27,8 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { updateDocumentNonBlocking, useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, doc, query } from 'firebase/firestore';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, doc, query, updateDoc } from 'firebase/firestore';
 import type { Product, Category } from '@/lib/definitions';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { Progress } from '@/components/ui/progress';
@@ -159,7 +159,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
     );
   };
 
-  const onSubmit = (data: ProductFormValues) => {
+  const onSubmit = async (data: ProductFormValues) => {
     if (!firestore) return;
 
     const productRef = doc(firestore, 'products', product.id);
@@ -176,13 +176,21 @@ export default function EditProductDialog({ product, children }: EditProductDial
         }
     };
     
-    updateDocumentNonBlocking(productRef, updatedProductData);
-    
-    toast({
-        title: 'Produto Atualizado!',
-        description: `O produto "${data.name}" foi atualizado com sucesso.`,
-    });
-    setOpen(false);
+    try {
+        await updateDoc(productRef, updatedProductData);
+        toast({
+            title: 'Produto Atualizado!',
+            description: `O produto "${data.name}" foi atualizado com sucesso.`,
+        });
+        setOpen(false);
+    } catch (error: any) {
+        console.error("Error updating document: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Erro ao atualizar produto',
+            description: error.message,
+        });
+    }
   };
 
   return (

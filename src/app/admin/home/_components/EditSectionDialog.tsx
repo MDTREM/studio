@@ -24,8 +24,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { updateDocumentNonBlocking, useFirestore } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { HomepageSection } from '@/lib/definitions';
 
 const sectionFormSchema = z.object({
@@ -50,17 +50,25 @@ export default function EditSectionDialog({ section }: EditSectionDialogProps) {
     },
   });
 
-  const onSubmit = (data: SectionFormValues) => {
+  const onSubmit = async (data: SectionFormValues) => {
     if (!firestore) return;
 
     const sectionRef = doc(firestore, 'homepage_sections', section.id);
-    updateDocumentNonBlocking(sectionRef, { title: data.title });
     
-    toast({
-        title: 'Seção Atualizada!',
-        description: `A seção foi renomeada para "${data.title}".`,
-    });
-    setOpen(false);
+    try {
+        await updateDoc(sectionRef, { title: data.title });
+        toast({
+            title: 'Seção Atualizada!',
+            description: `A seção foi renomeada para "${data.title}".`,
+        });
+        setOpen(false);
+    } catch (error: any) {
+        toast({
+            variant: 'destructive',
+            title: 'Erro ao atualizar',
+            description: error.message,
+        });
+    }
   };
 
   return (

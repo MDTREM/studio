@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dialog';
 import { HomepageSection, Product } from '@/lib/definitions';
 import { Check, ChevronsUpDown, Loader2, Pencil } from 'lucide-react';
-import { useFirestore, updateDocumentNonBlocking } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import {
   Command,
@@ -44,17 +44,26 @@ export default function ManageProductsDialog({ section, allProducts }: ManagePro
   const firestore = useFirestore();
   const { toast } = useToast();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!firestore) return;
     setIsSubmitting(true);
     const sectionRef = doc(firestore, 'homepage_sections', section.id);
-    updateDocumentNonBlocking(sectionRef, { productIds: selectedProductIds });
-    toast({
-      title: 'Produtos atualizados!',
-      description: `A seção "${section.title}" foi atualizada com sucesso.`,
-    });
-    setIsSubmitting(false);
-    setOpen(false);
+    try {
+        await updateDoc(sectionRef, { productIds: selectedProductIds });
+        toast({
+          title: 'Produtos atualizados!',
+          description: `A seção "${section.title}" foi atualizada com sucesso.`,
+        });
+        setIsSubmitting(false);
+        setOpen(false);
+    } catch (error: any) {
+        toast({
+            title: 'Erro ao atualizar',
+            description: error.message,
+            variant: 'destructive',
+        });
+        setIsSubmitting(false);
+    }
   };
   
   const productOptions = allProducts.map(p => ({ value: p.id, label: p.name }));

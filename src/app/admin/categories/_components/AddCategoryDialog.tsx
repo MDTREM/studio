@@ -22,17 +22,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { setDocumentNonBlocking, useCollection, useFirebase, useMemoFirebase } from '@/firebase';
-import { collection, doc, query } from 'firebase/firestore';
+import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection, doc, query, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Category } from '@/lib/definitions';
 import { Switch } from '@/components/ui/switch';
-import { FormDescription } from '@/components/ui/form';
+
 
 const categoryFormSchema = z.object({
   id: z.string().min(2, { message: 'O ID deve ter pelo menos 2 caracteres.' }).regex(/^[a-z0-9-]+$/, 'Use apenas letras minúsculas, números e hífens.'),
@@ -99,7 +100,7 @@ export default function AddCategoryDialog() {
   };
 
 
-  const onSubmit = (data: CategoryFormValues) => {
+  const onSubmit = async (data: CategoryFormValues) => {
     if (!firestore) return;
 
     const categoryRef = doc(firestore, 'categories', data.id);
@@ -113,14 +114,22 @@ export default function AddCategoryDialog() {
       showInMenu: data.showInMenu,
     }
 
-    setDocumentNonBlocking(categoryRef, categoryData, { merge: false });
-    
-    toast({
-        title: 'Categoria Adicionada!',
-        description: `A categoria "${data.name}" foi criada com sucesso.`,
-    });
-    setOpen(false);
-    form.reset();
+    try {
+        await setDoc(categoryRef, categoryData, { merge: false });
+        toast({
+            title: 'Categoria Adicionada!',
+            description: `A categoria "${data.name}" foi criada com sucesso.`,
+        });
+        setOpen(false);
+        form.reset();
+    } catch (error: any) {
+        console.error("Error adding category: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Erro ao criar categoria',
+            description: error.message,
+        });
+    }
   };
 
   return (

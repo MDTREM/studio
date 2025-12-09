@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Product } from '@/lib/definitions';
 import { ArrowRight, Check, FileUp, Loader2, Phone } from 'lucide-react';
-import { useAuth, useFirestore, addDocumentNonBlocking } from '@/firebase';
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { useAuth, useFirestore } from '@/firebase';
+import { collection, serverTimestamp, addDoc } from 'firebase/firestore';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 
@@ -74,7 +74,7 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
     return encodeURIComponent(message);
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firestore || !selectedProduct) return;
 
@@ -103,16 +103,14 @@ export default function QuoteForm({ products, selectedProductId }: QuoteFormProp
         createdAt: serverTimestamp(),
     };
 
-    addDocumentNonBlocking(collectionRef, orderData)
-      .then(() => {
+    try {
+        await addDoc(collectionRef, orderData);
         setIsSubmitted(true);
-      })
-      .catch((error) => {
+    } catch (error) {
         console.error("Error writing document: ", error);
-      })
-      .finally(() => {
+    } finally {
         setIsSubmitting(false);
-      });
+    }
   }
 
   if (isSubmitted) {
