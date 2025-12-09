@@ -45,25 +45,11 @@ export default function FeaturedProducts() {
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Produtos em Destaque</h2>
                 </div>
-                <Carousel
-                    opts={{
-                        align: "start",
-                        loop: products.length > 4,
-                    }}
-                    className="w-full"
-                >
-                    <CarouselContent>
-                        {products.map((product) => (
-                            <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
-                                <div className="p-1 h-full">
-                                    <BestsellerProductCard product={product} />
-                                </div>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="hidden sm:flex" />
-                    <CarouselNext className="hidden sm:flex" />
-                </Carousel>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {products.map((product) => (
+                        <BestsellerProductCard key={product.id} product={product} />
+                    ))}
+                </div>
             </div>
         </section>
     );
