@@ -5,12 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase";
-import { Order, OrderStatus } from "@/lib/definitions";
+import { Order, OrderStatus, User } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { collection, query, doc, where, orderBy, getDocs, collectionGroup } from "firebase/firestore";
 import { ListFilter, MoreHorizontal, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAdmin } from "../layout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -27,28 +27,69 @@ const availableStatuses: OrderStatus[] = ['Em análise', 'Em produção', 'Pront
 export default function AdminOrdersPage() {
     const firestore = useFirestore();
     const { toast } = useToast();
-    const [statusFilters, setStatusFilters] = useState<OrderStatus[]>([]);
-    const { isAdmin, isCheckingAdmin } = useAdmin(); // Consumir o contexto
+    const { isAdmin, isCheckingAdmin } = useAdmin();
 
-    const allOrdersQuery = useMemoFirebase(() => {
-        if (!firestore || isCheckingAdmin || !isAdmin) return null;
-        
-        const baseQuery = collectionGroup(firestore, 'orders');
-        const queryConstraints: any[] = [orderBy("createdAt", "desc")];
-        
-        if (statusFilters.length > 0) {
-            queryConstraints.push(where("status", "in", statusFilters));
+    const [allOrders, setAllOrders] = useState<Order[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    
+    useEffect(() => {
+        const fetchAllOrders = async () => {
+            if (!firestore || !isAdmin) {
+                if (!isCheckingAdmin) setIsLoading(false);
+                return;
+            };
+            setIsLoading(true);
+
+            try {
+                const usersCollectionRef = collection(firestore, 'users');
+                const usersSnapshot = await getDocs(usersCollectionRef);
+                const allUsers = usersSnapshot.docs.map(doc => doc.data() as User);
+
+                const ordersPromises = allUsers.map(user => {
+                    const ordersRef = collection(firestore, 'users', user.id, 'orders');
+                    return getDocs(ordersRef);
+                });
+
+                const ordersSnapshots = await Promise.all(ordersPromises);
+
+                let fetchedOrders: Order[] = [];
+                ordersSnapshots.forEach(snapshot => {
+                    const userOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+                    fetchedOrders = [...fetchedOrders, ...userOrders];
+                });
+                
+                // Sort by creation date, descending
+                fetchedOrders.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.orderDate);
+                    const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.orderDate);
+                    return dateB.getTime() - dateA.getTime();
+                });
+
+                setAllOrders(fetchedOrders);
+            } catch (error) {
+                console.error("Error fetching orders:", error);
+                toast({ title: 'Erro ao buscar pedidos', description: 'Não foi possível carregar os pedidos de todos os usuários.', variant: 'destructive' });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (!isCheckingAdmin) {
+            fetchAllOrders();
         }
-
-        return query(baseQuery, ...queryConstraints);
-    }, [firestore, statusFilters, isCheckingAdmin, isAdmin]);
-
-    const { data: allOrders, isLoading } = useCollection<Order>(allOrdersQuery);
+    }, [firestore, isAdmin, isCheckingAdmin, toast]);
     
     const handleStatusChange = (orderId: string, customerId: string, newStatus: OrderStatus) => {
         if (!firestore) return;
         const orderDocRef = doc(firestore, 'users', customerId, 'orders', orderId);
         updateDocumentNonBlocking(orderDocRef, { status: newStatus });
+
+        // Update local state to reflect change immediately
+        setAllOrders(prevOrders => 
+            prevOrders.map(order => 
+                order.id === orderId ? { ...order, status: newStatus } : order
+            )
+        );
 
         toast({
             title: "Status Atualizado!",
@@ -56,44 +97,13 @@ export default function AdminOrdersPage() {
         });
     }
 
-    const handleFilterChange = (status: OrderStatus, checked: boolean) => {
-        setStatusFilters(prev => {
-            if (checked) {
-                return [...prev, status];
-            } else {
-                return prev.filter(s => s !== status);
-            }
-        });
-    }
 
     return (
         <>
             <div className="flex items-center">
                 <h1 className="text-lg font-semibold md:text-2xl">Pedidos</h1>
                 <div className="ml-auto flex items-center gap-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 gap-1">
-                            <ListFilter className="h-3.5 w-3.5" />
-                            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                            Filtrar
-                            </span>
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Filtrar por status</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {availableStatuses.map(status => (
-                            <DropdownMenuCheckboxItem 
-                                key={status}
-                                checked={statusFilters.includes(status)}
-                                onCheckedChange={(checked) => handleFilterChange(status, !!checked)}
-                            >
-                                {status}
-                            </DropdownMenuCheckboxItem>
-                        ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    {/* Filter button can be added here if needed */}
                 </div>
             </div>
             <Card>
