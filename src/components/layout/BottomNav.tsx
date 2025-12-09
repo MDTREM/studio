@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Home, Search, Package, LayoutGrid, Loader2 } from 'lucide-react';
@@ -76,13 +75,14 @@ export default function BottomNav() {
             <Link
               key={item.label}
               href={item.href}
+              aria-label={item.label}
               className={cn(
                 'inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group',
                 isActive ? 'text-primary' : 'text-muted-foreground'
               )}
             >
-              <item.icon className="w-5 h-5 mb-1" />
-              <span className="text-xs">{item.label}</span>
+              <item.icon className="w-6 h-6" />
+              <span className="sr-only">{item.label}</span>
             </Link>
           );
         })}
@@ -90,13 +90,14 @@ export default function BottomNav() {
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <button
+              aria-label="Buscar"
               className={cn(
                 'inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group',
                 'text-muted-foreground'
               )}
             >
-              <Search className="w-5 h-5 mb-1" />
-              <span className="text-xs">Buscar</span>
+              <Search className="w-6 h-6" />
+              <span className="sr-only">Buscar</span>
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="rounded-t-lg h-[80vh]">
