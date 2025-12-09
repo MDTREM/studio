@@ -25,8 +25,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { addDocumentNonBlocking, useFirestore } from '@/firebase';
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { setDocumentNonBlocking, useFirestore } from '@/firebase';
+import { collection, doc, serverTimestamp } from 'firebase/firestore';
 
 const sectionFormSchema = z.object({
   id: z.string().min(3, 'ID deve ter pelo menos 3 caracteres').regex(/^[a-z0-9_]+$/, 'Use apenas letras minúsculas, números e underscore.'),
@@ -51,32 +51,26 @@ export default function AddSectionDialog() {
   const onSubmit = (data: SectionFormValues) => {
     if (!firestore) return;
 
+    // Use o ID do formulário para criar a referência do documento
+    const sectionRef = doc(firestore, 'homepage_sections', data.id);
+
     const sectionData = {
       ...data,
       active: true,
-      order: 99, // Will be re-ordered on drag, place it at the end initially.
+      order: 99, // Será reordenado, colocado no final inicialmente.
       productIds: [],
       createdAt: serverTimestamp(),
     };
     
-    // We use the ID from the form as the document ID
-    const sectionRef = collection(firestore, 'homepage_sections');
-    addDocumentNonBlocking(sectionRef, sectionData)
-      .then(() => {
-        toast({
-          title: 'Seção Adicionada!',
-          description: `A seção "${data.title}" foi criada com sucesso.`,
-        });
-        setOpen(false);
-        form.reset();
-      })
-      .catch((error) => {
-        toast({
-          variant: 'destructive',
-          title: 'Erro ao adicionar seção',
-          description: error.message,
-        });
-      });
+    // Use setDocumentNonBlocking para criar o documento com o ID especificado
+    setDocumentNonBlocking(sectionRef, sectionData, { merge: false });
+    
+    toast({
+      title: 'Seção Adicionada!',
+      description: `A seção "${data.title}" foi criada com sucesso.`,
+    });
+    setOpen(false);
+    form.reset();
   };
 
   return (
