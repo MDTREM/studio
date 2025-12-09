@@ -5,6 +5,13 @@ import { Product } from '@/lib/definitions';
 import { collection, query, where } from 'firebase/firestore';
 import { Filter, Search } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 export default function CatalogoClientPage() {
   const searchParams = useSearchParams();
@@ -63,11 +70,24 @@ export default function CatalogoClientPage() {
       </div>
         {isLoading && <p>Carregando produtos...</p>}
         {products && products.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-                {products.map((product: Product) => (
-                <ProductCard key={product.id} product={product} />
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {products.map((product) => (
+                  <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                    <div className="p-1 h-full">
+                      <ProductCard product={product} />
+                    </div>
+                  </CarouselItem>
                 ))}
-            </div>
+              </CarouselContent>
+              <CarouselPrevious className="hidden sm:flex" />
+              <CarouselNext className="hidden sm:flex" />
+            </Carousel>
         )}
         {!isLoading && (!products || products.length === 0) && (
             <div className="text-center py-16">
