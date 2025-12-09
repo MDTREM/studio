@@ -22,7 +22,6 @@ import Image from 'next/image';
 const navItems = [
   { href: '/', label: 'Início', icon: Home },
   { href: '/dashboard', label: 'Pedidos', icon: Package },
-  { href: '/catalogo', label: 'Categorias', icon: LayoutGrid },
 ];
 
 export default function BottomNav() {
@@ -67,7 +66,7 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background border-t z-50">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-background border-t z-40">
       <div className="grid h-full max-w-lg grid-cols-4 mx-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -82,7 +81,6 @@ export default function BottomNav() {
               )}
             >
               <item.icon className="w-6 h-6" />
-              <span className="sr-only">{item.label}</span>
             </Link>
           );
         })}
@@ -97,7 +95,6 @@ export default function BottomNav() {
               )}
             >
               <Search className="w-6 h-6" />
-              <span className="sr-only">Buscar</span>
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="rounded-t-lg h-[80vh]">
@@ -144,7 +141,16 @@ export default function BottomNav() {
             </div>
           </SheetContent>
         </Sheet>
-
+         <Link
+            href="/catalogo"
+            aria-label="Categorias"
+            className={cn(
+            'inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group',
+            pathname.startsWith('/catalogo') ? 'text-primary' : 'text-muted-foreground'
+            )}
+        >
+            <LayoutGrid className="w-6 h-6" />
+        </Link>
       </div>
     </nav>
   );
