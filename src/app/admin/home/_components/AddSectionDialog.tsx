@@ -11,7 +11,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Loader2, PlusCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,8 +24,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { setDocumentNonBlocking, useFirestore } from '@/firebase';
-import { collection, doc, serverTimestamp } from 'firebase/firestore';
+import { setDocumentNonBlocking, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, doc, serverTimestamp, query } from 'firebase/firestore';
+import { HomepageSection } from '@/lib/definitions';
 
 const sectionFormSchema = z.object({
   id: z.string().min(3, 'ID deve ter pelo menos 3 caracteres').regex(/^[a-z0-9_]+$/, 'Use apenas letras minúsculas, números e underscore.'),
@@ -40,6 +40,13 @@ export default function AddSectionDialog() {
   const { toast } = useToast();
   const firestore = useFirestore();
 
+  // Busca as seções existentes para verificar IDs duplicados
+  const sectionsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'homepage_sections'));
+  }, [firestore]);
+  const { data: existingSections } = useCollection<HomepageSection>(sectionsQuery);
+
   const form = useForm<SectionFormValues>({
     resolver: zodResolver(sectionFormSchema),
     defaultValues: {
@@ -51,21 +58,27 @@ export default function AddSectionDialog() {
   const onSubmit = (data: SectionFormValues) => {
     if (!firestore) return;
 
-    // Use o ID do formulário para criar a referência do documento
+    // Verifica se o ID já existe
+    const isIdTaken = existingSections?.some(section => section.id === data.id);
+    if (isIdTaken) {
+      form.setError('id', {
+        type: 'manual',
+        message: 'Este ID já está em uso. Por favor, escolha outro.',
+      });
+      return;
+    }
+
     const sectionRef = doc(firestore, 'homepage_sections', data.id);
 
     const sectionData = {
       id: data.id,
       title: data.title,
       active: true,
-      order: 99, // Será reordenado, colocado no final inicialmente.
+      order: 99,
       productIds: [],
       createdAt: serverTimestamp(),
     };
     
-    // Use setDocumentNonBlocking para criar o documento com o ID especificado
-    // A opção { merge: false } garante que estamos criando um novo documento
-    // e não mesclando com um existente que possa ter o mesmo ID.
     setDocumentNonBlocking(sectionRef, sectionData, { merge: false });
     
     toast({

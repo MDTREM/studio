@@ -8,6 +8,7 @@ import {
   CollectionReference,
   DocumentReference,
   SetOptions,
+  FirestoreError,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import {FirestorePermissionError} from '@/firebase/errors';
@@ -17,16 +18,21 @@ import {FirestorePermissionError} from '@/firebase/errors';
  * Does NOT await the write operation internally.
  */
 export function setDocumentNonBlocking(docRef: DocumentReference, data: any, options?: SetOptions) {
-  // Pass the options object directly to setDoc
-  setDoc(docRef, data, options || {}).catch(error => {
-    errorEmitter.emit(
-      'permission-error',
-      new FirestorePermissionError({
-        path: docRef.path,
-        operation: options?.merge ? 'update' : 'create', // Determine operation based on merge option
-        requestResourceData: data,
-      })
-    )
+  setDoc(docRef, data, options || {}).catch((error: FirestoreError) => {
+    // Check if the error is a permission error
+    if (error.code === 'permission-denied') {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: docRef.path,
+            operation: options?.merge ? 'update' : 'create', // Determine operation based on merge option
+            requestResourceData: data,
+          })
+        )
+    } else {
+        // Log other types of errors to the console for debugging
+        console.error("Firestore Error on setDocumentNonBlocking:", error);
+    }
   })
   // Execution continues immediately
 }
