@@ -173,12 +173,12 @@ export default function ProductPage({ product }: ProductPageProps) {
                           />
                       )}
                   </div>
-                  <div className="flex flex-row gap-2">
+                  <div className="grid grid-cols-5 gap-2">
                       {product.imageUrl?.slice(0, 5).map((url, i) => (
                       <button
                           key={i} 
                           className={cn(
-                              "aspect-square w-1/5 relative bg-secondary/50 rounded-md cursor-pointer ring-2 ring-transparent hover:ring-primary transition-all",
+                              "aspect-square w-full relative bg-secondary/50 rounded-md cursor-pointer ring-2 ring-transparent hover:ring-primary transition-all",
                               mainImage === url && "ring-primary"
                           )}
                           onClick={() => setMainImage(url)}
