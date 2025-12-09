@@ -70,7 +70,7 @@ export default function SignupPage() {
           // The useEffect will handle the redirect to /dashboard
         }
       });
-
+      // The function was being called without arguments, causing the error.
       initiateEmailSignUp(auth, email, password);
 
     } catch (error) {
