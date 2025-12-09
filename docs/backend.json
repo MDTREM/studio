@@ -41,6 +41,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "showOnHome": {
+          "type": "boolean",
+          "description": "Determines if the product is featured on the homepage."
         }
       },
       "required": [
@@ -220,50 +224,6 @@
         "productId",
         "createdAt"
       ]
-    },
-    "HomepageSection": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "HomepageSection",
-      "type": "object",
-      "description": "Represents a customizable section on the homepage.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the section."
-        },
-        "title": {
-          "type": "string",
-          "description": "The title of the section, e.g., 'Mais Vendidos'."
-        },
-        "order": {
-          "type": "number",
-          "description": "The display order of the section on the homepage."
-        },
-        "productIds": {
-          "type": "array",
-          "description": "An array of product IDs to display in this section.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "active": {
-            "type": "boolean",
-            "description": "Whether the section is currently active and should be displayed."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp of when the section was created.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "order",
-        "productIds",
-        "active",
-        "createdAt"
-      ]
     }
   },
   "auth": {
@@ -377,24 +337,8 @@
             }
           ]
         }
-      },
-      {
-        "path": "/homepage_sections/{sectionId}",
-        "definition": {
-          "entityName": "HomepageSection",
-          "schema": {
-            "$ref": "#/backend/entities/HomepageSection"
-          },
-          "description": "Stores the configuration for homepage sections. Readable by everyone, writable only by admins.",
-          "params": [
-            {
-              "name": "sectionId",
-              "description": "Unique identifier for the homepage section."
-            }
-          ]
-        }
       }
     ],
-    "reasoning": "The Firestore data structure is designed to support the Ouro Gráfica marketplace application, focusing on products, categories, orders, and users. The structure is optimized for security, scalability, and ease of querying, adhering to the principles of Authorization Independence, Structural Segregation, and Access Modeling.\n\nAuthorization Independence is achieved by avoiding hierarchical authorization dependencies.  Instead of relying on `get()` calls to parent documents, data necessary for authorization is denormalized into the child documents where needed.  For example, while not explicitly stated as required, if Order items would need different roles depending on the parent Order this could be achieved by denormalizing relevant Order data into the OrderItem.\n\nStructural Segregation is implemented by separating different data types into distinct collections (e.g., `products`, `categories`, `users`, `orders`). This ensures that each collection has a homogeneous security posture and simplifies security rules.  Private user data is stored under `/users/{userId}`, enabling simple path-based ownership rules.\n\nA new collection `homepage_sections` is added to allow administrators to dynamically control the content and order of product sections on the homepage. This collection is publicly readable to render the homepage for all users, but write access is restricted to admins."
+    "reasoning": "The Firestore data structure is designed to support the Ouro Gráfica marketplace application, focusing on products, categories, orders, and users. The structure is optimized for security, scalability, and ease of querying, adhering to the principles of Authorization Independence, Structural Segregation, and Access Modeling.\n\nAuthorization Independence is achieved by avoiding hierarchical authorization dependencies.  Instead of relying on `get()` calls to parent documents, data necessary for authorization is denormalized into the child documents where needed.  For example, while not explicitly stated as required, if Order items would need different roles depending on the parent Order this could be achieved by denormalizing relevant Order data into the OrderItem.\n\nStructural Segregation is implemented by separating different data types into distinct collections (e.g., `products`, `categories`, `users`, `orders`). This ensures that each collection has a homogeneous security posture and simplifies security rules.  Private user data is stored under `/users/{userId}`, enabling simple path-based ownership rules."
   }
 }

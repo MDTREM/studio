@@ -33,6 +33,7 @@ import type { Product, Category } from '@/lib/definitions';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 const productFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
@@ -48,7 +49,8 @@ const productFormSchema = z.object({
     formats: z.string().min(1, { message: 'Pelo menos um formato é obrigatório.'}),
     finishings: z.string().min(1, { message: 'Pelo menos um acabamento é obrigatório.'}),
     quantities: z.string().min(1, { message: 'Pelo menos uma quantidade é obrigatória.'}),
-  })
+  }),
+  showOnHome: z.boolean().default(false),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -109,7 +111,8 @@ export default function EditProductDialog({ product, children }: EditProductDial
             formats: product.variations.formats.join(', '),
             finishings: product.variations.finishings.join(', '),
             quantities: product.variations.quantities.join(', '),
-        }
+        },
+        showOnHome: product.showOnHome || false,
     },
   });
 
@@ -372,6 +375,26 @@ export default function EditProductDialog({ product, children }: EditProductDial
                     )}
                 />
             </div>
+            <FormField
+              control={form.control}
+              name="showOnHome"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm mt-4">
+                  <div className="space-y-0.5">
+                    <FormLabel>Mostrar na Página Inicial</FormLabel>
+                    <FormDescription>
+                      Marque para destacar este produto na home.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
             <DialogFooter>
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                     {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

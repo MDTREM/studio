@@ -3,7 +3,7 @@ import Hero from "@/components/sections/home/Hero";
 import InfoCarousel from "@/components/sections/home/InfoCarousel";
 import PrinterBanners from "@/components/sections/home/PrinterBanners";
 import PromoBanners from "@/components/sections/home/PromoBanners";
-import HomepageSections from "@/components/sections/home/HomepageSections";
+import FeaturedProducts from "@/components/sections/home/FeaturedProducts";
 
 export default function Home() {
   return (
@@ -11,7 +11,7 @@ export default function Home() {
       <Hero />
       <InfoCarousel />
       <PromoBanners />
-      <HomepageSections />
+      <FeaturedProducts />
       <CategoriesSection />
       <PrinterBanners />
     </>

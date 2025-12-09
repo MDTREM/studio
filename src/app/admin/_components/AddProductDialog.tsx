@@ -33,6 +33,7 @@ import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Category } from '@/lib/definitions';
+import { Switch } from '@/components/ui/switch';
 
 const productFormSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
@@ -48,7 +49,8 @@ const productFormSchema = z.object({
     formats: z.string().min(1, { message: 'Pelo menos um formato é obrigatório.'}),
     finishings: z.string().min(1, { message: 'Pelo menos um acabamento é obrigatório.'}),
     quantities: z.string().min(1, { message: 'Pelo menos uma quantidade é obrigatória.'}),
-  })
+  }),
+  showOnHome: z.boolean().default(false),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -107,7 +109,8 @@ export default function AddProductDialog() {
             formats: '',
             finishings: '',
             quantities: '',
-        }
+        },
+        showOnHome: false,
     },
   });
 
@@ -210,7 +213,6 @@ export default function AddProductDialog() {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto px-1">
-            {/* Form fields remain the same */}
             <FormField
               control={form.control}
               name="name"
@@ -376,6 +378,26 @@ export default function AddProductDialog() {
                     )}
                 />
             </div>
+            <FormField
+              control={form.control}
+              name="showOnHome"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm mt-4">
+                  <div className="space-y-0.5">
+                    <FormLabel>Mostrar na Página Inicial</FormLabel>
+                    <FormDescription>
+                      Marque para destacar este produto na home.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
             <DialogFooter>
                 <Button type="submit" disabled={form.formState.isSubmitting}>
                     {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

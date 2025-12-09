@@ -124,13 +124,6 @@ function AdminNavLinks() {
           <Users className="h-4 w-4" />
           Clientes
         </Link>
-        <Link
-          href="/admin/home"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-        >
-          <Home className="h-4 w-4" />
-          Gerenciar Home
-        </Link>
       </nav>
     );
   }
