@@ -2,7 +2,6 @@ import CategoriesSection from "@/components/sections/home/CategoriesSection";
 import Hero from "@/components/sections/home/Hero";
 import InfoCarousel from "@/components/sections/home/InfoCarousel";
 import PrinterBanners from "@/components/sections/home/PrinterBanners";
-import PromoBanners from "@/components/sections/home/PromoBanners";
 import FeaturedProducts from "@/components/sections/home/FeaturedProducts";
 import BestsellersSection from "@/components/sections/home/BestsellersSection";
 
@@ -11,9 +10,8 @@ export default function Home() {
     <>
       <Hero />
       <InfoCarousel />
-      <PromoBanners />
-      <BestsellersSection />
       <CategoriesSection />
+      <BestsellersSection />
       <FeaturedProducts />
       <PrinterBanners />
     </>
