@@ -75,6 +75,15 @@ service cloud.firestore {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
+    
+    /**
+     * @description Homepage Sections configuration. Publicly readable, admin writable.
+     * @path /homepage_sections/{sectionId}
+     */
+    match /homepage_sections/{sectionId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
 
     /**
      * @description A user's profile document. Owners can manage their data. Admins have read access.
