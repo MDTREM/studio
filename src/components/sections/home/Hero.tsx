@@ -4,9 +4,9 @@ import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section className="relative w-full h-[60vh] bg-black">
+    <section className="relative w-full md:h-[60vh] bg-black">
       {/* Imagem para Mobile */}
-      <div className="md:hidden relative w-full h-full">
+      <div className="md:hidden relative w-full aspect-square">
         <Image
           src="https://i.imgur.com/DHLrPss.png"
           alt="Banner para mobile"
