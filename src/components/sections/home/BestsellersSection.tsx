@@ -43,7 +43,7 @@ export default function BestsellersSection() {
                 >
                     <CarouselContent>
                         {products.map((product) => (
-                            <CarouselItem key={product.id} className="md:basis-1/3 lg:basis-1/4">
+                            <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                                 <div className="p-1">
                                     <BestsellerProductCard product={product} />
                                 </div>
