@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, doc, serverTimestamp, query, setDoc } from 'firebase/firestore';
+import { collection, doc, serverTimestamp, query, setDoc, getDoc } from 'firebase/firestore';
 import { HomepageSection } from '@/lib/definitions';
 
 const sectionFormSchema = z.object({
@@ -57,29 +57,29 @@ export default function AddSectionDialog() {
   const onSubmit = async (data: SectionFormValues) => {
     if (!firestore) return;
 
-    // Check for duplicate ID before submitting
-    const isIdTaken = existingSections?.some(section => section.id === data.id);
-    if (isIdTaken) {
-      form.setError('id', {
-        type: 'manual',
-        message: 'Este ID já está em uso. Por favor, escolha outro.',
-      });
-      return;
-    }
-
     const sectionRef = doc(firestore, 'homepage_sections', data.id);
-
-    const sectionData = {
-      id: data.id,
-      title: data.title,
-      active: true,
-      order: existingSections?.length ?? 0, // Place new section at the end
-      productIds: [],
-      createdAt: serverTimestamp(),
-    };
-
+    
     try {
-      // Use await to ensure the operation completes before proceeding
+      // Direct check against Firestore to prevent race conditions
+      const docSnap = await getDoc(sectionRef);
+
+      if (docSnap.exists()) {
+        form.setError('id', {
+          type: 'manual',
+          message: 'Este ID já está em uso. Por favor, escolha outro.',
+        });
+        return; // Stop submission
+      }
+
+      const sectionData = {
+        id: data.id,
+        title: data.title,
+        active: true,
+        order: existingSections?.length ?? 0, // Place new section at the end
+        productIds: [],
+        createdAt: serverTimestamp(),
+      };
+
       await setDoc(sectionRef, sectionData, { merge: false });
       
       toast({
@@ -118,7 +118,6 @@ export default function AddSectionDialog() {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          {/* We use a native form element to leverage isSubmitting state */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
             <FormField
               control={form.control}
