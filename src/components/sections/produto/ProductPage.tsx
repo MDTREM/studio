@@ -160,39 +160,41 @@ export default function ProductPage({ product }: ProductPageProps) {
                 </nav>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
                 {/* Imagens do Produto */}
-                <div className="lg:sticky top-24 self-start grid grid-cols-1 gap-4">
-                  <div className="aspect-square w-full relative bg-secondary rounded-lg">
-                      {mainImage && (
-                          <Image
-                              src={mainImage}
-                              alt={product.name}
-                              fill
-                              className="object-cover rounded-lg"
-                              data-ai-hint={product.imageHint}
-                              priority
-                          />
-                      )}
-                  </div>
-                  <div className="grid grid-cols-5 gap-2">
-                      {product.imageUrl?.slice(0, 5).map((url, i) => (
-                      <button
-                          key={i} 
-                          className={cn(
-                              "aspect-square w-full relative bg-secondary/50 rounded-md cursor-pointer ring-2 ring-transparent hover:ring-primary transition-all",
-                              mainImage === url && "ring-primary"
+                <div className="lg:sticky top-24 self-start">
+                    <div className="grid grid-cols-1 gap-4">
+                        <div className="aspect-square w-full relative bg-secondary rounded-lg">
+                          {mainImage && (
+                              <Image
+                                  src={mainImage}
+                                  alt={product.name}
+                                  fill
+                                  className="object-cover rounded-lg"
+                                  data-ai-hint={product.imageHint}
+                                  priority
+                              />
                           )}
-                          onClick={() => setMainImage(url)}
-                      >
-                          <Image
-                              src={url}
-                              alt={`${product.name} thumbnail ${i+1}`}
-                              fill
-                              className="object-cover rounded-md"
-                              data-ai-hint={product.imageHint}
-                          />
-                      </button>
-                      ))}
-                  </div>
+                        </div>
+                        <div className="grid grid-cols-5 gap-2">
+                            {product.imageUrl?.slice(0, 5).map((url, i) => (
+                            <button
+                                key={i} 
+                                className={cn(
+                                    "aspect-square w-full relative bg-secondary/50 rounded-md cursor-pointer ring-2 ring-transparent hover:ring-primary transition-all",
+                                    mainImage === url && "ring-primary"
+                                )}
+                                onClick={() => setMainImage(url)}
+                            >
+                                <Image
+                                    src={url}
+                                    alt={`${product.name} thumbnail ${i+1}`}
+                                    fill
+                                    className="object-cover rounded-md"
+                                    data-ai-hint={product.imageHint}
+                                />
+                            </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Detalhes do Produto e Compra */}
