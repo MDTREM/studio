@@ -11,13 +11,11 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = headers().get('stripe-signature') as string;
-  // Obtém a instância da Stripe usando a função getStripe() em vez de importá-la diretamente.
   const stripe = getStripe();
 
   let event: Stripe.Event;
 
   try {
-    // Verifica a assinatura do evento para garantir que ele veio da Stripe
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error(`❌ Erro na verificação da assinatura do webhook: ${err.message}`);
@@ -28,63 +26,49 @@ export async function POST(req: NextRequest) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    // Verifica se a sessão tem os metadados e o ID do cliente necessários
-    if (!session?.metadata?.cartItems || !session?.client_reference_id) {
-        console.error('❌ Metadados ou client_reference_id ausentes na sessão de checkout.');
+    // Obtém o ID do pedido dos metadados
+    const orderId = session.metadata?.orderId;
+    const userId = session.client_reference_id;
+
+    if (!orderId || !userId) {
+        console.error('❌ orderId ou client_reference_id ausentes na sessão de checkout.');
         return new NextResponse('Webhook Error: Faltando metadados na sessão.', { status: 400 });
     }
 
     try {
         const { firestore } = getSdks();
-        const userId = session.client_reference_id;
+        const orderRef = doc(firestore, 'users', userId, 'orders', orderId);
+        
+        // Pega os dados do usuário para salvar nome/email no pedido
         const userRef = doc(firestore, 'users', userId);
         const userSnap = await getDoc(userRef);
-
         if (!userSnap.exists()) {
-            console.error(`❌ Usuário não encontrado no Firestore com o ID: ${userId}`);
-            return new NextResponse('Webhook Error: Usuário não encontrado.', { status: 404 });
+             console.error(`❌ Usuário não encontrado no Firestore com o ID: ${userId}`);
+             return new NextResponse('Webhook Error: Usuário não encontrado.', { status: 404 });
         }
-        
         const userData = userSnap.data();
 
-        // O carrinho está armazenado como uma string JSON nos metadados
-        const cartItems = JSON.parse(session.metadata.cartItems);
-
-        // O valor total da sessão Stripe é autoritativo (em centavos)
-        const stripeTotalAmount = session.amount_total;
-
-        // Cria um pedido único com o valor total da sessão Stripe e os itens detalhados
-        const newOrderRef = collection(firestore, 'users', userId, 'orders');
-        const orderData = {
-            customerId: userId,
+        // Pega os itens do pedido que já foram salvos no rascunho
+        const orderSnap = await getDoc(orderRef);
+        const orderItems = orderSnap.data()?.items || [];
+        
+        // Atualiza o pedido com os detalhes finais do pagamento
+        await updateDoc(orderRef, {
+            id: orderId,
+            status: 'Em análise',
+            orderDate: new Date().toISOString(),
+            totalAmount: session.amount_total ? session.amount_total / 100 : 0,
             customerName: userData.name,
             customerEmail: userData.email,
-            orderDate: new Date().toISOString(),
-            status: 'Em análise',
-            // O valor total vem diretamente da sessão Stripe para garantir consistência
-            totalAmount: stripeTotalAmount ? stripeTotalAmount / 100 : 0, 
-            items: cartItems.map((item: any) => ({
-                productName: item.productName,
-                quantity: item.quantity,
-                totalPrice: item.totalPrice, // Armazena o preço do item individual
-                variation: {
-                    format: item.selectedFormat,
-                    finishing: item.selectedFinishing,
-                },
-                artworkFee: item.artworkFee || 0,
-            })),
-            artworkUrl: '', // O cliente enviará a arte separadamente
-            createdAt: serverTimestamp(),
-        };
-
-        const docRef = await addDoc(newOrderRef, orderData);
-        // Salva o ID gerado pelo Firestore dentro do próprio documento
-        await updateDoc(docRef, { id: docRef.id });
-
+            items: orderItems, // Garante que os itens estão lá
+            // Adiciona informações da Stripe se necessário
+            stripeSessionId: session.id,
+            paymentStatus: session.payment_status,
+        });
 
     } catch (error) {
-        console.error('❌ Erro ao salvar o pedido no Firestore:', error);
-        return new NextResponse('Webhook Error: Erro interno ao salvar pedido.', { status: 500 });
+        console.error('❌ Erro ao atualizar o pedido no Firestore:', error);
+        return new NextResponse('Webhook Error: Erro interno ao atualizar pedido.', { status: 500 });
     }
   }
 
