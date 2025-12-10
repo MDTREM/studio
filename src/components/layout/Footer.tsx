@@ -32,6 +32,7 @@ export default function Footer() {
               <Link href="/politica-de-cookies" className="hover:text-primary transition-colors">Política de Cookies</Link>
               <Link href="/termos-de-uso" className="hover:text-primary transition-colors">Termos de Uso</Link>
               <Link href="/politica-de-privacidade" className="hover:text-primary transition-colors">Política de Privacidade</Link>
+              <Link href="/paginas" className="hover:text-primary transition-colors">Mapa do Site</Link>
             </nav>
           </div>
 
