@@ -6,6 +6,18 @@ import { collection, query, where } from 'firebase/firestore';
 import { Filter, Loader2, Search } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import CategoryFilter from './_components/CategoryFilter';
+import { useMemo } from 'react';
+
+// Função para obter todos os IDs de subcategorias de forma recursiva
+const getSubCategoryIds = (categoryId: string, allCategories: Category[]): string[] => {
+    const subCategories = allCategories.filter(c => c.parentId === categoryId);
+    let ids = [categoryId];
+    subCategories.forEach(sub => {
+        ids = [...ids, ...getSubCategoryIds(sub.id, allCategories)];
+    });
+    return ids;
+};
+
 
 export default function CatalogoClientPage() {
   const searchParams = useSearchParams();
@@ -13,15 +25,36 @@ export default function CatalogoClientPage() {
   const searchQuery = searchParams.get('q');
   const firestore = useFirestore();
 
+  // 1. Buscar todas as categorias para construir a árvore
+  const categoriesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'categories'));
+  }, [firestore]);
+  const { data: allCategories } = useCollection<Category>(categoriesQuery);
+
+  // 2. Montar a lista de IDs de categoria (principal + subcategorias)
+  const categoryIdsToFilter = useMemo(() => {
+    if (!currentCategory || !allCategories) return null;
+    return getSubCategoryIds(currentCategory, allCategories);
+  }, [currentCategory, allCategories]);
+
+
   const productsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     let productsCollection: any = collection(firestore, 'products');
     
     const queryConstraints = [];
 
-    if (currentCategory) {
+    // 3. Alterar a lógica de busca
+    if (categoryIdsToFilter && categoryIdsToFilter.length > 0) {
+      // Usa o operador 'in' para buscar produtos em múltiplas categorias.
+      // O Firestore limita a 30 itens no array do 'in'.
+      queryConstraints.push(where('categoryId', 'in', categoryIdsToFilter.slice(0, 30)));
+    } else if (currentCategory && !categoryIdsToFilter) {
+      // Se as categorias ainda não carregaram, busca pela principal para evitar piscar a tela
       queryConstraints.push(where('categoryId', '==', currentCategory));
     }
+
 
     if (searchQuery) {
         queryConstraints.push(where('keywords', 'array-contains', searchQuery.toLowerCase()));
@@ -32,7 +65,7 @@ export default function CatalogoClientPage() {
     }
 
     return query(productsCollection);
-  }, [firestore, currentCategory, searchQuery]);
+  }, [firestore, currentCategory, searchQuery, categoryIdsToFilter]);
 
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
