@@ -405,7 +405,7 @@ export default function AddProductDialog() {
                 />
             </div>
             
-            <h4 className="font-medium text-lg mt-4">Ficha Técnica</h4>
+            <h4 className="font-medium text-lg mt-4">Ficha Técnica (Opcional)</h4>
              <div className="grid grid-cols-2 gap-4">
                  <FormField control={form.control} name="technicalSheet.material" render={({ field }) => (<FormItem><FormLabel>Papel/Material</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
                  <FormField control={form.control} name="technicalSheet.colors" render={({ field }) => (<FormItem><FormLabel>Cores</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
