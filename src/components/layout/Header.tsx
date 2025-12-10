@@ -204,13 +204,13 @@ export default function Header() {
           </div>
           
           {/* Desktop Header */}
-          <div className="hidden md:flex w-full items-center gap-8">
+          <div className="hidden md:flex w-full items-center justify-between gap-8">
              <div className="flex-shrink-0">
                 <Link href="/">
                     <Logo />
                 </Link>
              </div>
-            <form className="flex-grow max-w-xl" onSubmit={handleSearch}>
+            <form className="flex-1 max-w-xl" onSubmit={handleSearch}>
               <div className="relative w-full">
                   <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-white/20 text-white border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-gray-300" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                   <Button type="submit" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full text-white hover:bg-white/10 hover:text-white">
@@ -337,5 +337,6 @@ ListItem.displayName = "ListItem"
     
 
     
+
 
 
