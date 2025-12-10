@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useEffect, Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useSearchParams } from "next/navigation";
-import { useDoc, useFirebase } from "@/firebase";
+import { useDoc, useFirebase, useMemoFirebase } from "@/firebase";
 import { Order } from "@/lib/definitions";
 import { doc } from "firebase/firestore";
 import Image from "next/image";
