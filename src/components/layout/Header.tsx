@@ -100,7 +100,7 @@ export default function Header() {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
         <div className="container flex h-20 max-w-7xl items-center">
           
-          <div className="flex-1 flex justify-start md:hidden">
+          <div className="md:hidden flex-1 flex justify-start">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/10 hover:text-white">
@@ -186,13 +186,16 @@ export default function Header() {
             </Sheet>
           </div>
           
-          <div className="flex-1 flex justify-center md:justify-start">
+          <div className="flex-1 md:hidden flex justify-center">
              <Link href="/">
                 <Logo />
             </Link>
           </div>
-          
-          <div className="hidden md:flex flex-1 justify-center px-8">
+
+          <div className="hidden md:flex flex-1 items-center justify-center gap-8">
+            <Link href="/" className='shrink-0'>
+                <Logo />
+            </Link>
             <form className="w-full max-w-xl" onSubmit={handleSearch}>
               <div className="relative w-full">
                   <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-white/20 text-white border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-gray-300" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
@@ -201,12 +204,12 @@ export default function Header() {
                   </Button>
               </div>
             </form>
+            <div className="flex items-center gap-4 shrink-0">
+                <UserNav />
+            </div>
           </div>
 
           <div className="flex-1 flex justify-end items-center gap-4">
-            <div className="hidden md:flex">
-                <UserNav />
-            </div>
              <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
                 <Link href="/carrinho">
                     <ShoppingCart className="h-6 w-6" />
