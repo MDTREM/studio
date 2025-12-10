@@ -78,9 +78,8 @@ export default function ProductPage({ product }: ProductPageProps) {
             if (product.variations?.colors?.[0]) {
                 setSelectedColor(product.variations.colors[0]);
             }
-            if (product.variations?.finishings?.[0]) {
-                setSelectedFinishing(product.variations.finishings[0]);
-            }
+            // Não pré-seleciona mais o acabamento
+            setSelectedFinishing('');
         }
     }, [product]);
     
@@ -161,7 +160,8 @@ export default function ProductPage({ product }: ProductPageProps) {
         if (hasVariations('materials') && !selectedMaterial) return true;
         if (hasVariations('formats') && !selectedFormat) return true;
         if (hasVariations('colors') && !selectedColor) return true;
-        if (hasVariations('finishings') && !selectedFinishing) return true;
+        // O acabamento não é mais obrigatório
+        // if (hasVariations('finishings') && !selectedFinishing) return true; 
         if (!quantity) return true;
         // The user must calculate and select a shipping option before adding to cart
         if (!selectedShipping) return true; 
@@ -282,8 +282,14 @@ export default function ProductPage({ product }: ProductPageProps) {
                     )}
                     {hasVariations('finishings') && (
                         <div className="grid gap-3">
-                            <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento</Label>
+                            <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento (Opcional)</Label>
                             <RadioGroup value={selectedFinishing} onValueChange={setSelectedFinishing} className="flex flex-wrap gap-2">
+                                <div>
+                                    <RadioGroupItem value="" id="finishing-none" className="sr-only" />
+                                    <Label htmlFor="finishing-none" className={cn("border rounded-md px-4 py-2 cursor-pointer transition-colors", selectedFinishing === '' && "bg-primary text-primary-foreground border-primary")}>
+                                        Nenhum
+                                    </Label>
+                                </div>
                                 {product.variations.finishings!.map(f => (
                                     <div key={f}>
                                         <RadioGroupItem value={f} id={`finishing-${f}`} className="sr-only" />
@@ -492,7 +498,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </AccordionContent>
                         </AccordionItem>
                     )}
-                     <AccordionItem value="item-3">
+                    <AccordionItem value="item-3">
                         <AccordionTrigger className="text-lg font-semibold">Como Enviar sua Arte?</AccordionTrigger>
                         <AccordionContent>
                             <div className='space-y-3 pt-2 text-muted-foreground text-sm'>
