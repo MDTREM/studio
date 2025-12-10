@@ -98,76 +98,31 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
-        <div className="container flex h-20 max-w-7xl items-center">
+        <div className="container flex h-20 max-w-7xl items-center justify-between">
           
-          <div className="md:hidden flex-1 flex justify-start">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/10 hover:text-white">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Toggle Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="bg-black text-white p-0 flex flex-col">
-                <SheetHeader className="p-6">
-                  <SheetTitle className="sr-only">Menu Principal</SheetTitle>
-                  <Link href="/">
-                      <Logo />
-                  </Link>
-                </SheetHeader>
-                <div className="overflow-y-auto flex-1">
-                    <nav className="flex flex-col text-base font-medium">
-                        <Accordion type="multiple" className="w-full">
-                            <AccordionItem value="user-links" className="border-b border-white/20">
-                                <div className="p-6 flex flex-col gap-4">
-                                {mobileUserLinks.map((link, index) => (
-                                <Link
-                                    key={`${link.label}-${index}`}
-                                    href={link.href}
-                                    className="flex items-center gap-3 transition-colors hover:text-primary"
-                                >
-                                    {link.icon}
-                                    {link.label}
-                                </Link>
-                                ))}
-                                </div>
-                            </AccordionItem>
-                            <AccordionItem value="categories" className="border-b border-white/20">
-                                <AccordionTrigger className="p-6 hover:no-underline text-base">Categorias</AccordionTrigger>
-                                <AccordionContent className="bg-white/10">
-                                    <div className="flex flex-col p-6">
-                                        <Link href="/catalogo" className="transition-colors hover:text-primary mb-4">Todos os Produtos</Link>
-                                        <Accordion type="multiple" className="w-full">
-                                            {areMenuCategoriesLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className='h-8 w-full bg-gray-700 mb-2' />) 
-                                            : categoryTree.map((category) => (
-                                                category.children && category.children.length > 0 ? (
-                                                    <AccordionItem key={category.id} value={category.id} className="border-b border-white/20">
-                                                        <AccordionTrigger className='py-3 hover:no-underline'>
-                                                            <Link href={`/catalogo?categoria=${category.id}`} className='hover:text-primary'>{category.name}</Link>
-                                                        </AccordionTrigger>
-                                                        <AccordionContent className='pt-2 pl-4'>
-                                                            <div className="flex flex-col gap-3">
-                                                                {category.children.map(child => (
-                                                                    <Link key={child.id} href={`/catalogo?categoria=${child.id}`} className="transition-colors hover:text-primary text-sm">
-                                                                        {child.name}
-                                                                    </Link>
-                                                                ))}
-                                                            </div>
-                                                        </AccordionContent>
-                                                    </AccordionItem>
-                                                ) : (
-                                                    <Link key={category.id} href={`/catalogo?categoria=${category.id}`} className="transition-colors hover:text-primary py-3 block border-b border-white/20">
-                                                        {category.name}
-                                                    </Link>
-                                                )
-                                            ))}
-                                        </Accordion>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                             <AccordionItem value="services" className="border-b-0">
-                                <div className="p-6 flex flex-col gap-4">
-                                    {mobileServiceLinks.map((link, index) => (
+          {/* Mobile Header */}
+          <div className="flex w-full items-center justify-between md:hidden">
+            <div className="flex-1">
+                <Sheet>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/10 hover:text-white">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Toggle Menu</span>
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="bg-black text-white p-0 flex flex-col">
+                    <SheetHeader className="p-6">
+                    <SheetTitle className="sr-only">Menu Principal</SheetTitle>
+                    <Link href="/">
+                        <Logo />
+                    </Link>
+                    </SheetHeader>
+                    <div className="overflow-y-auto flex-1">
+                        <nav className="flex flex-col text-base font-medium">
+                            <Accordion type="multiple" className="w-full">
+                                <AccordionItem value="user-links" className="border-b border-white/20">
+                                    <div className="p-6 flex flex-col gap-4">
+                                    {mobileUserLinks.map((link, index) => (
                                     <Link
                                         key={`${link.label}-${index}`}
                                         href={link.href}
@@ -177,26 +132,85 @@ export default function Header() {
                                         {link.label}
                                     </Link>
                                     ))}
-                                </div>
-                            </AccordionItem>
-                        </Accordion>
-                    </nav>
-                </div>
-              </SheetContent>
-            </Sheet>
+                                    </div>
+                                </AccordionItem>
+                                <AccordionItem value="categories" className="border-b border-white/20">
+                                    <AccordionTrigger className="p-6 hover:no-underline text-base">Categorias</AccordionTrigger>
+                                    <AccordionContent className="bg-white/10">
+                                        <div className="flex flex-col p-6">
+                                            <Link href="/catalogo" className="transition-colors hover:text-primary mb-4">Todos os Produtos</Link>
+                                            <Accordion type="multiple" className="w-full">
+                                                {areMenuCategoriesLoading ? Array.from({length: 5}).map((_, i) => <Skeleton key={i} className='h-8 w-full bg-gray-700 mb-2' />) 
+                                                : categoryTree.map((category) => (
+                                                    category.children && category.children.length > 0 ? (
+                                                        <AccordionItem key={category.id} value={category.id} className="border-b border-white/20">
+                                                            <AccordionTrigger className='py-3 hover:no-underline'>
+                                                                <Link href={`/catalogo?categoria=${category.id}`} className='hover:text-primary'>{category.name}</Link>
+                                                            </AccordionTrigger>
+                                                            <AccordionContent className='pt-2 pl-4'>
+                                                                <div className="flex flex-col gap-3">
+                                                                    {category.children.map(child => (
+                                                                        <Link key={child.id} href={`/catalogo?categoria=${child.id}`} className="transition-colors hover:text-primary text-sm">
+                                                                            {child.name}
+                                                                        </Link>
+                                                                    ))}
+                                                                </div>
+                                                            </AccordionContent>
+                                                        </AccordionItem>
+                                                    ) : (
+                                                        <Link key={category.id} href={`/catalogo?categoria=${category.id}`} className="transition-colors hover:text-primary py-3 block border-b border-white/20">
+                                                            {category.name}
+                                                        </Link>
+                                                    )
+                                                ))}
+                                            </Accordion>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="services" className="border-b-0">
+                                    <div className="p-6 flex flex-col gap-4">
+                                        {mobileServiceLinks.map((link, index) => (
+                                        <Link
+                                            key={`${link.label}-${index}`}
+                                            href={link.href}
+                                            className="flex items-center gap-3 transition-colors hover:text-primary"
+                                        >
+                                            {link.icon}
+                                            {link.label}
+                                        </Link>
+                                        ))}
+                                    </div>
+                                </AccordionItem>
+                            </Accordion>
+                        </nav>
+                    </div>
+                </SheetContent>
+                </Sheet>
+            </div>
+            <div className="flex-shrink-0">
+                <Link href="/">
+                    <Logo />
+                </Link>
+            </div>
+            <div className="flex-1 flex justify-end">
+                <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
+                    <Link href="/carrinho">
+                        <ShoppingCart className="h-6 w-6" />
+                        {cartCount > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
+                        <span className="sr-only">Carrinho</span>
+                    </Link>
+                </Button>
+            </div>
           </div>
           
-          <div className="md:hidden flex-1 flex justify-center">
-             <Link href="/">
-                <Logo />
-            </Link>
-          </div>
-
-          <div className="hidden md:flex flex-1 items-center gap-8 justify-between">
-            <Link href="/" className='shrink-0'>
-                <Logo />
-            </Link>
-            <form className="w-full max-w-xl" onSubmit={handleSearch}>
+          {/* Desktop Header */}
+          <div className="hidden md:flex w-full items-center gap-8">
+             <div className="flex-shrink-0">
+                <Link href="/">
+                    <Logo />
+                </Link>
+             </div>
+            <form className="flex-grow max-w-xl" onSubmit={handleSearch}>
               <div className="relative w-full">
                   <Input type="search" placeholder="Digite o que você procura" className="w-full rounded-full border-2 bg-white/20 text-white border-border/50 h-11 pl-6 pr-12 text-base placeholder:text-gray-300" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                   <Button type="submit" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full text-white hover:bg-white/10 hover:text-white">
@@ -204,19 +218,16 @@ export default function Header() {
                   </Button>
               </div>
             </form>
-            <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center gap-4 flex-shrink-0">
                 <UserNav />
+                 <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
+                    <Link href="/carrinho">
+                        <ShoppingCart className="h-6 w-6" />
+                        {cartCount > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
+                        <span className="sr-only">Carrinho</span>
+                    </Link>
+                </Button>
             </div>
-          </div>
-
-          <div className="flex justify-end items-center gap-4">
-             <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
-                <Link href="/carrinho">
-                    <ShoppingCart className="h-6 w-6" />
-                    {cartCount > 0 && <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{cartCount}</span>}
-                    <span className="sr-only">Carrinho</span>
-                </Link>
-            </Button>
           </div>
         </div>
 
@@ -326,3 +337,4 @@ ListItem.displayName = "ListItem"
     
 
     
+
