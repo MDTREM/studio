@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { useFirestore } from '@/firebase';
 import { collection, doc, writeBatch } from 'firebase/firestore';
 import { Loader2, Upload } from 'lucide-react';
 import Papa from 'papaparse';
@@ -101,8 +101,6 @@ export default function ImportProductsDialog() {
                 formats: (productData.formats || '').split(',').map((s:string) => s.trim()),
                 finishings: (productData.finishings || '').split(',').map((s:string) => s.trim()),
                 quantities: (productData.quantities || '').split(',').map((s:string) => parseInt(s.trim(), 10)),
-                materials: (productData.materials || '').split(',').map((s:string) => s.trim()),
-                colors: (productData.colors || '').split(',').map((s:string) => s.trim()),
               },
               createdAt: new Date(),
             };
@@ -164,7 +162,7 @@ export default function ImportProductsDialog() {
             </div>
             <div className='text-xs text-muted-foreground space-y-2 p-4 bg-secondary/50 rounded-md'>
                 <p className='font-bold'>Instruções:</p>
-                <p>O arquivo deve ter as colunas: `id` (opcional), `name`, `shortDescription`, `description`, `imageUrl`, `imageHint`, `basePrice`, `categoryId`, `formats`, `finishings`, `quantities`, `materials`, `colors`.</p>
+                <p>O arquivo deve ter as colunas: `id` (opcional), `name`, `shortDescription`, `description`, `imageUrl`, `imageHint`, `basePrice`, `categoryId`, `formats`, `finishings`, `quantities`.</p>
                 <p>Para campos com múltiplos valores (como `imageUrl` ou `formats`), separe os valores por vírgulas (ex: "url1,url2,url3").</p>
                 <p>Se um `id` for fornecido e já existir, o produto será atualizado. Caso contrário, um novo produto será criado.</p>
             </div>
