@@ -143,9 +143,9 @@ export default function ProductPage({ product }: ProductPageProps) {
       // Simula uma chamada de API de frete
       setTimeout(() => {
         const options: ShippingOption[] = [
-          { name: 'SEDEX', price: 25.50, days: 3 },
+          { name: 'SEDEX', price: 25.50, days: 7 },
           { name: 'PAC', price: 15.80, days: 7 },
-          { name: 'Retirar na Loja', price: 0, days: 1 },
+          { name: 'Retirar na Loja', price: 0, days: 7 },
         ];
         setShippingOptions(options);
         setIsCalculatingShipping(false);
@@ -440,7 +440,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                                     <div>
                                         <p className="font-medium">{option.name}</p>
                                         <p className="text-muted-foreground text-xs">
-                                            {option.price > 0 ? `Até ${option.days} dias úteis` : 'Pronto em até 1 dia útil'}
+                                            {option.price > 0 ? `Até ${option.days} dias úteis` : `Disponível em até ${option.days} dias úteis`}
                                         </p>
                                     </div>
                                 </div>
