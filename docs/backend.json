@@ -169,6 +169,10 @@
         "address": {
           "type": "string",
           "description": "Address of the user."
+        },
+        "document": {
+            "type": "string",
+            "description": "The user's document (CPF or CNPJ)."
         }
       },
       "required": [

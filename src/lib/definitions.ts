@@ -74,6 +74,7 @@ export type User = {
   companyName?: string;
   tradingName?: string;
   cnpj?: string;
+  document?: string;
   isAdmin?: boolean;
 };
 
