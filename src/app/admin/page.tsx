@@ -3,17 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Product } from "@/lib/definitions";
-import { MoreHorizontal } from "lucide-react";
+import { Copy, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import Image from "next/image";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, doc, deleteDoc } from "firebase/firestore";
+import { collection, query, doc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import AddProductDialog from "./_components/AddProductDialog";
 import EditProductDialog from "./_components/EditProductDialog";
 import {
@@ -41,6 +42,37 @@ export default function AdminProductsPage() {
   }, [firestore]);
 
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
+
+  const handleDuplicate = async (product: Product) => {
+    if (!firestore) return;
+    
+    // Create a new product object, omitting the id and adding a copy suffix.
+    const { id, ...productData } = product;
+    const newProductData = {
+      ...productData,
+      name: `${product.name} (Cópia)`,
+      createdAt: serverTimestamp(), // Set a new creation timestamp
+      // Reset visibility flags
+      showOnHome: false,
+      isBestseller: false,
+      isNew: false,
+    };
+
+    try {
+      await addDoc(collection(firestore, 'products'), newProductData);
+      toast({
+        title: "Produto Duplicado!",
+        description: `Uma cópia de "${product.name}" foi criada com sucesso.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao duplicar produto',
+        description: error.message,
+      });
+    }
+  };
+
 
   const handleDelete = async (productId: string, productName: string) => {
     if (!firestore) return;
@@ -142,6 +174,11 @@ export default function AdminProductsPage() {
                                     Editar
                                   </DropdownMenuItem>
                                 </EditProductDialog>
+                                <DropdownMenuItem onClick={() => handleDuplicate(product)}>
+                                  <Copy className="mr-2 h-4 w-4" />
+                                  <span>Duplicar</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
                                 <AlertDialogTrigger asChild>
                                   <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>Excluir</DropdownMenuItem>
                                 </AlertDialogTrigger>
