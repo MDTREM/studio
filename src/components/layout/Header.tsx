@@ -186,13 +186,13 @@ export default function Header() {
             </Sheet>
           </div>
           
-          <div className="flex-1 md:hidden flex justify-center">
+          <div className="md:hidden flex-1 flex justify-center">
              <Link href="/">
                 <Logo />
             </Link>
           </div>
 
-          <div className="hidden md:flex flex-1 justify-center items-center gap-8">
+          <div className="hidden md:flex flex-1 items-center gap-8 justify-between">
             <Link href="/" className='shrink-0'>
                 <Logo />
             </Link>
