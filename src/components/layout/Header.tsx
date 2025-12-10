@@ -192,7 +192,7 @@ export default function Header() {
             </Link>
           </div>
 
-          <div className="hidden md:flex flex-1 items-center justify-center gap-8">
+          <div className="hidden md:flex flex-1 justify-center items-center gap-8">
             <Link href="/" className='shrink-0'>
                 <Logo />
             </Link>
@@ -209,7 +209,7 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="flex-1 flex justify-end items-center gap-4">
+          <div className="flex justify-end items-center gap-4">
              <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 hover:bg-white/10 hover:text-white rounded-full">
                 <Link href="/carrinho">
                     <ShoppingCart className="h-6 w-6" />
@@ -322,5 +322,7 @@ const ListItem = forwardRef<React.ElementRef<"a">, React.ComponentPropsWithoutRe
   )
 })
 ListItem.displayName = "ListItem"
+
+    
 
     
