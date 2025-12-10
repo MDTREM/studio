@@ -43,15 +43,10 @@ export default function CatalogoClientPage() {
     return 'Todos os produtos';
   }
 
-  const showNewProductsSection = !currentCategory && !searchQuery;
-
   return (
     <div className="container max-w-7xl mx-auto px-4 py-12">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Nosso Catálogo</h1>
-        <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
-          Explore nossa variedade de produtos e encontre a solução perfeita para divulgar sua marca.
-        </p>
       </div>
 
       <div className='flex items-center mb-8 gap-4'>
