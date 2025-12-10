@@ -33,6 +33,13 @@ import {
 interface ProductPageProps {
   product: Product;
 }
+
+interface ShippingOption {
+    name: string;
+    price: number;
+    days: number;
+}
+
 const ART_DESIGN_COST = 35.00;
 
 export default function ProductPage({ product }: ProductPageProps) {
@@ -48,7 +55,8 @@ export default function ProductPage({ product }: ProductPageProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [cep, setCep] = useState('');
     const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
-    const [shippingOptions, setShippingOptions] = useState<{name: string, price: number, days: number}[] | null>(null);
+    const [shippingOptions, setShippingOptions] = useState<ShippingOption[] | null>(null);
+    const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
 
     const { addToCart } = useCart();
     const { toast } = useToast();
@@ -97,12 +105,17 @@ export default function ProductPage({ product }: ProductPageProps) {
         if (artworkOption === 'professional-design') {
             finalPrice += ART_DESIGN_COST;
         }
+        if (selectedShipping) {
+            finalPrice += selectedShipping.price;
+        }
         return finalPrice;
-    }, [quantity, product, artworkOption]);
+    }, [quantity, product, artworkOption, selectedShipping]);
 
     const handleAddToCart = () => {
+        // O frete não é adicionado ao preço do item no carrinho, 
+        // ele é calculado no final da compra. A mudança de preço aqui é apenas visual.
         const artworkFee = artworkOption === 'professional-design' ? ART_DESIGN_COST : 0;
-        const finalPrice = selectedPrice;
+        const itemPrice = getPriceForQuantity(quantity).totalPrice + artworkFee;
 
         const cartItem = {
             id: `${product.id}-${selectedFormat}-${selectedFinishing}-${artworkFee > 0 ? 'with-design' : 'no-design'}`,
@@ -111,7 +124,7 @@ export default function ProductPage({ product }: ProductPageProps) {
             selectedFormat,
             selectedFinishing,
             artworkFee: artworkFee,
-            totalPrice: finalPrice, // Envia o preço final calculado
+            totalPrice: itemPrice, 
         };
         addToCart(cartItem);
         toast({
@@ -125,14 +138,16 @@ export default function ProductPage({ product }: ProductPageProps) {
       if (!cep) return;
       setIsCalculatingShipping(true);
       setShippingOptions(null);
+      setSelectedShipping(null); // Reseta o frete selecionado
 
       // Simula uma chamada de API de frete
       setTimeout(() => {
-        setShippingOptions([
+        const options: ShippingOption[] = [
           { name: 'SEDEX', price: 25.50, days: 3 },
           { name: 'PAC', price: 15.80, days: 7 },
           { name: 'Retirar na Loja', price: 0, days: 1 },
-        ]);
+        ];
+        setShippingOptions(options);
         setIsCalculatingShipping(false);
       }, 1000);
     };
@@ -396,21 +411,34 @@ export default function ProductPage({ product }: ProductPageProps) {
                             <div className="mt-4 text-center text-muted-foreground">Calculando...</div>
                         )}
                         {shippingOptions && (
-                          <div className="mt-4 space-y-2">
+                          <RadioGroup 
+                            className="mt-4 space-y-2"
+                            onValueChange={(value) => setSelectedShipping(shippingOptions.find(opt => opt.name === value) || null)}
+                          >
                             {shippingOptions.map(option => (
-                              <div key={option.name} className="flex justify-between items-center text-sm p-2 rounded-md hover:bg-background">
-                                <div>
-                                  <p className="font-medium">{option.name}</p>
-                                  <p className="text-muted-foreground">
-                                    {option.price > 0 ? `Até ${option.days} dias úteis` : 'Pronto em até 1 dia útil'}
-                                  </p>
+                              <Label 
+                                key={option.name} 
+                                htmlFor={`shipping-${option.name}`}
+                                className={cn(
+                                    "flex justify-between items-center text-sm p-3 rounded-md border-2 cursor-pointer hover:border-primary/50",
+                                    selectedShipping?.name === option.name ? "border-primary" : "border-transparent bg-background"
+                                )}
+                              >
+                                <div className='flex items-center gap-3'>
+                                    <RadioGroupItem value={option.name} id={`shipping-${option.name}`} />
+                                    <div>
+                                        <p className="font-medium">{option.name}</p>
+                                        <p className="text-muted-foreground text-xs">
+                                            {option.price > 0 ? `Até ${option.days} dias úteis` : 'Pronto em até 1 dia útil'}
+                                        </p>
+                                    </div>
                                 </div>
                                 <p className="font-semibold text-primary">
                                   {option.price > 0 ? option.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'Grátis'}
                                 </p>
-                              </div>
+                              </Label>
                             ))}
-                          </div>
+                          </RadioGroup>
                         )}
                     </div>
                     <div className='space-y-4'>
