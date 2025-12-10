@@ -62,6 +62,11 @@ export default function ProductPage({ product }: ProductPageProps) {
     const { toast } = useToast();
     const router = useRouter();
 
+    // Helper to check if a variation array is valid and not empty
+    const hasVariations = (key: 'models' | 'materials' | 'formats' | 'colors' | 'finishings' | 'quantities') => {
+        return product?.variations?.[key] && Array.isArray(product.variations[key]) && (product.variations[key] as any[]).length > 0 && (product.variations[key] as any[])[0] !== '';
+    }
+
     // Effect to safely initialize state when product data is available.
     useEffect(() => {
         if (product) {
@@ -78,8 +83,12 @@ export default function ProductPage({ product }: ProductPageProps) {
             if (product.variations?.colors?.[0]) {
                 setSelectedColor(product.variations.colors[0]);
             }
-            // Não pré-seleciona mais o acabamento
-            setSelectedFinishing('');
+            // If there are finishings, select the first one by default.
+            if (hasVariations('finishings')) {
+                setSelectedFinishing(product.variations.finishings[0]);
+            } else {
+                setSelectedFinishing('');
+            }
         }
     }, [product]);
     
@@ -151,17 +160,12 @@ export default function ProductPage({ product }: ProductPageProps) {
       }, 1000);
     };
     
-    // Helper to check if a variation array is valid and not empty
-    const hasVariations = (key: 'models' | 'materials' | 'formats' | 'colors' | 'finishings' | 'quantities') => {
-        return product?.variations?.[key] && Array.isArray(product.variations[key]) && (product.variations[key] as any[]).length > 0 && (product.variations[key] as any[])[0] !== '';
-    }
 
     const isAddToCartDisabled = useMemo(() => {
         if (hasVariations('materials') && !selectedMaterial) return true;
         if (hasVariations('formats') && !selectedFormat) return true;
         if (hasVariations('colors') && !selectedColor) return true;
-        // O acabamento não é mais obrigatório
-        // if (hasVariations('finishings') && !selectedFinishing) return true; 
+        if (hasVariations('finishings') && !selectedFinishing) return true; 
         if (!quantity) return true;
         // The user must calculate and select a shipping option before adding to cart
         if (!selectedShipping) return true; 
@@ -282,14 +286,8 @@ export default function ProductPage({ product }: ProductPageProps) {
                     )}
                     {hasVariations('finishings') && (
                         <div className="grid gap-3">
-                            <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento (Opcional)</Label>
+                            <Label htmlFor="finishing" className='font-semibold text-base'>Acabamento</Label>
                             <RadioGroup value={selectedFinishing} onValueChange={setSelectedFinishing} className="flex flex-wrap gap-2">
-                                <div>
-                                    <RadioGroupItem value="" id="finishing-none" className="sr-only" />
-                                    <Label htmlFor="finishing-none" className={cn("border rounded-md px-4 py-2 cursor-pointer transition-colors", selectedFinishing === '' && "bg-primary text-primary-foreground border-primary")}>
-                                        Nenhum
-                                    </Label>
-                                </div>
                                 {product.variations.finishings!.map(f => (
                                     <div key={f}>
                                         <RadioGroupItem value={f} id={`finishing-${f}`} className="sr-only" />
