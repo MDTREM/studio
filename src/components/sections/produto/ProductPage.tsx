@@ -157,6 +157,17 @@ export default function ProductPage({ product }: ProductPageProps) {
         return product?.variations?.[key] && Array.isArray(product.variations[key]) && (product.variations[key] as any[]).length > 0 && (product.variations[key] as any[])[0] !== '';
     }
 
+    const isAddToCartDisabled = useMemo(() => {
+        if (hasVariations('materials') && !selectedMaterial) return true;
+        if (hasVariations('formats') && !selectedFormat) return true;
+        if (hasVariations('colors') && !selectedColor) return true;
+        if (hasVariations('finishings') && !selectedFinishing) return true;
+        if (!quantity) return true;
+        // The user must calculate and select a shipping option before adding to cart
+        if (!selectedShipping) return true; 
+        return false;
+    }, [selectedMaterial, selectedFormat, selectedColor, selectedFinishing, quantity, selectedShipping, product]);
+
 
     return (
         <TooltipProvider>
@@ -501,9 +512,15 @@ export default function ProductPage({ product }: ProductPageProps) {
                             </div>
                         </div>
 
-                        <Button size="lg" className="w-full md:w-auto text-lg" onClick={handleAddToCart}>
-                            <ShoppingCart className="mr-2 h-5 w-5" />
-                            Comprar
+                        <Button size="lg" className="w-full md:w-auto text-lg" onClick={handleAddToCart} disabled={isAddToCartDisabled}>
+                            {isAddToCartDisabled ? (
+                                'Selecione as opções'
+                            ) : (
+                                <>
+                                <ShoppingCart className="mr-2 h-5 w-5" />
+                                Comprar
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>
