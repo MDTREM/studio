@@ -487,7 +487,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                                     Baixar Gabarito
                                 </Button>
                             </a>
-                            <a href="/guia-canva.pdf" download="guia-canva-ouro-grafica.pdf">
+                            <a href="/guia-canva-ouro-grafica.pdf" download="guia-canva-ouro-grafica.pdf">
                                 <Button variant="outline">
                                     <Download className='mr-2 h-4 w-4' />
                                     Guia de Fechamento (Canva)
