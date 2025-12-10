@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Product } from "@/lib/definitions";
-import { Copy, MoreHorizontal } from "lucide-react";
+import { Copy, MoreHorizontal, CheckCircle2, XCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast";
 import ImportProductsDialog from "./_components/ImportProductsDialog";
+import { Badge } from "@/components/ui/badge";
 
 
 export default function AdminProductsPage() {
@@ -129,7 +130,7 @@ export default function AdminProductsPage() {
                   <span className="sr-only">Image</span>
                 </TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead>Categoria</TableHead>
+                <TableHead>Visibilidade</TableHead>
                 <TableHead className="hidden md:table-cell">
                   Preço Base
                 </TableHead>
@@ -154,7 +155,22 @@ export default function AdminProductsPage() {
                         />
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.categoryId}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col items-start gap-1.5">
+                        <Badge variant={product.showOnHome ? "default" : "secondary"}>
+                          {product.showOnHome ? <CheckCircle2 className="mr-1 h-3 w-3" /> : <XCircle className="mr-1 h-3 w-3" />}
+                          Destaque
+                        </Badge>
+                        <Badge variant={product.isBestseller ? "default" : "secondary"}>
+                          {product.isBestseller ? <CheckCircle2 className="mr-1 h-3 w-3" /> : <XCircle className="mr-1 h-3 w-3" />}
+                          Mais Vendido
+                        </Badge>
+                         <Badge variant={product.isNew ? "default" : "secondary"}>
+                          {product.isNew ? <CheckCircle2 className="mr-1 h-3 w-3" /> : <XCircle className="mr-1 h-3 w-3" />}
+                          Novidade
+                        </Badge>
+                      </div>
+                    </TableCell>
                     <TableCell className="hidden md:table-cell">
                         {product.basePrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </TableCell>
