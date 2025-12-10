@@ -461,11 +461,11 @@ export default function ProductPage({ product }: ProductPageProps) {
                     </div>
                 </div>
 
-                <Accordion type="single" collapsible className="w-full mt-8" defaultValue='item-1'>
+                <Accordion type="multiple" collapsible className="w-full mt-8" defaultValue={['item-1', 'item-2', 'item-3']}>
                     {product.description && (
                         <AccordionItem value="item-1">
                             <AccordionTrigger className="text-lg font-semibold">Descrição do Produto</AccordionTrigger>
-                            <AccordionContent className="prose prose-sm max-w-none text-muted-foreground">
+                            <AccordionContent className="prose prose-sm max-w-none text-muted-foreground pt-2">
                                 {product.description}
                             </AccordionContent>
                         </AccordionItem>
@@ -501,8 +501,8 @@ export default function ProductPage({ product }: ProductPageProps) {
                     <AccordionItem value="item-3">
                         <AccordionTrigger className="text-lg font-semibold">Como Enviar sua Arte?</AccordionTrigger>
                         <AccordionContent>
-                            <div className='space-y-3 pt-2 text-muted-foreground text-sm'>
-                                <p>Para garantir a melhor qualidade de impressão, utilize nossos gabaritos. Se precisar de ajuda, consulte nosso guia para fechar o arquivo no Canva.</p>
+                             <div className='space-y-4 pt-2'>
+                                <p className='text-sm text-muted-foreground'>Para garantir a melhor qualidade de impressão, utilize nossos gabaritos. Se precisar de ajuda, consulte nosso guia para fechar o arquivo no Canva.</p>
                                 <div className='flex flex-col sm:flex-row items-start gap-4'>
                                     <a href="/gabarito.pdf" download className={cn(buttonVariants({ variant: "outline" }))}>
                                         <Download className='mr-2 h-4 w-4' />

@@ -47,7 +47,7 @@ const productFormSchema = z.object({
   categoryId: z.string().min(1, { message: 'A categoria é obrigatória.' }),
   variations: z.object({
     formats: z.string().min(1, { message: 'Pelo menos um formato é obrigatório.'}),
-    finishings: z.string().min(1, { message: 'Pelo menos um acabamento é obrigatório.'}),
+    finishings: z.string().optional(),
     quantities: z.string().min(1, { message: 'Pelo menos uma quantidade é obrigatória.'}),
   }),
   technicalSheet: z.object({
@@ -200,7 +200,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
         variations: {
             ...data.variations,
             formats: data.variations.formats.split(',').map(s => s.trim()),
-            finishings: data.variations.finishings.split(',').map(s => s.trim()),
+            finishings: data.variations.finishings?.split(',').map(s => s.trim()) || [],
             quantities: data.variations.quantities.split(',').map(s => parseInt(s.trim(), 10)),
         }
     };
@@ -392,7 +392,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
                     name="variations.finishings"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Acabamentos</FormLabel>
+                        <FormLabel>Acabamentos (Opcional)</FormLabel>
                         <FormControl>
                             <Input placeholder="Ex: Laminação Fosca, Verniz Localizado" {...field} />
                         </FormControl>
