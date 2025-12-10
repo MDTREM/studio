@@ -16,7 +16,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Link href={`/produto/${product.id}`} className="group block">
         <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
         <CardHeader className="p-0">
-            <div className="relative aspect-video">
+            <div className="relative aspect-square">
             <Image
                 src={imageUrl}
                 alt={`Imagem do produto ${product.name}`}
