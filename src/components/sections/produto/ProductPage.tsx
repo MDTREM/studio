@@ -452,6 +452,26 @@ export default function ProductPage({ product }: ProductPageProps) {
                           </RadioGroup>
                         )}
                     </div>
+                    
+                    <div className='border rounded-lg p-4 space-y-3'>
+                        <h3 className="font-semibold">Como enviar sua arte?</h3>
+                        <p className="text-sm text-muted-foreground">Para garantir a melhor qualidade de impressão, utilize nossos gabaritos. Se precisar de ajuda, consulte nosso guia para fechar o arquivo no Canva.</p>
+                         <div className='flex flex-col sm:flex-row items-start gap-4'>
+                             <a href="/gabarito.pdf" download="gabarito-ouro-grafica.pdf">
+                                <Button variant="outline">
+                                    <Download className='mr-2 h-4 w-4' />
+                                    Baixar Gabarito
+                                </Button>
+                            </a>
+                            <a href="/guia-canva-ouro-grafica.pdf" download="guia-canva-ouro-grafica.pdf">
+                                <Button variant="outline">
+                                    <Download className='mr-2 h-4 w-4' />
+                                    Guia de Fechamento (Canva)
+                                </Button>
+                            </a>
+                        </div>
+                    </div>
+
                     <div className='space-y-4'>
                         <h3 className="text-lg font-semibold mt-6 mb-2">Especificações do Produto</h3>
                         <div className='border rounded-lg'>
@@ -477,25 +497,6 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </div>}
                         </div>
                     </div>
-                    <Accordion type="single" collapsible className="w-full">
-                        <AccordionItem value="item-2">
-                        <AccordionTrigger>Como enviar minha arte corretamente?</AccordionTrigger>
-                        <AccordionContent className='flex flex-col sm:flex-row items-start gap-4'>
-                             <a href="/gabarito.pdf" download="gabarito-ouro-grafica.pdf">
-                                <Button variant="outline">
-                                    <Download className='mr-2 h-4 w-4' />
-                                    Baixar Gabarito
-                                </Button>
-                            </a>
-                            <a href="/guia-canva-ouro-grafica.pdf" download="guia-canva-ouro-grafica.pdf">
-                                <Button variant="outline">
-                                    <Download className='mr-2 h-4 w-4' />
-                                    Guia de Fechamento (Canva)
-                                </Button>
-                            </a>
-                        </AccordionContent>
-                        </AccordionItem>
-                    </Accordion>
                 </div>
                 </div>
             </div>
