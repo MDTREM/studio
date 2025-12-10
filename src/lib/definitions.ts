@@ -2,6 +2,19 @@
 // Onde você pode adicionar novos campos nos produtos.
 // Altere esta interface para adicionar ou remover propriedades dos seus produtos.
 // Lembre-se de atualizar também a estrutura no Firestore e os formulários no painel de admin.
+
+export type TechnicalSheet = {
+  material?: string;
+  colors?: string;
+  grammage?: string;
+  mass?: string;
+  bleedSize?: string;
+  finalSize?: string;
+  ennoblement?: string;
+  finishing?: string;
+  productionTime?: string;
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -19,6 +32,7 @@ export type Product = {
     finishings: string[];
     quantities: number[];
   };
+  technicalSheet?: TechnicalSheet;
   keywords?: string[];
   createdAt?: any; // Can be a server timestamp
   showOnHome?: boolean;

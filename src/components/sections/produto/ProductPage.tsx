@@ -168,6 +168,7 @@ export default function ProductPage({ product }: ProductPageProps) {
         return false;
     }, [selectedMaterial, selectedFormat, selectedColor, selectedFinishing, quantity, selectedShipping, product]);
 
+    const technicalSheetData = product.technicalSheet ? Object.entries(product.technicalSheet).filter(([_, value]) => value) : [];
 
     return (
         <TooltipProvider>
@@ -440,7 +441,7 @@ export default function ProductPage({ product }: ProductPageProps) {
                                     <div>
                                         <p className="font-medium">{option.name}</p>
                                         <p className="text-muted-foreground text-xs">
-                                            {option.price > 0 ? `Até ${option.days} dias úteis` : `Disponível em até ${option.days} dias úteis`}
+                                          Disponível em até {option.days} dias úteis
                                         </p>
                                     </div>
                                 </div>
@@ -453,11 +454,40 @@ export default function ProductPage({ product }: ProductPageProps) {
                         )}
                     </div>
                     
+                    <div className='space-y-4'>
+                        <h3 className="text-lg font-semibold mt-6 mb-2">Ficha Técnica</h3>
+                        {technicalSheetData.length > 0 ? (
+                            <div className='border rounded-lg'>
+                                {technicalSheetData.map(([key, value], index) => {
+                                    const labels: { [key: string]: string } = {
+                                        material: "Papel/Material",
+                                        colors: "Cores",
+                                        grammage: "Gramatura",
+                                        mass: "Peso",
+                                        bleedSize: "Tamanho da arte com sangria",
+                                        finalSize: "Tamanho final",
+                                        ennoblement: "Enobrecimento",
+                                        finishing: "Acabamento",
+                                        productionTime: "Prazo de produção"
+                                    };
+                                    return (
+                                        <div key={key} className={cn("flex justify-between items-center p-3", index < technicalSheetData.length -1 && "border-b")}>
+                                            <span className='font-medium'>{labels[key] || key}</span>
+                                            <span className='text-muted-foreground'>{value}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Nenhuma especificação técnica disponível para este produto.</p>
+                        )}
+                    </div>
+
                     <div className='border rounded-lg p-4 space-y-3'>
                         <h3 className="font-semibold">Como enviar sua arte?</h3>
                         <p className="text-sm text-muted-foreground">Para garantir a melhor qualidade de impressão, utilize nossos gabaritos. Se precisar de ajuda, consulte nosso guia para fechar o arquivo no Canva.</p>
                          <div className='flex flex-col sm:flex-row items-start gap-4'>
-                             <a href="/gabarito.pdf" download className={cn(buttonVariants({ variant: "outline" }))}>
+                            <a href="/gabarito.pdf" download className={cn(buttonVariants({ variant: "outline" }))}>
                                 <Download className='mr-2 h-4 w-4' />
                                 Baixar Gabarito
                             </a>
@@ -468,31 +498,6 @@ export default function ProductPage({ product }: ProductPageProps) {
                         </div>
                     </div>
 
-                    <div className='space-y-4'>
-                        <h3 className="text-lg font-semibold mt-6 mb-2">Especificações do Produto</h3>
-                        <div className='border rounded-lg'>
-                        <div className='flex justify-between items-center p-3 border-b'>
-                            <span className='font-medium'>Prazo de produção</span>
-                            <span className='text-muted-foreground'>4 dias úteis + frete <Tooltip><TooltipTrigger type='button' onClick={e => e.preventDefault()}><Info className='inline w-4 h-4 text-blue-500'/></TooltipTrigger><TooltipContent><p>O prazo pode variar.</p></TooltipContent></Tooltip></span>
-                        </div>
-                         {selectedMaterial && <div className='flex justify-between items-center p-3 border-b'>
-                            <span className='font-medium'>Material</span>
-                            <span className='text-muted-foreground'>{selectedMaterial}</span>
-                        </div>}
-                        {selectedFormat && <div className='flex justify-between items-center p-3 border-b'>
-                            <span className='font-medium'>Formato</span>
-                            <span className='text-muted-foreground'>{selectedFormat}</span>
-                        </div>}
-                        {selectedColor && <div className='flex justify-between items-center p-3 border-b'>
-                            <span className='font-medium'>Cor de Impressão</span>
-                            <span className='text-muted-foreground'>{selectedColor}</span>
-                        </div>}
-                        {selectedFinishing && <div className='flex justify-between items-center p-3'>
-                            <span className='font-medium'>Acabamento</span>
-                            <span className='text-muted-foreground'>{selectedFinishing}</span>
-                        </div>}
-                        </div>
-                    </div>
                 </div>
                 </div>
             </div>

@@ -50,6 +50,17 @@ const productFormSchema = z.object({
     finishings: z.string().min(1, { message: 'Pelo menos um acabamento é obrigatório.'}),
     quantities: z.string().min(1, { message: 'Pelo menos uma quantidade é obrigatória.'}),
   }),
+  technicalSheet: z.object({
+    material: z.string().optional(),
+    colors: z.string().optional(),
+    grammage: z.string().optional(),
+    mass: z.string().optional(),
+    bleedSize: z.string().optional(),
+    finalSize: z.string().optional(),
+    ennoblement: z.string().optional(),
+    finishing: z.string().optional(),
+    productionTime: z.string().optional(),
+  }).optional(),
   showOnHome: z.boolean().default(false),
   isBestseller: z.boolean().default(false),
   isNew: z.boolean().default(false),
@@ -111,6 +122,17 @@ export default function AddProductDialog() {
             formats: '',
             finishings: '',
             quantities: '',
+        },
+        technicalSheet: {
+            material: '',
+            colors: '',
+            grammage: '',
+            mass: '',
+            bleedSize: '',
+            finalSize: '',
+            ennoblement: '',
+            finishing: '',
+            productionTime: '',
         },
         showOnHome: false,
         isBestseller: false,
@@ -382,6 +404,20 @@ export default function AddProductDialog() {
                     )}
                 />
             </div>
+            
+            <h4 className="font-medium text-lg mt-4">Ficha Técnica</h4>
+             <div className="grid grid-cols-2 gap-4">
+                 <FormField control={form.control} name="technicalSheet.material" render={({ field }) => (<FormItem><FormLabel>Papel/Material</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
+                 <FormField control={form.control} name="technicalSheet.colors" render={({ field }) => (<FormItem><FormLabel>Cores</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
+                 <FormField control={form.control} name="technicalSheet.grammage" render={({ field }) => (<FormItem><FormLabel>Gramatura</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
+                 <FormField control={form.control} name="technicalSheet.mass" render={({ field }) => (<FormItem><FormLabel>Peso</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
+                 <FormField control={form.control} name="technicalSheet.bleedSize" render={({ field }) => (<FormItem><FormLabel>Tam. com Sangria</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
+                 <FormField control={form.control} name="technicalSheet.finalSize" render={({ field }) => (<FormItem><FormLabel>Tamanho Final</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
+                 <FormField control={form.control} name="technicalSheet.ennoblement" render={({ field }) => (<FormItem><FormLabel>Enobrecimento</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
+                 <FormField control={form.control} name="technicalSheet.finishing" render={({ field }) => (<FormItem><FormLabel>Acabamento</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
+                 <FormField control={form.control} name="technicalSheet.productionTime" render={({ field }) => (<FormItem><FormLabel>Prazo de Produção</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>)} />
+            </div>
+
             <FormField
               control={form.control}
               name="showOnHome"
