@@ -1,5 +1,5 @@
 'use client';
-import ProductCard from '@/components/shared/ProductCard';
+import BestsellerProductCard from '@/components/shared/BestsellerProductCard';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { Category, Product } from '@/lib/definitions';
 import { collection, query, where } from 'firebase/firestore';
@@ -71,7 +71,7 @@ export default function CatalogoClientPage() {
       {products && products.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <BestsellerProductCard key={product.id} product={product} />
               ))}
           </div>
       )}
