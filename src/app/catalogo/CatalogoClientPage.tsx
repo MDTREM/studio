@@ -1,10 +1,11 @@
 'use client';
 import ProductCard from '@/components/shared/ProductCard';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { Product } from '@/lib/definitions';
+import { Category, Product } from '@/lib/definitions';
 import { collection, query, where } from 'firebase/firestore';
-import { Filter, Search } from 'lucide-react';
+import { Filter, Loader2, Search } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import CategoryFilter from './_components/CategoryFilter';
 
 export default function CatalogoClientPage() {
   const searchParams = useSearchParams();
@@ -39,9 +40,6 @@ export default function CatalogoClientPage() {
     if (searchQuery) {
         return `Resultados da busca para: "${searchQuery}"`;
     }
-    if (currentCategory) {
-        return `Categoria: ${currentCategory}`;
-    }
     return 'Todos os produtos';
   }
 
@@ -54,29 +52,40 @@ export default function CatalogoClientPage() {
         </p>
       </div>
 
-      <div className="flex items-center gap-2 mb-8">
-        {searchQuery ? <Search className="w-5 h-5 text-muted-foreground" /> : <Filter className="w-5 h-5 text-muted-foreground" />}
-        <span className="font-semibold">Filtros:</span>
-        <span className="text-sm text-muted-foreground">
-          {getFilterText()}
-        </span>
+      <div className='grid grid-cols-1 md:grid-cols-4 gap-8'>
+        <aside className="col-span-1">
+          <CategoryFilter />
+        </aside>
+        <main className="col-span-1 md:col-span-3">
+          <div className="flex items-center gap-2 mb-8">
+            {searchQuery ? <Search className="w-5 h-5 text-muted-foreground" /> : <Filter className="w-5 h-5 text-muted-foreground" />}
+            <span className="font-semibold">Filtros:</span>
+            <span className="text-sm text-muted-foreground">
+              {currentCategory ? `Categoria: ${currentCategory}` : getFilterText()}
+            </span>
+          </div>
+            {isLoading && (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              </div>
+            )}
+            {products && products.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    {products.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                </div>
+            )}
+            {!isLoading && (!products || products.length === 0) && (
+                <div className="text-center py-16">
+                    <p className="text-lg font-semibold">Nenhum produto encontrado.</p>
+                    <p className="text-muted-foreground mt-2">
+                        {searchQuery ? 'Tente uma busca diferente.' : 'Verifique os filtros ou a categoria selecionada.'}
+                    </p>
+                </div>
+            )}
+        </main>
       </div>
-        {isLoading && <p>Carregando produtos...</p>}
-        {products && products.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-            </div>
-        )}
-        {!isLoading && (!products || products.length === 0) && (
-            <div className="text-center py-16">
-                <p className="text-lg font-semibold">Nenhum produto encontrado.</p>
-                <p className="text-muted-foreground mt-2">
-                    {searchQuery ? 'Tente uma busca diferente.' : 'Verifique os filtros ou a categoria selecionada.'}
-                </p>
-            </div>
-        )}
     </div>
   );
 }
