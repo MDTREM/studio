@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Product } from '@/lib/definitions';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Check, ChevronRight, Download, FileUp, Home, Info, Lightbulb, Link as LinkIcon, Loader2, Minus, PackageSearch, Pencil, Plus, ShoppingCart, Star, Truck } from 'lucide-react';
@@ -457,17 +457,13 @@ export default function ProductPage({ product }: ProductPageProps) {
                         <h3 className="font-semibold">Como enviar sua arte?</h3>
                         <p className="text-sm text-muted-foreground">Para garantir a melhor qualidade de impressão, utilize nossos gabaritos. Se precisar de ajuda, consulte nosso guia para fechar o arquivo no Canva.</p>
                          <div className='flex flex-col sm:flex-row items-start gap-4'>
-                             <a href="/gabarito.pdf" download="gabarito-ouro-grafica.pdf">
-                                <Button variant="outline">
-                                    <Download className='mr-2 h-4 w-4' />
-                                    Baixar Gabarito
-                                </Button>
+                             <a href="/gabarito.pdf" download className={cn(buttonVariants({ variant: "outline" }))}>
+                                <Download className='mr-2 h-4 w-4' />
+                                Baixar Gabarito
                             </a>
-                            <a href="/guia-canva-ouro-grafica.pdf" download="guia-canva-ouro-grafica.pdf">
-                                <Button variant="outline">
-                                    <Download className='mr-2 h-4 w-4' />
-                                    Guia de Fechamento (Canva)
-                                </Button>
+                            <a href="/guia-canva-ouro-grafica.pdf" download className={cn(buttonVariants({ variant: "outline" }))}>
+                                <Download className='mr-2 h-4 w-4' />
+                                Guia de Fechamento (Canva)
                             </a>
                         </div>
                     </div>
