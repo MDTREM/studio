@@ -28,8 +28,8 @@ export default function NewProductsSection() {
     if (isLoading) {
         return (
             <section className="py-16 sm:py-24 bg-background">
-                <div className="container max-w-7xl mx-auto px-4 text-left">
-                    <Loader2 className="h-8 w-8 animate-spin" />
+                <div className="container max-w-7xl mx-auto px-4 text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto" />
                 </div>
             </section>
         );
@@ -42,8 +42,8 @@ export default function NewProductsSection() {
     return (
         <section className="py-16 sm:py-24 bg-background">
             <div className="container max-w-7xl mx-auto px-4">
-                <div className="text-left mb-12">
-                    <h2 className="text-xl md:text-2xl font-bold tracking-tight">Novidades</h2>
+                <div className="text-center mb-12">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Novidades</h2>
                 </div>
                  <Carousel
                     opts={{
