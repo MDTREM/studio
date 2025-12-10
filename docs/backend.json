@@ -49,6 +49,10 @@
         "isBestseller": {
           "type": "boolean",
           "description": "Marks the product as a bestseller."
+        },
+        "isNew": {
+          "type": "boolean",
+          "description": "Marks the product as new."
         }
       },
       "required": [

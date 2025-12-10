@@ -52,6 +52,7 @@ const productFormSchema = z.object({
   }),
   showOnHome: z.boolean().default(false),
   isBestseller: z.boolean().default(false),
+  isNew: z.boolean().default(false),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -115,6 +116,7 @@ export default function EditProductDialog({ product, children }: EditProductDial
         },
         showOnHome: product.showOnHome || false,
         isBestseller: product.isBestseller || false,
+        isNew: product.isNew || false,
     },
   });
 
@@ -406,6 +408,26 @@ export default function EditProductDialog({ product, children }: EditProductDial
                     <FormLabel>Marcar como Mais Vendido</FormLabel>
                     <FormDescription>
                       Este produto aparecerá na seção "Mais Vendidos".
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="isNew"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Marcar como Novidade</FormLabel>
+                    <FormDescription>
+                      Este produto aparecerá na seção "Novidades".
                     </FormDescription>
                   </div>
                   <FormControl>

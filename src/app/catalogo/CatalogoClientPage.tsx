@@ -1,5 +1,6 @@
 'use client';
 import BestsellerProductCard from '@/components/shared/BestsellerProductCard';
+import NewProductsSection from '@/components/sections/home/NewProductsSection';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { Category, Product } from '@/lib/definitions';
 import { collection, query, where } from 'firebase/firestore';
@@ -43,6 +44,8 @@ export default function CatalogoClientPage() {
     return 'Todos os produtos';
   }
 
+  const showNewProductsSection = !currentCategory && !searchQuery;
+
   return (
     <div className="container max-w-7xl mx-auto px-4 py-12">
       <div className="text-center mb-12">
@@ -62,6 +65,8 @@ export default function CatalogoClientPage() {
             </span>
         </div>
       </div>
+
+      {showNewProductsSection && <NewProductsSection />}
 
       {isLoading && (
         <div className="flex justify-center items-center h-64">

@@ -23,6 +23,7 @@ export type Product = {
   createdAt?: any; // Can be a server timestamp
   showOnHome?: boolean;
   isBestseller?: boolean;
+  isNew?: boolean;
 };
 
 export type Category = {
