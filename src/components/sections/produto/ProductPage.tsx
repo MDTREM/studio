@@ -479,13 +479,18 @@ export default function ProductPage({ product }: ProductPageProps) {
                     </div>
                     <Accordion type="single" collapsible className="w-full">
                         <AccordionItem value="item-2">
-                        <AccordionTrigger>Utilize o gabarito</AccordionTrigger>
-                        <AccordionContent className='flex flex-col items-start gap-4'>
-                            <p>Para garantir a qualidade da impressão, utilize nossos gabaritos.</p>
+                        <AccordionTrigger>Como enviar minha arte corretamente?</AccordionTrigger>
+                        <AccordionContent className='flex flex-col sm:flex-row items-start gap-4'>
                              <a href="/gabarito.pdf" download="gabarito-ouro-grafica.pdf">
                                 <Button variant="outline">
                                     <Download className='mr-2 h-4 w-4' />
-                                    Baixar gabarito
+                                    Baixar Gabarito
+                                </Button>
+                            </a>
+                            <a href="/guia-canva.pdf" download="guia-canva-ouro-grafica.pdf">
+                                <Button variant="outline">
+                                    <Download className='mr-2 h-4 w-4' />
+                                    Guia de Fechamento (Canva)
                                 </Button>
                             </a>
                         </AccordionContent>
