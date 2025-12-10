@@ -23,7 +23,7 @@ const banners = [
 
 export default function Hero() {
   return (
-    <section className="relative w-full h-[60vh] bg-black">
+    <section className="relative w-full bg-black">
          <Carousel
             opts={{
                 align: "start",
@@ -34,7 +34,7 @@ export default function Hero() {
                     delay: 5000,
                 }),
             ]}
-            className="w-full h-full"
+            className="w-full"
         >
             <CarouselContent>
                 {banners.map((banner, index) => (
@@ -50,7 +50,7 @@ export default function Hero() {
                             />
                         </div>
                         {/* Imagem para Desktop */}
-                        <div className="hidden md:block relative w-full h-full">
+                        <div className="hidden md:block relative w-full h-[60vh]">
                             <Image
                             src={banner.desktop}
                             alt={banner.alt}
