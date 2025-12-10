@@ -52,40 +52,37 @@ export default function CatalogoClientPage() {
         </p>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-8'>
-        <aside className="col-span-1">
-          <CategoryFilter />
-        </aside>
-        <main className="col-span-1 md:col-span-3">
-          <div className="flex items-center gap-2 mb-8">
-            {searchQuery ? <Search className="w-5 h-5 text-muted-foreground" /> : <Filter className="w-5 h-5 text-muted-foreground" />}
-            <span className="font-semibold">Filtros:</span>
-            <span className="text-sm text-muted-foreground">
-              {currentCategory ? `Categoria: ${currentCategory}` : getFilterText()}
+      <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4'>
+        <CategoryFilter />
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {searchQuery ? <Search className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
+            <span className="font-semibold">Mostrando:</span>
+            <span>
+                {currentCategory || getFilterText()}
             </span>
-          </div>
-            {isLoading && (
-              <div className="flex justify-center items-center h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-              </div>
-            )}
-            {products && products.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {products.map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                </div>
-            )}
-            {!isLoading && (!products || products.length === 0) && (
-                <div className="text-center py-16">
-                    <p className="text-lg font-semibold">Nenhum produto encontrado.</p>
-                    <p className="text-muted-foreground mt-2">
-                        {searchQuery ? 'Tente uma busca diferente.' : 'Verifique os filtros ou a categoria selecionada.'}
-                    </p>
-                </div>
-            )}
-        </main>
+        </div>
       </div>
+
+      {isLoading && (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      {products && products.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+          </div>
+      )}
+      {!isLoading && (!products || products.length === 0) && (
+          <div className="text-center py-16">
+              <p className="text-lg font-semibold">Nenhum produto encontrado.</p>
+              <p className="text-muted-foreground mt-2">
+                  {searchQuery ? 'Tente uma busca diferente.' : 'Verifique os filtros ou a categoria selecionada.'}
+              </p>
+          </div>
+      )}
     </div>
   );
 }

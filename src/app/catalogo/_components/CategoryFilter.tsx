@@ -4,16 +4,51 @@ import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { Category } from "@/lib/definitions";
 import { cn } from "@/lib/utils";
 import { collection, query } from "firebase/firestore";
-import { ChevronRight, Loader2 } from "lucide-react";
+import { ChevronRight, Filter, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface CategoryWithChildren extends Category {
     children: CategoryWithChildren[];
 }
+
+const renderSubMenu = (categories: CategoryWithChildren[], currentCategory: string | null) => {
+    return categories.map(category => (
+        category.children.length > 0 ? (
+            <DropdownMenuSub key={category.id}>
+                <DropdownMenuSubTrigger>{category.name}</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                        <Link href={`/catalogo?categoria=${category.id}`} passHref>
+                             <DropdownMenuItem>Ver tudo em {category.name}</DropdownMenuItem>
+                        </Link>
+                        <DropdownMenuSeparator />
+                        {renderSubMenu(category.children, currentCategory)}
+                    </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+            </DropdownMenuSub>
+        ) : (
+             <Link href={`/catalogo?categoria=${category.id}`} passHref key={category.id}>
+                <DropdownMenuItem active={currentCategory === category.id}>{category.name}</DropdownMenuItem>
+            </Link>
+        )
+    ));
+}
+
 
 export default function CategoryFilter() {
     const firestore = useFirestore();
@@ -48,74 +83,29 @@ export default function CategoryFilter() {
         return rootCategories;
     }, [categories]);
 
-    if (isLoading) {
-        return (
-            <div className="space-y-4">
-                <Skeleton className="h-8 w-3/4" />
-                <Skeleton className="h-6 w-1/2" />
-                <Skeleton className="h-6 w-1/2" />
-                <Skeleton className="h-6 w-1/2" />
-            </div>
-        )
-    }
-
     return (
-        <div className="sticky top-24">
-            <h3 className="text-lg font-semibold mb-4">Categorias</h3>
-            <div className="space-y-2 flex flex-col items-start">
-                <Link
-                    href="/catalogo"
-                    className={cn(
-                        "font-medium hover:text-primary transition-colors",
-                        !currentCategory && "text-primary"
-                    )}
-                >
-                    Todos os Produtos
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                    <Filter className="mr-2 h-4 w-4" />
+                    Filtrar por Categoria
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Categorias</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <Link href="/catalogo" passHref>
+                    <DropdownMenuItem active={!currentCategory}>Todos os Produtos</DropdownMenuItem>
                 </Link>
-
-                <Accordion type="multiple" className="w-full">
-                    {categoryTree.map(category => (
-                        <div key={category.id}>
-                            {category.children.length > 0 ? (
-                                <AccordionItem value={category.id} className="border-b-0">
-                                    <AccordionTrigger className={cn(
-                                        "py-2 hover:no-underline font-medium hover:text-primary transition-colors",
-                                        currentCategory === category.id && "text-primary"
-                                    )}>
-                                        <Link href={`/catalogo?categoria=${category.id}`} className="hover:text-primary">{category.name}</Link>
-                                    </AccordionTrigger>
-                                    <AccordionContent className="pl-4">
-                                        <div className="space-y-2 flex flex-col items-start">
-                                        {category.children.map(child => (
-                                            <Link
-                                                key={child.id}
-                                                href={`/catalogo?categoria=${child.id}`}
-                                                className={cn(
-                                                    "text-muted-foreground hover:text-primary transition-colors",
-                                                    currentCategory === child.id && "text-primary font-semibold"
-                                                )}
-                                            >
-                                                {child.name}
-                                            </Link>
-                                        ))}
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ) : (
-                                <Link
-                                    href={`/catalogo?categoria=${category.id}`}
-                                    className={cn(
-                                        "font-medium hover:text-primary transition-colors block py-2",
-                                        currentCategory === category.id && "text-primary"
-                                    )}
-                                >
-                                    {category.name}
-                                </Link>
-                            )}
-                        </div>
-                    ))}
-                </Accordion>
-            </div>
-        </div>
+                {isLoading ? (
+                    <DropdownMenuItem disabled>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Carregando...
+                    </DropdownMenuItem>
+                ) : (
+                    renderSubMenu(categoryTree, currentCategory)
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
