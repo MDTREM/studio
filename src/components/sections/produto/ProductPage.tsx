@@ -453,52 +453,65 @@ export default function ProductPage({ product }: ProductPageProps) {
                           </RadioGroup>
                         )}
                     </div>
-                    
-                    <div className='space-y-4'>
-                        <h3 className="text-lg font-semibold mt-6 mb-2">Ficha Técnica</h3>
-                        {technicalSheetData.length > 0 ? (
-                            <div className='border rounded-lg'>
+                </div>
+
+                <Accordion type="single" collapsible className="w-full mt-8" defaultValue='item-1'>
+                    {product.description && (
+                        <AccordionItem value="item-1">
+                            <AccordionTrigger className="text-lg font-semibold">Descrição do Produto</AccordionTrigger>
+                            <AccordionContent className="prose prose-sm max-w-none text-muted-foreground">
+                                {product.description}
+                            </AccordionContent>
+                        </AccordionItem>
+                    )}
+                    {technicalSheetData.length > 0 && (
+                        <AccordionItem value="item-2">
+                        <AccordionTrigger className="text-lg font-semibold">Ficha Técnica</AccordionTrigger>
+                        <AccordionContent>
+                           <div className='border rounded-lg mt-2'>
                                 {technicalSheetData.map(([key, value], index) => {
                                     const labels: { [key: string]: string } = {
                                         material: "Papel/Material",
                                         colors: "Cores",
                                         grammage: "Gramatura",
                                         mass: "Peso",
-                                        bleedSize: "Tamanho da arte com sangria",
-                                        finalSize: "Tamanho final",
+                                        bleedSize: "Tam. com Sangria",
+                                        finalSize: "Tamanho Final",
                                         ennoblement: "Enobrecimento",
                                         finishing: "Acabamento",
-                                        productionTime: "Prazo de produção"
+                                        productionTime: "Prazo de Produção"
                                     };
                                     return (
-                                        <div key={key} className={cn("flex justify-between items-center p-3", index < technicalSheetData.length -1 && "border-b")}>
-                                            <span className='font-medium'>{labels[key] || key}</span>
+                                        <div key={key} className={cn("flex justify-between items-center p-3 text-sm", index < technicalSheetData.length -1 && "border-b")}>
+                                            <span className='font-medium text-foreground'>{labels[key] || key}</span>
                                             <span className='text-muted-foreground'>{value}</span>
                                         </div>
                                     );
                                 })}
                             </div>
-                        ) : (
-                            <p className="text-sm text-muted-foreground">Nenhuma especificação técnica disponível para este produto.</p>
-                        )}
-                    </div>
+                        </AccordionContent>
+                        </AccordionItem>
+                    )}
+                     <AccordionItem value="item-3">
+                        <AccordionTrigger className="text-lg font-semibold">Como Enviar sua Arte?</AccordionTrigger>
+                        <AccordionContent>
+                            <div className='space-y-3 pt-2 text-muted-foreground text-sm'>
+                                <p>Para garantir a melhor qualidade de impressão, utilize nossos gabaritos. Se precisar de ajuda, consulte nosso guia para fechar o arquivo no Canva.</p>
+                                <div className='flex flex-col sm:flex-row items-start gap-4'>
+                                    <a href="/gabarito.pdf" download className={cn(buttonVariants({ variant: "outline" }))}>
+                                        <Download className='mr-2 h-4 w-4' />
+                                        Baixar Gabarito
+                                    </a>
+                                    <a href="/guia-canva-ouro-grafica.pdf" download className={cn(buttonVariants({ variant: "outline" }))}>
+                                        <Download className='mr-2 h-4 w-4' />
+                                        Guia de Fechamento (Canva)
+                                    </a>
+                                </div>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
 
-                    <div className='border rounded-lg p-4 space-y-3'>
-                        <h3 className="font-semibold">Como enviar sua arte?</h3>
-                        <p className="text-sm text-muted-foreground">Para garantir a melhor qualidade de impressão, utilize nossos gabaritos. Se precisar de ajuda, consulte nosso guia para fechar o arquivo no Canva.</p>
-                         <div className='flex flex-col sm:flex-row items-start gap-4'>
-                            <a href="/gabarito.pdf" download className={cn(buttonVariants({ variant: "outline" }))}>
-                                <Download className='mr-2 h-4 w-4' />
-                                Baixar Gabarito
-                            </a>
-                            <a href="/guia-canva-ouro-grafica.pdf" download className={cn(buttonVariants({ variant: "outline" }))}>
-                                <Download className='mr-2 h-4 w-4' />
-                                Guia de Fechamento (Canva)
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
                 </div>
             </div>
             </div>
