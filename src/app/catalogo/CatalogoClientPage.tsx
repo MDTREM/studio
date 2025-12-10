@@ -52,7 +52,7 @@ export default function CatalogoClientPage() {
         </p>
       </div>
 
-      <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4'>
+      <div className='flex items-center mb-8 gap-4'>
         <CategoryFilter />
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {searchQuery ? <Search className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
