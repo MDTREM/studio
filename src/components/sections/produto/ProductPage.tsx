@@ -482,10 +482,12 @@ export default function ProductPage({ product }: ProductPageProps) {
                         <AccordionTrigger>Utilize o gabarito</AccordionTrigger>
                         <AccordionContent className='flex flex-col items-start gap-4'>
                             <p>Para garantir a qualidade da impressão, utilize nossos gabaritos.</p>
-                            <Button variant="outline">
-                                <Download className='mr-2 h-4 w-4' />
-                                Baixar gabarito
-                            </Button>
+                             <a href="/gabarito.pdf" download="gabarito-ouro-grafica.pdf">
+                                <Button variant="outline">
+                                    <Download className='mr-2 h-4 w-4' />
+                                    Baixar gabarito
+                                </Button>
+                            </a>
                         </AccordionContent>
                         </AccordionItem>
                     </Accordion>
